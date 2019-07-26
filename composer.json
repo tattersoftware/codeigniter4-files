@@ -1,0 +1,42 @@
+{
+	"name": "tatter/files",
+	"description": "File uploads and management, for CodeIgniter 4",
+	"keywords": [
+		"codeigniter",
+		"codeigniter4",
+		"files",
+		"uploads",
+		"dropzone"
+	],
+	"homepage": "https://github.com/tattersoftware/codeigniter4-files",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Matthew Gatner",
+			"email": "mgatner@tattersoftware.com",
+			"homepage": "https://tattersoftware.com",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"php" : "^7.0",
+        "enyo/dropzone": "^5.5",
+		"tatter/alerts": "^1.0",
+		"tatter/audits": "^1.0",
+		"tatter/permits": "^1.0"
+	},
+	"require-dev": {
+		"codeigniter4/framework": "dev-master"
+	},
+	"autoload": {
+		"psr-4": {
+			"Tatter\\Files\\": "src"
+		}
+	},
+	"scripts": {
+		"post-update-cmd": [
+			"composer dump-autoload",
+			"php spark migrate:latest -n all"
+		]
+	}
+}
