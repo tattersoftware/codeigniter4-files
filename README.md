@@ -1,5 +1,5 @@
 # Tatter\Files
-Job task control through dynamic workflows, for CodeIgniter 4
+File uploads and management, for CodeIgniter 4
 
 ## Quick Start
 

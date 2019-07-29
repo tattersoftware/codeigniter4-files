@@ -1,6 +1,6 @@
 <?php
 // Determine upload limit from PHP settings
-helper('upload');
+helper('files');
 $uploadLimitBytes = max_file_upload_in_bytes();
 
 // Buffer chunks to be just under the limit (maintain bytes)

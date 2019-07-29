@@ -7,7 +7,7 @@ use Tatter\Files\Models\FileModel;
 
 class Files extends Controller
 {
-	protected $helpers = ['alerts'];
+	protected $helpers = ['alerts', 'files', 'text'];
 
 	public function __construct()
 	{		

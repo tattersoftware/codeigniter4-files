@@ -1,4 +1,34 @@
 <?php
+// Outputs a human-friendly conversion of bytes
+if (! function_exists('bytes2human'))
+{
+	function bytes2human($bytes) {
+		$unit = 'bytes';
+		if ($bytes > 1024):
+			$bytes /= 1024;
+			$unit = 'KB';
+		endif;
+		if ($bytes > 1024):
+			$bytes /= 1024;
+			$unit = 'MB';
+		endif;
+		if ($bytes > 1024):
+			$bytes /= 1024;
+			$unit = 'GB';
+		endif;
+		if ($bytes > 1024):
+			$bytes /= 1024;
+			$unit = 'TB';
+		endif;
+		if ($bytes > 1024):
+			$bytes /= 1024;
+			$unit = 'PB';
+		endif;
+		
+		return round($bytes, 1) . ' ' . $unit;
+	}
+}
+
 // Thanks to AoEmaster (https://stackoverflow.com/users/1732818/aoemaster)
 // https://stackoverflow.com/questions/2840755/how-to-determine-the-max-file-upload-limit-in-php
 
@@ -18,7 +48,7 @@ if (! function_exists('max_file_upload_in_bytes'))
 		// Return the smallest of them, this defines the real limit
 		return min($max_upload, $max_post, $memory_limit);
 	}
-}		
+}
 
 if (! function_exists('return_bytes'))
 {
