@@ -18,6 +18,9 @@ class Files extends \Tatter\Files\Config\Files
 	// the session variable to check for a logged-in user ID
 	public $userSource = 'logged_in';
 	
+	// Directory to store files (with trailing slash)
+	public $storagePath = ROOTPATH . 'writable/files/';
+	
 	// views to display for each function
 	public $views = [
 		'header'    => 'Tatter\Files\Views\templates\header',

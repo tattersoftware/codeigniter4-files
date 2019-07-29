@@ -14,6 +14,10 @@ class Files extends Controller
 		// Preload the model & config
 		$this->model  = new FileModel();
 		$this->config = config('Files');
+
+		// Verify the storage directory
+		if (! is_dir($this->config->storagePath) && ! mkdir($this->config->storagePath, 0775, true))
+			throw FilesException::forDirFail($this->config->storagePath);
 	}
 	
 	// Displays a list all files
@@ -59,15 +63,13 @@ class Files extends Controller
 			$uuid = $this->request->getPost('uuid');
 			
 			// Check for chunk directory
-			$dir = WRITEPATH . 'uploads/chunks/' . $uuid;
-			if (! is_dir($dir)):
-				if (! mkdir($dir, 0775, true)):
-					throw FilesException::forChunkDirFail($dir);
-				endif;
+			$chunkDir = WRITEPATH . 'uploads/' . $uuid;
+			if (! is_dir($chunkDir) && ! mkdir($chunkDir, 0775, true)):
+				throw FilesException::forChunkDirFail($chunkDir);
 			endif;
 			
 			// Move the file
-			$file->move($dir, $chunkIndex . '.' . $file->getExtension());
+			$file->move($chunkDir, $chunkIndex . '.' . $file->getExtension());
 			
 			// Check for more chunks
 			if ($chunkIndex < $totalChunks-1):
@@ -78,7 +80,7 @@ class Files extends Controller
 			$clientname = $file->getClientName();
 			
 			// Merge the chunks
-			$path = $this->mergeChunks($dir);
+			$path = $this->mergeChunks($chunkDir);
 			$file = new File($path);
 			
 			// Gather merged file data
@@ -105,8 +107,8 @@ class Files extends Controller
 		endif;
 		
 		// Move the file
-		$file->move(WRITEPATH . 'uploads/files', $row['filename']);
-		chmod(WRITEPATH . 'uploads/files/' . $row['filename'], 0664); // WIP
+		$file->move($this->config->storagePath, $row['localname']);
+		chmod($this->config->storagePath . $row['localname'], 0664); // WIP
 
 		// Record in the database
 		$fileId = $this->model->insert($row);
@@ -115,6 +117,29 @@ class Files extends Controller
 		$userId = $userId ?? session($this->config->userSource) ?? 0;
 		if ($userId)
 			$this->model->addToUser($fileId, $userId);
+		
+		// Try to create a thumbnail
+		$thumbnails = service('thumbnails');
+		$tmpfile = tempnam(sys_get_temp_dir(), random_string());
+		if ($thumbnails->create($this->config->storagePath . $row['localname'], $tmpfile)):
+			// Read in file binary data
+			$handle = fopen($tmpfile, 'rb');
+			$data = fread($handle, filesize($tmpfile));
+			fclose($handle);
+			
+			// Encode as base64 and add to the database
+			$data = base64_encode($data);
+			$this->model->update($fileId, ['thumbnail' => $data]);
+		else:
+			$errors = implode('. ', $thumbnails->getErrors());
+			log_message('debug', "Unable to create thumbnail for {$row['filename']}: {$errors}");
+		endif;
+		unlink($tmpfile);
+		
+		if (! $this->request->isAJAX()):
+			set_message('success', "Upload of {$row['filename']} successful.");
+			return redirect()->back();
+		endif;
 	}
 	
 	protected function failure($errorCode, $errorMessage)
@@ -174,21 +199,7 @@ class Files extends Controller
 	public function thumbnail($fileId)
 	{
 		$file = $this->model->find($fileId);
-
-		if (empty($file->thumbnail)):
-			$locator = service('locator');
-			$path = $locator->locateFile('\Tatter\Files\Assets\Unavailable.png', null, 'png');
-			$handle = fopen($path, "rb");
-			$data = fread($handle, filesize($path));
-			fclose($handle);
-			return $this->response->setHeader('Content-type', 'image/png')->setBody($data);
-		endif;
-		
-		//$this->response->setHeader('Content-type', 'image/png')->setBody($body);
-		//$file = FCPATH . '/assets/img/hammock.png';
-		//readfile($file);
-		//$data = base64_decode($this->unavailable());
-		//return $this->response->setHeader('Content-type', 'image/png')->setBody($data);
+		$data = $file->getThumbnail('raw');
+		return $this->response->setHeader('Content-type', 'image/jpeg')->setBody($data);
 	}
-	
 }

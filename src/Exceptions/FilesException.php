@@ -5,6 +5,10 @@ use CodeIgniter\Exceptions\FrameworkException;
 
 class FilesException extends \RuntimeException implements ExceptionInterface
 {
+	public static function forDirFail($dir)
+	{
+		return new static(lang('Files.dirFail', [$dir]));
+	}
 	public static function forChunkDirFail($dir)
 	{
 		return new static(lang('Files.chunkDirFail', [$dir]));

@@ -13,7 +13,7 @@ class Migration_create_table_files extends Migration
 			'clientname'    => ['type' => 'VARCHAR', 'constraint' => 255],
 			'type'          => ['type' => 'VARCHAR', 'constraint' => 255],
 			'size'          => ['type' => 'INT', 'unsigned' => true],
-			'thumbnail'     => ['type' => 'LONGBLOB', null => true],
+			'thumbnail'     => ['type' => 'LONGBLOB', 'null' => true],
 			'created_at'    => ['type' => 'DATETIME', 'null' => true],
 			'updated_at'    => ['type' => 'DATETIME', 'null' => true],
 			'deleted_at'    => ['type' => 'DATETIME', 'null' => true],

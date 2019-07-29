@@ -19,7 +19,7 @@
 <?php else: ?>
 			<div class="card-deck">
 	<?php foreach ($files as $file): ?>
-				<div class="card">
+				<div class="card mb-4" style="min-width: 10rem;">
 					<img src="<?= $file->thumbnail ?>" class="card-img-top img-thumbnail" alt="<?= $file->filename ?>">
 					<div class="card-header">
 						<button class="btn btn-secondary dropdown-toggle <?= rand(0,1)==1 ? 'disabled' : '' ?>" type="button" id="export-<?= $file->id ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
