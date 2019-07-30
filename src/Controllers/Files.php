@@ -29,19 +29,28 @@ class Files extends Controller
 			return redirect()->back();
 		endif;
 		
-		$files = $this->model->orderBy('filename')->findAll();
 		$format = in_array($format, ['cards', 'list']) ? $format : 'cards';
-		$access = $this->model->mayManage() ? 'manage' : 'display';
+		$data = [
+			'config' => $this->config,
+			'files'  => $this->model->orderBy('filename')->findAll(),
+			'access' => $this->model->mayManage() ? 'manage' : 'display',
+		];
 		
-		return view("Tatter\Files\Views\\{$format}\\{$access}", ['config' => $this->config, 'files' => $files]);
+		return view("Tatter\Files\Views\\{$format}", $data);
 	}
 	
 	// Displays files for a user (defaults to the current user)
 	public function user($userId = null, $format = 'card')
 	{
 		$userId = $userId ?? session($this->config->userSource) ?? 0;
-		$files = $this->model->getForUser($userId);
-		return view("Tatter\Files\Views\\{$format}\\{$access}", ['config' => $this->config, 'files' => $files]);
+		$format = in_array($format, ['cards', 'list']) ? $format : 'cards';
+		$data = [
+			'config' => $this->config,
+			'files'  => $this->model->getForUser($userId),
+			'access' => $this->model->mayManage() ? 'manage' : 'display',
+		];
+		
+		return view("Tatter\Files\Views\\{$format}", $data);
 	}
 	
 	// Receives uploads from Dropzone
