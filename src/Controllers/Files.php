@@ -3,6 +3,7 @@
 use CodeIgniter\Controller;
 use CodeIgniter\Files\File;
 use CodeIgniter\HTTP\ResponseInterface;
+use Tatter\Exports\Models\ExportModel;
 use Tatter\Files\Exceptions\FilesException;
 use Tatter\Files\Models\FileModel;
 
@@ -208,15 +209,24 @@ class Files extends Controller
 	// Process an export request
 	public function export($uid, $fileId)
 	{
+		// Match the export handler
+		$exports = new ExportModel();
+		$handler = $exports->where('uid', $uid)->first();
+		if (empty($handler)):
+			alert('warning', 'No handler found for ' . $uid);
+			return redirect()->back();
+		endif;
+		
+		// Load the file and pass to the handler
 		$file = $this->model->find($fileId);
-		$handler = new \Tatter\Exports\Exports\DownloadExport();
 		$response = $handler->process($file->path, $file->filename);
-
+		
+		// If the handler returned a response then we're done
 		if ($response instanceof ResponseInterface):
 			return $response;
 		endif;
-var_dump($response); die();
-
+		
+		var_dump($response);
 	}
 	
 	// Output a file's thumbnail directly as image data
