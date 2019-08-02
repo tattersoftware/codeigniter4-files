@@ -23,6 +23,7 @@
         "enyo/dropzone": "^5.5",
 		"tatter/alerts": "^1.0",
 		"tatter/audits": "^1.0",
+		"tatter/exports": "^1.0",
 		"tatter/permits": "^1.0",
 		"tatter/thumbnails": "^1.0"
 	},

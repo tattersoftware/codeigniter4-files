@@ -22,14 +22,17 @@
 				<div class="card mb-4" style="min-width: 10rem; max-width: 200px;">
 					<img src="<?= $file->thumbnail ?>" class="card-img-top img-thumbnail" alt="<?= $file->filename ?>">
 					<div class="card-header">
-						<button class="btn btn-secondary dropdown-toggle <?= rand(0,1)==1 ? 'disabled' : '' ?>" type="button" id="export-<?= $file->id ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<button class="btn btn-secondary btn-sm dropdown-toggle <?= rand(0,1)==1 ? 'disabled' : '' ?>" type="button" id="export-<?= $file->id ?>" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 							<i class="fas fa-share-square"></i> Export
 						</button>
 						<div class="dropdown-menu" aria-labelledby="export-<?= $file->id ?>">
-							<a class="dropdown-item" href="#">Download</a>
+							<h6 class="dropdown-header">Send To</h6>
+							<a class="dropdown-item" href="#">Preview</a>
+							<a class="dropdown-item" href="<?= site_url('files/export/download/' . $file->id) ?>">Download</a>
 							<div class="dropdown-divider"></div>
-							<a class="dropdown-item" href="#">Another action</a>
-							<a class="dropdown-item" href="#">Something else here</a>
+							<h6 class="dropdown-header">Manage</h6>
+							<a class="dropdown-item" href="#">Rename</a>
+							<a class="dropdown-item" href="#">Delete</a>
 						</div>
 					</div>
 					<div class="card-body">

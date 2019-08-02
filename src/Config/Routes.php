@@ -10,4 +10,5 @@ $routes->group('files', ['namespace' => 'Tatter\Files\Controllers'], function($r
 	$routes->get('thumbnail/(:num)', 'Files::thumbnail/$1');
 
 	$routes->post('upload',          'Files::upload');
+	$routes->add('export/(:any)',    'Files::export/$1');
 });

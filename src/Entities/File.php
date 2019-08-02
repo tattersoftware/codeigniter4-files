@@ -16,4 +16,11 @@ class File extends Entity
 			return 'data:image/jpg;base64,' . $data;
 		return base64_decode($data);
 	}
+	
+	// Return the full path to this file
+	public function getPath()
+	{
+		$config = config('Files');
+		return $config->storagePath . $this->attributes['localname'];
+	}
 }

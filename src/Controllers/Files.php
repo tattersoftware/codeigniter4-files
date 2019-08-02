@@ -2,6 +2,7 @@
 
 use CodeIgniter\Controller;
 use CodeIgniter\Files\File;
+use CodeIgniter\HTTP\ResponseInterface;
 use Tatter\Files\Exceptions\FilesException;
 use Tatter\Files\Models\FileModel;
 
@@ -202,6 +203,20 @@ class Files extends Controller
 		fclose($output);
 
 		return $tmpfile;
+	}
+	
+	// Process an export request
+	public function export($uid, $fileId)
+	{
+		$file = $this->model->find($fileId);
+		$handler = new \Tatter\Exports\Exports\DownloadExport();
+		$response = $handler->process($file->path, $file->filename);
+
+		if ($response instanceof ResponseInterface):
+			return $response;
+		endif;
+var_dump($response); die();
+
 	}
 	
 	// Output a file's thumbnail directly as image data
