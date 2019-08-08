@@ -55,6 +55,62 @@ class Files extends Controller
 		return view("Tatter\Files\Views\\{$format}", $data);
 	}
 	
+	// Display or process the form to rename a file
+	public function rename($fileId = null)
+	{
+		// Load the request
+		$fileId = $this->request->getGetPost('file_id') ?? $fileId;
+		$file = $this->model->find($fileId);
+		
+		// Handle missing info
+		if (empty($file)):
+			if ($this->request->isAJAX()):
+				echo lang('Files.noFile');
+				return;
+			endif;
+
+			alert('warning', lang('Files.noFile'));
+			return redirect()->back();
+		endif;
+		
+		// Check for form submission
+		if ($filename = $this->request->getGetPost('filename')):
+			// Update the name
+			$file->filename = $filename;
+			$this->model->save($file);
+		
+			// AJAX requests are blank on success
+			if ($this->request->isAJAX()):
+				return;
+			endif;
+			
+			// Set the message and return
+			alert('success', lang('Files.renameSuccess', [$filename]));
+			return redirect()->back();
+		endif;
+		
+		$data = [
+			'config' => $this->config,
+			'file'   => $file,
+		];
+		
+		// Display only the form for AJAX
+		if ($this->request->isAJAX())
+			return view('Tatter\Files\Views\renameForm', $data);
+		
+		// Display the form
+		return view('Tatter\Files\Views\rename', $data);
+	}
+	
+	// Delete a file
+	public function delete($fileId)
+	{
+		$file = $this->model->find($fileId);
+		$this->model->delete($fileId);
+		alert('success', 'Deleted ' . $file->filename);
+		return redirect()->back();
+	}
+	
 	// Receives uploads from Dropzone
 	public function upload()
 	{
@@ -222,11 +278,17 @@ class Files extends Controller
 		$response = $handler->process($file->path, $file->filename);
 		
 		// If the handler returned a response then we're done
-		if ($response instanceof ResponseInterface):
+		if ($response instanceof ResponseInterface)
 			return $response;
+		
+		if ($response === true):
+			alert('success', ucfirst($uid) . ' export was successful.');
+		elseif ($response === false):
+			$error = implode('. ', $handler->getErrors());
+			alert('error', $error);
 		endif;
 		
-		var_dump($response);
+		return redirect()->back();
 	}
 	
 	// Output a file's thumbnail directly as image data
