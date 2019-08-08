@@ -51,6 +51,6 @@ class FileModel extends PModel
 			->select('files.*')
 			->join('files_users', 'files_users.file_id = files.id', 'left')
 			->where('user_id', $userId)
-			->get()->getResult();
+			->get()->getResult($this->returnType);
     }
 }

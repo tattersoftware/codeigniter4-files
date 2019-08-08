@@ -22,8 +22,8 @@ class Files extends Controller
 			throw FilesException::forDirFail($this->config->storagePath);
 	}
 	
-	// Displays a list all files
-	public function index($format = 'cards')
+	// Displays a list of all files
+	public function index()
 	{
 		// Check for list permission
 		if (! $this->model->mayList()):
@@ -31,25 +31,72 @@ class Files extends Controller
 			return redirect()->back();
 		endif;
 		
+		// Check for universal write permission
+		if ($userId = session($this->config->userSource))
+			$access = service('permits')->hasPermit($userId, 'manageFiles') ? 'manage' : 'display';
+		else
+			$access = 'display';
+		
+		// Validate display format
+		$settings = service('settings');
+		$format = $this->request->getGetPost('format') ?? $settings->filesFormat ?? 'cards';
 		$format = in_array($format, ['cards', 'list']) ? $format : 'cards';
+		$settings->filesFormat = $format;
+		
 		$data = [
 			'config' => $this->config,
 			'files'  => $this->model->orderBy('filename')->findAll(),
-			'access' => $this->model->mayManage() ? 'manage' : 'display',
+			'source' => 'index',
+			'format' => $format,
+			'access' => $access,
 		];
-		
 		return view("Tatter\Files\Views\\{$format}", $data);
 	}
 	
 	// Displays files for a user (defaults to the current user)
-	public function user($userId = null, $format = 'card')
+	public function user($userId = null)
 	{
-		$userId = $userId ?? session($this->config->userSource) ?? 0;
+		// Figure out user & access
+		$currentUser = session($this->config->userSource);
+		$userId = $userId ?? $currentUser ?? 0;
+		
+		// Not logged in
+		if (! $userId):
+			// Check for list permission
+			if (! $this->model->mayList()):
+				alert('warning', lang('Permits.notPermitted'));
+				return redirect()->back();
+			endif;
+			
+			$access = 'display';
+		
+		// Logged in, looking at another user
+		elseif ($userId != $currentUser):
+			// Check for list permission
+			if (! $this->model->mayList()):
+				alert('warning', lang('Permits.notPermitted'));
+				return redirect()->back();
+			endif;
+			
+			$access = service('permits')->hasPermit($userId, 'manageFiles') ? 'manage' : 'display';
+		
+		// Looking at own files
+		else:
+			$access = 'manage';
+		endif;
+		
+		// Validate display format
+		$settings = service('settings');
+		$format = $this->request->getGetPost('format') ?? $settings->filesFormat ?? 'cards';
 		$format = in_array($format, ['cards', 'list']) ? $format : 'cards';
+		$settings->filesFormat = $format;
+		
 		$data = [
 			'config' => $this->config,
 			'files'  => $this->model->getForUser($userId),
-			'access' => $this->model->mayManage() ? 'manage' : 'display',
+			'source' => 'user/' . $userId,
+			'format' => $format,
+			'access' => $access,
 		];
 		
 		return view("Tatter\Files\Views\\{$format}", $data);
