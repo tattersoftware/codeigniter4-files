@@ -153,6 +153,9 @@ class Files extends Controller
 	public function delete($fileId)
 	{
 		$file = $this->model->find($fileId);
+		if (empty($file))
+			return redirect()->back();
+
 		$this->model->delete($fileId);
 		alert('success', 'Deleted ' . $file->filename);
 		return redirect()->back();
