@@ -19,4 +19,7 @@ class Files extends BaseConfig
 		'footer'    => 'Tatter\Files\Views\templates\footer',
 		'dropzone'  => 'Tatter\Files\Views\dropzone\config',
 	];
+	
+	// Default display format; built in are 'cards', 'list', 'select'
+	public $defaultFormat = 'cards';
 }

@@ -1,27 +1,5 @@
-<?= view($config->views['header']) ?>
-
-	<div class="row">
-		<div class="col">
-			<div class="btn-toolbar float-right" role="toolbar" aria-label="Toolbar with button groups">
-				<div class="btn-group mr-2" role="group" aria-label="Action group">
-					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#dropzoneModal">
-						<i class="fas fa-file-upload"></i> Add Files
-					</button>
-				</div>
-				<div class="btn-group mr-2" role="group" aria-label="Format group">
-					<a class="btn btn-outline-secondary" href="<?= site_url("files/{$source}") ?>?format=cards" role="button"><i class="fas fa-th-large"></i></a>
-					<a class="btn btn-secondary" href="<?= site_url("files/{$source}") ?>?format=list" role="button"><i class="fas fa-list"></i></a>
-				</div>
-			</div>
-			
-			<h1>My Files</h1>
-
 <?php if (empty($files)): ?>
-			<p>
-				You have no files! Would you like to
-				<a class="dropzone-button" href="<?= site_url('files/new') ?>" data-toggle="modal" data-target="#dropzoneModal">add some now</a>?
-			</p>
-
+			<p>No files to display.</p>
 <?php else: ?>
 			<table class="table table-striped">
 				<thead>
@@ -63,8 +41,3 @@
 				</tbody>
 			</table>
 <?php endif; ?>
-			
-		</div>
-	</div>
-
-<?= view($config->views['footer'], ['config' => $config]) ?>

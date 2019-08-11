@@ -25,37 +25,35 @@ class Files extends Controller
 	// Displays a list of all files
 	public function index()
 	{
-		// Check for list permission
-		if (! $this->model->mayList()):
-			alert('warning', lang('Permits.notPermitted'));
-			return redirect()->back();
-		endif;
+		$exports = new ExportModel();
 		
+		// If global listing is denied then try for the user's files
+		if (! $this->model->mayList())
+			return $this->user();
+
 		// Check for universal write permission
 		if ($userId = session($this->config->userSource))
-			$access = service('permits')->hasPermit($userId, 'manageFiles') ? 'manage' : 'display';
+			$access = $this->model->mayAdmin() ? 'manage' : 'display';
 		else
 			$access = 'display';
 		
-		// Validate display format
-		$settings = service('settings');
-		$format = $this->request->getGetPost('format') ?? $settings->filesFormat ?? 'cards';
-		$format = in_array($format, ['cards', 'list']) ? $format : 'cards';
-		$settings->filesFormat = $format;
-		
+		// Load data
 		$data = [
-			'config' => $this->config,
-			'files'  => $this->model->orderBy('filename')->findAll(),
-			'source' => 'index',
-			'format' => $format,
-			'access' => $access,
+			'config'  => $this->config,
+			'files'   => $this->model->orderBy('filename')->findAll(),
+			'source'  => 'index',
+			'format'  => $this->getFormat(),
+			'access'  => $access,
+			'exports' => $exports->getByExtensions(),
 		];
-		return view("Tatter\Files\Views\\{$format}", $data);
+		return view('Tatter\Files\Views\index', $data);
 	}
 	
 	// Displays files for a user (defaults to the current user)
 	public function user($userId = null)
 	{
+		$exports = new ExportModel();
+		
 		// Figure out user & access
 		$currentUser = session($this->config->userSource);
 		$userId = $userId ?? $currentUser ?? 0;
@@ -69,6 +67,7 @@ class Files extends Controller
 			endif;
 			
 			$access = 'display';
+			$username = 'User';
 		
 		// Logged in, looking at another user
 		elseif ($userId != $currentUser):
@@ -78,28 +77,63 @@ class Files extends Controller
 				return redirect()->back();
 			endif;
 			
-			$access = service('permits')->hasPermit($userId, 'manageFiles') ? 'manage' : 'display';
+			$access = $this->model->mayAdmin() ? 'manage' : 'display';
+			$username = 'User';
 		
 		// Looking at own files
 		else:
 			$access = 'manage';
+			$username = 'My';
 		endif;
 		
-		// Validate display format
+		// Load data
+		$data = [
+			'config'   => $this->config,
+			'files'    => $this->model->getForUser($userId),
+			'source'   => 'user/' . $userId,
+			'format'   => $this->getFormat(),
+			'access'   => $access,
+			'username' => $username,
+			'exports'  => $exports->getByExtensions(),
+		];
+		return view('Tatter\Files\Views\index', $data);
+	}
+	
+	// Determine the correct display format
+	protected function getFormat(): string
+	{		
 		$settings = service('settings');
-		$format = $this->request->getGetPost('format') ?? $settings->filesFormat ?? 'cards';
-		$format = in_array($format, ['cards', 'list']) ? $format : 'cards';
+		
+		// Check for a reformat request, then load from settings, fallback to the config default
+		$format = $this->request->getGetPost('format') ?? $settings->filesFormat ?? $this->config->defaultFormat;
+		
+		// Validate the determined format
+		$format = in_array($format, ['cards', 'list', 'select']) ? $format : 'cards';
+		
+		// Upate user setting with the new preference
 		$settings->filesFormat = $format;
+		
+		return $format;
+	}
+	
+	// AJAX list of selectable files for form; optional user filter
+	public function select($userId = null): string
+	{
+		// Figure out user & access
+		$currentUser = session($this->config->userSource);		
+		
+		// If no user or other user then check for list permission
+		if ((empty($userId) || $userId != $currentUser) && ! $this->model->mayList())
+			return lang('Permits.notPermitted');
+		
+		// Filter for user files
+		$files = empty($userId) ? $this->model->orderBy('filename')->findAll() : $this->model->getForUser($userId);
 		
 		$data = [
 			'config' => $this->config,
-			'files'  => $this->model->getForUser($userId),
-			'source' => 'user/' . $userId,
-			'format' => $format,
-			'access' => $access,
+			'files'  => $files,
 		];
-		
-		return view("Tatter\Files\Views\\{$format}", $data);
+		return view("Tatter\Files\Views\\formats\\select", $data);
 	}
 	
 	// Display or process the form to rename a file
