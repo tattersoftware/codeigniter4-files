@@ -51,6 +51,7 @@ class FileModel extends PModel
 			->select('files.*')
 			->join('files_users', 'files_users.file_id = files.id', 'left')
 			->where('user_id', $userId)
+			->where('deleted_at IS NULL')
 			->get()->getResult($this->returnType);
     }
 }

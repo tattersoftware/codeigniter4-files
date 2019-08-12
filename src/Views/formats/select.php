@@ -4,7 +4,6 @@
 			<table class="table table-sm table-striped">
 				<thead>
 					<tr>
-						<th scope="col"></th>
 						<th scope="col">Filename</th>
 						<th scope="col">Type</th>
 						<th scope="col">Size</th>
@@ -14,8 +13,12 @@
 				<tbody>
 	<?php foreach ($files as $file): ?>
 					<tr>
-						<td><input name="file_<?= $file->id ?>" type="checkbox" class="class="form-check-input" value="1"></td>
-						<td class="align-middle"><?= $file->filename ?></td>
+						<td>
+							<div class="form-check">
+								<input class="form-check-input" name="file<?= $file->id ?>" id="file<?= $file->id ?>" type="checkbox" value="<?= $file->id ?>">
+								<label class="form-check-label" for="file<?= $file->id ?>"><?= $file->filename ?></label>
+							</div>
+						</td>
 						<td class="align-middle"><?= $file->type ?></td>
 						<td class="align-middle"><?= bytes2human($file->size) ?></td>
 						<td class="align-middle"><?= $file->created_at->humanize(); ?></td>

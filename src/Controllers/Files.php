@@ -45,7 +45,12 @@ class Files extends Controller
 			'format'  => $this->getFormat(),
 			'access'  => $access,
 			'exports' => $exports->getByExtensions(),
+			'bulks'   => $exports->where('bulk', 1)->findAll(),
 		];
+		
+		// AJAX calls skip the wrapping
+		if ($this->request->isAJAX())
+			return view("Tatter\Files\Views\\formats\\{$data['format']}", $data);
 		return view('Tatter\Files\Views\index', $data);
 	}
 	
@@ -95,7 +100,12 @@ class Files extends Controller
 			'access'   => $access,
 			'username' => $username,
 			'exports'  => $exports->getByExtensions(),
+			'bulks'   => $exports->where('bulk', 1)->findAll(),
 		];
+		
+		// AJAX calls skip the wrapping
+		if ($this->request->isAJAX())
+			return view("Tatter\Files\Views\\formats\\{$data['format']}", $data);
 		return view('Tatter\Files\Views\index', $data);
 	}
 	
@@ -192,6 +202,59 @@ class Files extends Controller
 
 		$this->model->delete($fileId);
 		alert('success', 'Deleted ' . $file->filename);
+		return redirect()->back();
+	}
+	
+	// Handle bulk actions
+	public function bulk()
+	{
+		// Load post data
+		$post = $this->request->getPost();
+		
+		// Harvest file IDs and the requested action
+		$action = '';
+		$fileIds = [];
+		foreach ($post as $key => $value):
+			if (is_numeric($value)):
+				$fileIds[] = $value;
+			else:
+				$action = $key;
+			endif;
+		endforeach;
+		
+		// Make sure some files where checked
+		if (empty($fileIds)):
+			alert('warning', lang('File.nofile'));
+			return redirect()->back();
+		endif;
+		
+		// Handle actions
+		switch ($action):
+			case '':
+				alert('warning', 'No valid action.');
+			break;
+
+			// Bulk delete request
+			case 'delete':
+				$this->model->delete($fileIds);
+				alert('success', 'Deleted ' . count($fileIds) . ' files.');
+			break;
+			
+			default:
+				// Match the export handler
+				$exports = new ExportModel();
+				$handler = $exports->where('uid', $action)->first();
+				if (empty($handler)):
+					alert('warning', 'No handler found for ' . $uid);
+					return redirect()->back();
+				endif;
+				
+				// Pass to the handler
+				//$response = $handler->process($file->path, $file->filename);
+				
+				alert('success', 'Processed ' . count($fileIds) . ' files.');
+		endswitch;
+
 		return redirect()->back();
 	}
 	
@@ -357,8 +420,14 @@ class Files extends Controller
 			return redirect()->back();
 		endif;
 		
-		// Load the file and pass to the handler
+		// Load the file
 		$file = $this->model->find($fileId);
+		if (empty($file)):
+			alert('warning', lang('Files.noFile'));
+			return redirect()->back();
+		endif;
+		
+		// Pass to the handler
 		$response = $handler->process($file->path, $file->filename);
 		
 		// If the handler returned a response then we're done
@@ -366,7 +435,7 @@ class Files extends Controller
 			return $response;
 		
 		if ($response === true):
-			alert('success', ucfirst($uid) . ' export was successful.');
+			alert('success', lang('Files.noFile', [ucfirst($uid)]) );
 		elseif ($response === false):
 			$error = implode('. ', $handler->getErrors());
 			alert('error', $error);

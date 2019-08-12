@@ -7,5 +7,6 @@ return [
 	'noFile'            => 'No file provided',
 	'newFileFail'       => 'Unable to create file for merging: {0}',
 	'writeFileFail'     => 'Unable to open file for merging: {0}',
+	'exportSuccess'     => '{0} export was successful',
 	'renameSuccess'     => 'File renamed to {0}',
 ];

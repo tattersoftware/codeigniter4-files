@@ -17,17 +17,21 @@
 			</div>
 			
 			<h1><?= $access == 'manage' ? 'Manage' : 'Browse' ?> <?= $username ?? '' ?> Files</h1>
-
+			
+			<div id="files-wrapper">
 <?php if (empty($files)): ?>
-			<p>
-				You have no files! Would you like to
-				<a class="dropzone-button" href="<?= site_url('files/new') ?>" data-toggle="modal" data-target="#dropzoneModal">add some now</a>?
-			</p>
+				<p>
+					You have no files! Would you like to
+					<a class="dropzone-button" href="<?= site_url('files/new') ?>" data-toggle="modal" data-target="#dropzoneModal">add some now</a>?
+				</p>
 
 <?php else: ?>
-		<?= view("Tatter\Files\Views\\formats\\{$format}", ['files' => $files, 'access' => $access, 'exports' => $exports]); ?>
-
+				<form name="files-form" method="post" action="<?= site_url('files/bulk') ?>">
+					<?= $format == 'select' ? view('Tatter\Files\Views\actions\bulk', ['access' => $access, 'bulks' => $bulks]) : '' ?>
+					<?= view("Tatter\Files\Views\\formats\\{$format}", ['files' => $files, 'access' => $access, 'exports' => $exports]); ?>
+				</form>
 <?php endif; ?>
+			</div>
 		</div>
 	</div>
 
@@ -36,14 +40,14 @@
 	<!-- Modal -->
 	<div class="modal fade" id="globalModal" tabindex="-1" role="dialog" aria-labelledby="globalModalTitle" aria-hidden="true">
 		<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-			<div class="modal-content">
+			<div class="modal-content" style="max-height:600px;">
 				<div class="modal-header">
 					<h5 class="modal-title" id="globalModalTitle"></h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
 				</div>
-				<div class="modal-body"></div>
+				<div class="modal-body overflow-auto"></div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
 				</div>
