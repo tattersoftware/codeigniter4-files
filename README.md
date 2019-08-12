@@ -4,7 +4,7 @@ File uploads and management, for CodeIgniter 4
 ## Quick Start
 
 1. Install with Composer: `> composer require tatter/files`
-2. Update the database: `> php spark migrate:latest -all`
+2. Update the database: `> php spark migrate -all`
 3. Start managing files: https://[yourdomain.com]/files
 
 ## Features
@@ -25,7 +25,7 @@ Or, install manually by downloading the source files and adding the directory to
 
 Once the files are downloaded and included in the autoload, run any library migrations
 to ensure the database is setup correctly:
-* `> php spark migrate:latest -all`
+* `> php spark migrate -all`
 
 **Pro Tip:** You can add the spark command to your composer.json to ensure your database is
 always current with the latest release:
@@ -34,8 +34,8 @@ always current with the latest release:
 	...
     "scripts": {
         "post-update-cmd": [
-            "composer dump-autoload",
-            "php spark migrate:latest -all"
+            "@composer dump-autoload",
+            "php spark migrate -all"
         ]
     },
 	...
