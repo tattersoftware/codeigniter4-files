@@ -50,11 +50,19 @@ in the comments. If no config file is found in **app/Config** the library will u
 ## Usage
 
 Default routes:
-* **files/index** - Shows all files; the controller will check `mayManage()` to determine if files are read-only or editable
-* **files/manage** - Show all files; files are editable
-* **files/user** - Shows files for a single user; if no user ID is supplied it defaults to the current logged in user; files are editable
+* **files/index** - If user is allowed `mayList()` then shows all files, otherwise tries to fall back to the current logged in user
+* **files/user** - Shows files for a single user; if no user ID is supplied it defaults to the current logged in user
 
-Additional views:
-* **Views/files/cards/select** - Can be used to create selectable files, say as part of a form
-* **Views/files/list/select** - Can be used to create selectable files, say as part of a form
-* **Views/files/dropzone/config** - Default config for Dropzone; 
+Available formats:
+* **?format=cards** - Default view with thumbnail on responsive layout
+* **?format=list** - An efficient list of files in table format
+* **?format=select** - Can be used to create selectable files, e.g. as part of a form
+
+## Access control
+
+This library uses **Tatter\Permits** to control access to files, both generally (list, create)
+and specifically per user or group. The super-permit `mayAdmin()` can be added to a user or
+group for global file access.
+
+By default the **files/** routes are available as soon as the module is installed. In most
+cases you will want to use Route Filters to restrict some or all of the routes.
