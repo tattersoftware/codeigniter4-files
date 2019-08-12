@@ -19,7 +19,7 @@
 		}
 	],
 	"require": {
-		"php" : "^7.0",
+		"php": "^7.0",
         "enyo/dropzone": "^5.5",
 		"tatter/alerts": "^1.0",
 		"tatter/audits": "^1.0",
@@ -39,8 +39,8 @@
 	},
 	"scripts": {
 		"post-update-cmd": [
-			"composer dump-autoload",
-			"php spark migrate:latest -n all"
+			"@composer dump-autoload",
+			"php spark migrate -all"
 		]
 	}
 }
