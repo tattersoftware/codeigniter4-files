@@ -21,7 +21,7 @@
 	"require": {
 		"php": "^7.0",
         "enyo/dropzone": "^5.5",
-		"tatter/alerts": "^1.0",
+		"tatter/alerts": "^2.0",
 		"tatter/audits": "^1.0",
 		"tatter/exports": "^1.0",
 		"tatter/handlers": "^1.0",
