@@ -1,4 +1,4 @@
-<?php namespace App\Commands;
+<?php namespace Tatter\Files\Commands;
 
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
