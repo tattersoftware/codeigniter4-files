@@ -44,6 +44,13 @@ always current with the latest release:
 Finally, run the seeder to install necessary database settings:
 `spark db:seed "Tatter\Files\Database\Seeds\FileSeeder"`
 
+**NOTE**: If your project is part of a tracking repository you probably want to add the file
+storage to your **.gitignore**
+```
+writable/files/*
+!writable/files/index.html
+```
+
 ## Configuration (optional)
 
 The library's default behavior can be altered by extending its config file. Copy
