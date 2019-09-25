@@ -25,7 +25,7 @@
 		"tatter/audits": "^1.0",
 		"tatter/exports": "^1.0",
 		"tatter/handlers": "^1.0",
-		"tatter/permits": "^1.0",
+		"tatter/permits": "^1.1",
 		"tatter/settings": "^1.0",
 		"tatter/thumbnails": "^1.0"
 	},
