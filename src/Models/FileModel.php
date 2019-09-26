@@ -1,18 +1,18 @@
 <?php namespace Tatter\Files\Models;
 
-use Tatter\Permits\Models\PModel;
+use Tatter\Permits\Model;
 
-class FileModel extends PModel
+class FileModel extends Model
 {
-	// Audits
 	use \Tatter\Audits\Traits\AuditsTrait;
+	
+	// Audits
 	protected $afterInsert = ['auditInsert'];
 	protected $afterUpdate = ['auditUpdate'];
 	protected $afterDelete = ['auditDelete'];
 	
 	// Permits
-	protected $tableMode  = 0664;
-	protected $rowMode    = 0660;
+	protected $mode       = 04660;
 	protected $usersPivot = 'files_users';
 	protected $pivotKey   = 'file_id';
 	
@@ -27,9 +27,7 @@ class FileModel extends PModel
 
 	protected $useTimestamps = true;
 
-	protected $validationRules    = [
-		'filename'    => 'required|max_length[255]',
-	];
+	protected $validationRules    = ['filename' => 'required|max_length[255]'];
 	protected $validationMessages = [];
 	protected $skipValidation     = false;
 	
