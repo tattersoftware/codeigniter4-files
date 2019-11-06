@@ -4,7 +4,8 @@ File uploads and management, for CodeIgniter 4
 ## Quick Start
 
 1. Install with Composer: `> composer require tatter/files`
-2. Update the database: `> php spark migrate -all` `> spark db:seed "Tatter\Files\Database\Seeds\FileSeeder"`
+2. Migrate the database: `> php spark migrate -all`
+2. Seed the database: `> php spark db:seed "Tatter\Files\Database\Seeds\FileSeeder"`
 3. Start managing files: https://[yourdomain.com]/files
 
 ## Features
@@ -27,22 +28,8 @@ Once the files are downloaded and included in the autoload, run any library migr
 to ensure the database is setup correctly:
 * `> php spark migrate -all`
 
-**Pro Tip:** You can add the spark command to your composer.json to ensure your database is
-always current with the latest release:
-```
-{
-	...
-    "scripts": {
-        "post-update-cmd": [
-            "@composer dump-autoload",
-            "php spark migrate -all"
-        ]
-    },
-	...
-```
-
 Finally, run the seeder to install necessary database settings:
-`spark db:seed "Tatter\Files\Database\Seeds\FileSeeder"`
+`php spark db:seed "Tatter\Files\Database\Seeds\FileSeeder"`
 
 **NOTE**: If your project is part of a tracking repository you probably want to add the file
 storage to your **.gitignore**
