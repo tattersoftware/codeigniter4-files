@@ -8,7 +8,7 @@ class FileSeeder extends \CodeIgniter\Database\Seeder
 	{
 		// Check for format setting
 		$settings = new SettingModel();
-		$setting = $settings->where('name', 'fileFormat')->first();
+		$setting = $settings->where('name', 'filesFormat')->first();
 		if (empty($setting)):
 			// No setting - add the template
 			$row = [
