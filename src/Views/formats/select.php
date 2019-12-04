@@ -15,7 +15,13 @@
 					<tr>
 						<td>
 							<div class="form-check">
-								<input class="form-check-input" name="file<?= $file->id ?>" id="file<?= $file->id ?>" type="checkbox" value="<?= $file->id ?>">
+								<input class="form-check-input"
+									name="file<?= $file->id ?>"
+									id="file<?= $file->id ?>"
+									type="checkbox"
+									value="<?= $file->id ?>"
+									<?= ! empty($selected) && in_array($file->id, $selected) ?>
+								>
 								<label class="form-check-label" for="file<?= $file->id ?>"><?= $file->filename ?></label>
 							</div>
 						</td>
