@@ -1,4 +1,5 @@
-<?= view($config->views['header']) ?>
+<?= $this->extend($config->layouts['public']) ?>
+<?= $this->section('main') ?>
 
 	<h2>Information</h2>
 
@@ -34,4 +35,4 @@ if (! empty($errors)):
 endif;
 ?>
 
-<?= view($config->views['footer']) ?>
+<?= $this->endSection() ?>

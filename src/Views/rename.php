@@ -1,4 +1,5 @@
-<?= view($config->views['header']) ?>
+<?= $this->extend($config->layouts['public']) ?>
+<?= $this->section('main') ?>
 
 	<div class="row">
 		<div class="col">
@@ -7,4 +8,4 @@
 		</div>
 	</div>
 
-<?= view($config->views['footer'], ['config' => $config]) ?>
+<?= $this->endSection() ?>

@@ -187,7 +187,7 @@ class Files extends Controller
 		
 		// Display only the form for AJAX
 		if ($this->request->isAJAX())
-			return view('Tatter\Files\Views\renameForm', $data);
+			return view('Tatter\Files\Views\forms\rename', $data);
 		
 		// Display the form
 		return view('Tatter\Files\Views\rename', $data);
