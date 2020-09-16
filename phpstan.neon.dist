@@ -1,0 +1,21 @@
+parameters:
+	tmpDir: build/phpstan
+	level: 5
+	paths:
+		- src
+		- tests
+	bootstrapFiles:
+		- vendor/codeigniter4/codeigniter4/system/Test/bootstrap.php
+	excludes_analyse:
+		- src/Views/*
+	ignoreErrors:
+		- '#Access to an undefined property .+\\Entities\\[A-Za-z]+::\$[a-z]+#'
+		- '#Access to an undefined property Faker\\Generator::\$[A-Za-z]+#'
+		- '#Cannot access property [\$a-z_]+ on (array|object)#'
+		- '#Unsafe usage of new static\(\)*#'
+	scanDirectories:
+		- vendor/codeigniter4/codeigniter4/system/Helpers
+	dynamicConstantNames:
+		- ENVIRONMENT
+		- CI_DEBUG
+		- APP_NAMESPACE

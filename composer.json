@@ -18,29 +18,48 @@
 			"role": "Developer"
 		}
 	],
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "https://github.com/codeigniter4/CodeIgniter4"
+		}
+	],
+	"minimum-stability": "dev",
+	"prefer-stable": true,
 	"require": {
-		"php": "^7.0",
+		"php" : ">=7.2",
         "enyo/dropzone": "^5.5",
 		"tatter/alerts": "^2.0",
 		"tatter/audits": "^1.0",
 		"tatter/exports": "^1.0",
-		"tatter/handlers": "^1.0",
 		"tatter/permits": "^2.0",
 		"tatter/settings": "^1.0",
 		"tatter/thumbnails": "^1.1"
 	},
 	"require-dev": {
-		"codeigniter4/framework": "dev-master"
+		"codeigniter4/codeigniter4": "dev-develop",
+		"fzaninotto/faker": "^1.9@dev",
+		"phpunit/phpunit": "^8.5",
+		"phpstan/phpstan": "^0.12",
+		"squizlabs/php_codesniffer": "^3.5",
+		"codeigniter4/codeigniter4-standard": "^1.0"
 	},
 	"autoload": {
 		"psr-4": {
 			"Tatter\\Files\\": "src"
 		}
 	},
+	"autoload-dev": {
+		"psr-4": {
+			"Tests\\Support\\": "tests/_support"
+		}
+	},
 	"scripts": {
+		"analyze": "phpstan analyze",
+		"style": "phpcs --standard=./vendor/codeigniter4/codeigniter4-standard/CodeIgniter4 src/ tests/",
+		"test": "phpunit",
 		"post-update-cmd": [
-			"@composer dump-autoload",
-			"php spark migrate -all"
+			"composer dump-autoload"
 		]
 	}
 }
