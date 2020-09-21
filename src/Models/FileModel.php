@@ -5,6 +5,7 @@ use Tatter\Permits\Model;
 class FileModel extends Model
 {
 	use \Tatter\Audits\Traits\AuditsTrait;
+	use \Tatter\Permits\Traits\PermitsTrait;
 
 	protected $table      = 'files';
 	protected $primaryKey = 'id';
@@ -21,7 +22,8 @@ class FileModel extends Model
 
 	protected $validationRules = [
 		'filename' => 'required|max_length[255]',
-		'size'     => 'permit_empty|is_natural]',
+		// file size in bytes
+		'size'     => 'permit_empty|is_natural',
 	];
 
 	// Audits
@@ -31,21 +33,32 @@ class FileModel extends Model
 
 	// Permits
 	protected $mode       = 04660;
-	protected $usersPivot = 'files_users';
 	protected $pivotKey   = 'file_id';
+	protected $usersPivot = 'files_users';
 
-	// Associate a file with a user
-	public function addToUser(int $fileId, int $userId)
+	/**
+	 * Associates a file with a user
+	 *
+	 * @param int $fileId
+	 * @param int $userId
+	 *
+	 * @return bool
+	 */
+	public function addToUser(int $fileId, int $userId): bool
 	{
-		$row = [
-			'file_id' => (int)$fileId,
-			'user_id' => (int)$userId,
-		];
-
-		return $this->db->table('files_users')->insert($row);
+		return (bool) $this->db->table('files_users')->insert([
+			'file_id' => $fileId,
+			'user_id' => $userId,
+		]);
 	}
 
-	// Returns an array of all a user's files
+	/**
+	 * Returns an array of all a user's Files
+	 *
+	 * @param int $userId
+	 *
+	 * @return array
+	 */
 	public function getForUser(int $userId): array
 	{
 		return $this->builder()
