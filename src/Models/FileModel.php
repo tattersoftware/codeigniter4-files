@@ -6,6 +6,24 @@ class FileModel extends Model
 {
 	use \Tatter\Audits\Traits\AuditsTrait;
 
+	protected $table      = 'files';
+	protected $primaryKey = 'id';
+	protected $returnType = 'Tatter\Files\Entities\File';
+
+	protected $useTimestamps  = true;
+	protected $useSoftDeletes = true;
+	protected $skipValidation = false;
+
+	protected $allowedFields = [
+		'filename', 'localname', 'clientname',
+		'type', 'size', 'thumbnail',
+	];
+
+	protected $validationRules = [
+		'filename' => 'required|max_length[255]',
+		'size'     => 'permit_empty|is_natural]',
+	];
+
 	// Audits
 	protected $afterInsert = ['auditInsert'];
 	protected $afterUpdate = ['auditUpdate'];
@@ -15,28 +33,6 @@ class FileModel extends Model
 	protected $mode       = 04660;
 	protected $usersPivot = 'files_users';
 	protected $pivotKey   = 'file_id';
-
-	// Model
-	protected $table      = 'files';
-	protected $primaryKey = 'id';
-
-	protected $returnType     = 'Tatter\Files\Entities\File';
-	protected $useSoftDeletes = true;
-
-	protected $allowedFields = [
-		'filename',
-		'localname',
-		'clientname',
-		'type',
-		'size',
-		'thumbnail',
-	];
-
-	protected $useTimestamps = true;
-
-	protected $validationRules    = ['filename' => 'required|max_length[255]'];
-	protected $validationMessages = [];
-	protected $skipValidation     = false;
 
 	// Associate a file with a user
 	public function addToUser(int $fileId, int $userId)

@@ -11,6 +11,6 @@ class MaintainFiles extends BaseCommand
 
 	public function run(array $params)
 	{
-			CLI::write('Sample from `write` command');
+		CLI::write('Sample from `write` command');
 	}
 }

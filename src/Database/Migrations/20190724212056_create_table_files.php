@@ -8,42 +8,15 @@ class Migration_create_table_files extends Migration
 	{
 		// files
 		$fields = [
-			'filename'   => [
-				'type'       => 'VARCHAR',
-				'constraint' => 255,
-			],
-			'localname'  => [
-				'type'       => 'VARCHAR',
-				'constraint' => 255,
-			],
-			'clientname' => [
-				'type'       => 'VARCHAR',
-				'constraint' => 255,
-			],
-			'type'       => [
-				'type'       => 'VARCHAR',
-				'constraint' => 255,
-			],
-			'size'       => [
-				'type'     => 'INT',
-				'unsigned' => true,
-			],
-			'thumbnail'  => [
-				'type' => 'LONGBLOB',
-				'null' => true,
-			],
-			'created_at' => [
-				'type' => 'DATETIME',
-				'null' => true,
-			],
-			'updated_at' => [
-				'type' => 'DATETIME',
-				'null' => true,
-			],
-			'deleted_at' => [
-				'type' => 'DATETIME',
-				'null' => true,
-			],
+			'filename'   => ['type' => 'VARCHAR', 'constraint' => 255],
+			'localname'  => ['type' => 'VARCHAR', 'constraint' => 255],
+			'clientname' => ['type' => 'VARCHAR', 'constraint' => 255],
+			'type'       => ['type' => 'VARCHAR', 'constraint' => 255],
+			'size'       => ['type' => 'INT', 'unsigned' => true],
+			'thumbnail'  => ['type' => 'LONGBLOB', 'null' => true],
+			'created_at' => ['type' => 'DATETIME', 'null' => true],
+			'updated_at' => ['type' => 'DATETIME', 'null' => true],
+			'deleted_at' => ['type' => 'DATETIME', 'null' => true],
 		];
 
 		$this->forge->addField('id');
@@ -54,24 +27,11 @@ class Migration_create_table_files extends Migration
 
 		$this->forge->createTable('files');
 
-		/***
- * Pivot tables
-***/
-
 		// files_users
 		$fields = [
-			'file_id'    => [
-				'type'     => 'INT',
-				'unsigned' => true,
-			],
-			'user_id'    => [
-				'type'     => 'INT',
-				'unsigned' => true,
-			],
-			'created_at' => [
-				'type' => 'DATETIME',
-				'null' => true,
-			],
+			'file_id'    => ['type' => 'INT', 'unsigned' => true],
+			'user_id'    => ['type' => 'INT', 'unsigned' => true],
+			'created_at' => ['type' => 'DATETIME', 'null' => true],
 		];
 
 		$this->forge->addField('id');
@@ -84,18 +44,9 @@ class Migration_create_table_files extends Migration
 
 		// downloads
 		$fields = [
-			'file_id'    => [
-				'type'     => 'INT',
-				'unsigned' => true,
-			],
-			'user_id'    => [
-				'type'     => 'INT',
-				'unsigned' => true,
-			],
-			'created_at' => [
-				'type' => 'DATETIME',
-				'null' => true,
-			],
+			'file_id'    => ['type' => 'INT', 'unsigned' => true],
+			'user_id'    => ['type' => 'INT', 'unsigned' => true],
+			'created_at' => ['type' => 'DATETIME', 'null' => true],
 		];
 
 		$this->forge->addField('id');

@@ -10,12 +10,12 @@ class FileSeeder extends \CodeIgniter\Database\Seeder
 		if (! model(SettingModel::class)->where('name', 'filesFormat')->first())
 		{
 			model(SettingModel::class)->insert([
-										  'name'      => 'filesFormat',
-										  'scope'     => 'user',
-										  'content'   => 'cards',
-										  'protected' => 0,
-										  'summary'   => 'Default file index display format',
-									  ]);
+				'name'      => 'filesFormat',
+				'scope'     => 'user',
+				'content'   => 'cards',
+				'protected' => 0,
+				'summary'   => 'Default file index display format',
+		  ]);
 		}
 	}
 }
