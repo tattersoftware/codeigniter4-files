@@ -1,7 +1,6 @@
 <?php
 
 // Routes to Files controller
-/* @var CodeIgniter\Router\RouteCollection $routes */
 $routes->group('files', ['namespace' => '\Tatter\Files\Controllers'], function($routes)
 {
 	$routes->get('/',                'Files::index');
