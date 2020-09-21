@@ -17,4 +17,11 @@ class FilesTestCase extends CIDatabaseTestCase
 	 * @var string
 	 */
 	protected $namespace = 'Tatter\Files';
+
+	/**
+	 * A test file to work with
+	 *
+	 * @var string
+	 */
+	protected $testFile = SUPPORTPATH . 'image.jpg';
 }

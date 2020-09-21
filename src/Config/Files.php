@@ -44,4 +44,11 @@ class Files extends BaseConfig
 	 * @var string
 	 */
 	public $defaultFormat = 'cards';
+
+	/**
+	 * Path to the default thumbnail file
+	 *
+	 * @var string
+	 */
+	public $defaultThumbnail = '\\Tatter\\Files\\Views\\thumbnail.jpg';
 }

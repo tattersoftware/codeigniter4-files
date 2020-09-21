@@ -12,5 +12,5 @@ $routes->group('files', ['namespace' => '\Tatter\Files\Controllers'], function($
 	$routes->post('upload',          'Files::upload');
 	$routes->add('export/(:any)',    'Files::export/$1');
 	
-	$routes->add('(:any)',          'Files::$1');
+	$routes->add('(:any)',           'Files::$1');
 });
