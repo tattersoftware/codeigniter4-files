@@ -5,33 +5,33 @@
 
 <?php
 if (! empty($message)):
-?>
+	?>
 	<div class="alert alert-success">
 		<?= $message ?>
 	</div>
-<?php
+	<?php
 endif;
 
 if (! empty($error)):
-?>
+	?>
 	<div class="alert alert-danger">
 		<?= $error ?>
 	</div>
-<?php
+	<?php
 endif;
 
 if (! empty($errors)):
-?>
+	?>
 	<ul class="alert alert-danger">
-<?php
+	<?php
 	foreach ($errors as $error):
-?>
+		?>
 		<li><?= $error ?></li>
-<?php
+		<?php
 	endforeach;
-?>
+	?>
 	</ul>
-<?php
+	<?php
 endif;
 ?>
 

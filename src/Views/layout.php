@@ -30,11 +30,11 @@ $menu = $menu ?? '';
 
 		<div class="collapse navbar-collapse" id="navbarsExampleDefault">
 			<ul class="navbar-nav mr-auto">
-				<li class="nav-item <?= ($menu == 'index') ? 'active' : '' ?>">
-					<a class="nav-link" href="<?= site_url('files') ?>">All Files <?= ($menu=='index') ? '<span class="sr-only">(current)</span>' : '' ?></a>
+				<li class="nav-item <?= ($menu === 'index') ? 'active' : '' ?>">
+					<a class="nav-link" href="<?= site_url('files') ?>">All Files <?= ($menu === 'index') ? '<span class="sr-only">(current)</span>' : '' ?></a>
 				</li>
-				<li class="nav-item <?= ($menu == 'user') ? 'active' : '' ?>">
-					<a class="nav-link" href="<?= site_url('files/user') ?>">User Files <?= ($menu=='user') ? '<span class="sr-only">(current)</span>' : '' ?></a>
+				<li class="nav-item <?= ($menu === 'user') ? 'active' : '' ?>">
+					<a class="nav-link" href="<?= site_url('files/user') ?>">User Files <?= ($menu === 'user') ? '<span class="sr-only">(current)</span>' : '' ?></a>
 				</li>
 			</ul>
 		</div>

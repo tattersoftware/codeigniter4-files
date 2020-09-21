@@ -2,29 +2,30 @@
 // Outputs a human-friendly conversion of bytes
 if (! function_exists('bytes2human'))
 {
-	function bytes2human($bytes) {
+	function bytes2human($bytes)
+	{
 		$unit = 'bytes';
 		if ($bytes > 1024):
 			$bytes /= 1024;
-			$unit = 'KB';
+			$unit   = 'KB';
 		endif;
 		if ($bytes > 1024):
 			$bytes /= 1024;
-			$unit = 'MB';
+			$unit   = 'MB';
 		endif;
 		if ($bytes > 1024):
 			$bytes /= 1024;
-			$unit = 'GB';
+			$unit   = 'GB';
 		endif;
 		if ($bytes > 1024):
 			$bytes /= 1024;
-			$unit = 'TB';
+			$unit   = 'TB';
 		endif;
 		if ($bytes > 1024):
 			$bytes /= 1024;
-			$unit = 'PB';
+			$unit   = 'PB';
 		endif;
-		
+
 		return round($bytes, 1) . ' ' . $unit;
 	}
 }
@@ -33,7 +34,7 @@ if (! function_exists('bytes2human'))
 // https://stackoverflow.com/questions/2840755/how-to-determine-the-max-file-upload-limit-in-php
 
 if (! function_exists('max_file_upload_in_bytes'))
-{	
+{
 	function max_file_upload_in_bytes()
 	{
 		// Select maximum upload size
@@ -52,12 +53,13 @@ if (! function_exists('max_file_upload_in_bytes'))
 
 if (! function_exists('return_bytes'))
 {
-	function return_bytes($val) {
-		$val = strtolower(trim($val));
-		$unit = $val[strlen($val)-1];
-		$val = (int)rtrim($val, $unit);
-		
-		switch($unit) 
+	function return_bytes($val)
+	{
+		$val  = strtolower(trim($val));
+		$unit = $val[strlen($val) - 1];
+		$val  = (int)rtrim($val, $unit);
+
+		switch($unit)
 		{
 			case 'g': $val *= 1024;
 			case 'm': $val *= 1024;

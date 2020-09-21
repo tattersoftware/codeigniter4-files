@@ -13,17 +13,17 @@ class FilesException extends \RuntimeException implements ExceptionInterface
 	{
 		return new static(lang('Files.chunkDirFail', [$dir]));
 	}
-	
+
 	public static function forNoChunks($dir)
 	{
 		return new static(lang('Files.noChunks', [$dir]));
 	}
-	
+
 	public static function forNewFileFail($file)
 	{
 		return new static(lang('Files.newFileFail', [$file]));
 	}
-	
+
 	public static function forWriteFileFail($file)
 	{
 		return new static(lang('Files.writeFileFail', [$file]));

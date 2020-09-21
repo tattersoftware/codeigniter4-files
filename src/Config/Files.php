@@ -21,7 +21,7 @@ class Files extends BaseConfig
 
 	// Views to display for each function
 	public $views = [
-		'dropzone'  => 'Tatter\Files\Views\dropzone\config',
+		'dropzone' => 'Tatter\Files\Views\dropzone\config',
 	];
 
 	// Default display format; built in are 'cards', 'list', 'select'

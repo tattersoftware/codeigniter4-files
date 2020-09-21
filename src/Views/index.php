@@ -11,13 +11,13 @@
 				</div>
 
 				<div class="btn-group mr-2" role="group" aria-label="Format group">
-					<a class="btn <?= $format=='cards' ? 'btn-secondary' : 'btn-outline-secondary' ?>" href="<?= site_url("files/{$source}") ?>?format=cards" role="button"><i class="fas fa-th-large"></i></a>
-					<a class="btn <?= $format=='list' ? 'btn-secondary' : 'btn-outline-secondary' ?>" href="<?= site_url("files/{$source}") ?>?format=list" role="button"><i class="fas fa-list"></i></a>
-					<a class="btn <?= $format=='select' ? 'btn-secondary' : 'btn-outline-secondary' ?>" href="<?= site_url("files/{$source}") ?>?format=select" role="button"><i class="fas fa-tasks"></i></a>
+					<a class="btn <?= $format === 'cards' ? 'btn-secondary' : 'btn-outline-secondary' ?>" href="<?= site_url("files/{$source}") ?>?format=cards" role="button"><i class="fas fa-th-large"></i></a>
+					<a class="btn <?= $format === 'list' ? 'btn-secondary' : 'btn-outline-secondary' ?>" href="<?= site_url("files/{$source}") ?>?format=list" role="button"><i class="fas fa-list"></i></a>
+					<a class="btn <?= $format === 'select' ? 'btn-secondary' : 'btn-outline-secondary' ?>" href="<?= site_url("files/{$source}") ?>?format=select" role="button"><i class="fas fa-tasks"></i></a>
 				</div>
 			</div>
 			
-			<h1><?= $access == 'manage' ? 'Manage' : 'Browse' ?> <?= $username ?? '' ?> Files</h1>
+			<h1><?= $access === 'manage' ? 'Manage' : 'Browse' ?> <?= $username ?? '' ?> Files</h1>
 			
 			<div id="files-wrapper">
 <?php if (empty($files)): ?>
@@ -28,7 +28,7 @@
 
 <?php else: ?>
 				<form name="files-form" method="post" action="<?= site_url('files/bulk') ?>">
-					<?= $format == 'select' ? view('Tatter\Files\Views\actions\bulk', ['access' => $access, 'bulks' => $bulks]) : '' ?>
+					<?= $format === 'select' ? view('Tatter\Files\Views\actions\bulk', ['access' => $access, 'bulks' => $bulks]) : '' ?>
 					<?= view("Tatter\Files\Views\\formats\\{$format}", ['files' => $files, 'access' => $access, 'exports' => $exports]); ?>
 				</form>
 <?php endif; ?>
