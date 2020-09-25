@@ -9,11 +9,10 @@ class Files extends BaseConfig
 	 *
 	 * @var string
 	 */
-	// 
 	public $userSource = 'logged_in';
 
 	/**
-	 * Directory to store files (with trailing slash) 
+	 * Directory to store files (with trailing slash)
 	 *
 	 * @var string
 	 */
@@ -50,5 +49,5 @@ class Files extends BaseConfig
 	 *
 	 * @var string
 	 */
-	public $defaultThumbnail = '\\Tatter\\Files\\Views\\thumbnail.jpg';
+	public $defaultThumbnail = '\\Tatter\\Files\\Assets\\Unavailable.jpg';
 }
