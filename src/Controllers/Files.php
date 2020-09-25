@@ -17,7 +17,7 @@ class Files extends Controller
 
 	public function __construct()
 	{
-				// Preload the model & config
+		// Preload the model & config
 		$this->model  = new FileModel();
 		$this->config = config('Files');
 
@@ -78,32 +78,39 @@ class Files extends Controller
 		$userId      = $userId ?? $currentUser ?? 0;
 
 		// Not logged in
-		if (! $userId):
+		if (! $userId)
+		{
 			// Check for list permission
-			if (! $this->model->mayList()):
+			if (! $this->model->mayList())
+			{
 				alert('warning', lang('Permits.notPermitted'));
 				return redirect()->back();
-			endif;
+			}
 
 			$access   = 'display';
 			$username = 'User';
 
-			// Logged in, looking at another user
-		elseif ($userId !== $currentUser):
+		// Logged in, looking at another user
+		}
+		elseif ($userId !== $currentUser)
+		{
 			// Check for list permission
-			if (! $this->model->mayList()):
+			if (! $this->model->mayList())
+			{
 				alert('warning', lang('Permits.notPermitted'));
 				return redirect()->back();
-			endif;
+			}
 
 			$access   = $this->model->mayAdmin() ? 'manage' : 'display';
 			$username = 'User';
 
-			// Looking at own files
-		else:
+		// Looking at own files
+		}
+		else
+		{
 			$access   = 'manage';
 			$username = 'My';
-		endif;
+		}
 
 		// Load data
 		$data = [
@@ -128,7 +135,7 @@ class Files extends Controller
 	// Determine the correct display format
 	protected function getFormat(): string
 	{
-				$settings = service('settings');
+		$settings = service('settings');
 
 		// Check for a reformat request, then load from settings, fallback to the config default
 		$format = $this->request->getGetPost('format') ?? $settings->filesFormat ?? $this->config->defaultFormat;
@@ -171,31 +178,35 @@ class Files extends Controller
 		$file   = $this->model->find($fileId);
 
 		// Handle missing info
-		if (empty($file)):
-			if ($this->request->isAJAX()):
+		if (empty($file))
+		{
+			if ($this->request->isAJAX())
+			{
 				echo lang('Files.noFile');
 				return;
-			endif;
+			}
 
 			alert('warning', lang('Files.noFile'));
 			return redirect()->back();
-		endif;
+		}
 
 		// Check for form submission
-		if ($filename = $this->request->getGetPost('filename')):
+		if ($filename = $this->request->getGetPost('filename'))
+		{
 			// Update the name
 			$file->filename = $filename;
 			$this->model->save($file);
 
 			// AJAX requests are blank on success
-			if ($this->request->isAJAX()):
+			if ($this->request->isAJAX())
+			{
 				return;
-			endif;
+			}
 
 			// Set the message and return
 			alert('success', lang('Files.renameSuccess', [$filename]));
 			return redirect()->back();
-		endif;
+		}
 
 		$data = [
 			'config' => $this->config,
@@ -235,45 +246,51 @@ class Files extends Controller
 		// Harvest file IDs and the requested action
 		$action  = '';
 		$fileIds = [];
-		foreach ($post as $key => $value):
-			if (is_numeric($value)):
+		foreach ($post as $key => $value)
+		{
+			if (is_numeric($value))
+			{
 				$fileIds[] = $value;
-			else:
+			}
+			else
+			{
 				$action = $key;
-			endif;
-		endforeach;
+			}
+		}
 
 		// Make sure some files where checked
-		if (empty($fileIds)):
+		if (empty($fileIds))
+		{
 			alert('warning', lang('File.nofile'));
 			return redirect()->back();
-		endif;
+		}
 
 		// Handle actions
 		switch ($action):
 			case '':
 				alert('warning', 'No valid action.');
-			break;
+		break;
 
-			// Bulk delete request
-			case 'delete':
+		// Bulk delete request
+		case 'delete':
 				$this->model->delete($fileIds);
-				alert('success', 'Deleted ' . count($fileIds) . ' files.');
-			break;
+		alert('success', 'Deleted ' . count($fileIds) . ' files.');
+		break;
 
-			default:
+		default:
 				// Match the export handler
 				$exports = new ExportModel();
-				$handler = $exports->where('uid', $action)->first();
-				if (empty($handler)):
-					alert('warning', 'No handler found for ' . $uid);
-					return redirect()->back();
-				endif;
+		$handler = $exports->where('uid', $action)->first();
+		if (empty($handler))
+		{
+			alert('warning', 'No handler found for ' . $uid);
+			return redirect()->back();
+		}
 
-				// Pass to the handler
-				//$response = $handler->process($file->path, $file->filename);
+		// Pass to the handler
+		//$response = $handler->process($file->path, $file->filename);
 
-				alert('success', 'Processed ' . count($fileIds) . ' files.');
+		alert('success', 'Processed ' . count($fileIds) . ' files.');
 		endswitch;
 
 		return redirect()->back();
@@ -294,7 +311,8 @@ class Files extends Controller
 		}
 
 		// Check for chunks
-		if ($this->request->getPost('chunkIndex') !== null):
+		if ($this->request->getPost('chunkIndex') !== null)
+		{
 
 			// Gather chunk info
 			$chunkIndex  = $this->request->getPost('chunkIndex');
@@ -303,17 +321,19 @@ class Files extends Controller
 
 			// Check for chunk directory
 			$chunkDir = WRITEPATH . 'uploads/' . $uuid;
-			if (! is_dir($chunkDir) && ! mkdir($chunkDir, 0775, true)):
+			if (! is_dir($chunkDir) && ! mkdir($chunkDir, 0775, true))
+			{
 				throw FilesException::forChunkDirFail($chunkDir);
-			endif;
+			}
 
 			// Move the file
 			$file->move($chunkDir, $chunkIndex . '.' . $file->getExtension());
 
 			// Check for more chunks
-			if ($chunkIndex < $totalChunks - 1):
+			if ($chunkIndex < $totalChunks - 1)
+			{
 				return;
-			endif;
+			}
 
 			// Save client name from last chunk
 			$clientname = $file->getClientName();
@@ -331,8 +351,10 @@ class Files extends Controller
 				'size'       => $file->getSize(),
 			];
 
-			// No chunks, handle as a straight upload
-		else:
+		// No chunks, handle as a straight upload
+		}
+		else
+		{
 			log_message('debug', 'New file upload: ' . $file->getClientName());
 
 			// Gather file info
@@ -343,7 +365,7 @@ class Files extends Controller
 				'type'       => $file->getMimeType(),
 				'size'       => $file->getSize(),
 			];
-		endif;
+		}
 
 		// Move the file
 		$file->move($this->config->storagePath, $row['localname']);
@@ -362,7 +384,8 @@ class Files extends Controller
 		// Try to create a thumbnail
 		$thumbnails = service('thumbnails');
 		$tmpfile    = tempnam(sys_get_temp_dir(), random_string());
-		if ($thumbnails->create($this->config->storagePath . $row['localname'], $tmpfile)):
+		if ($thumbnails->create($this->config->storagePath . $row['localname'], $tmpfile))
+		{
 			// Read in file binary data
 			$handle = fopen($tmpfile, 'rb');
 			$data   = fread($handle, filesize($tmpfile));
@@ -371,30 +394,36 @@ class Files extends Controller
 			// Encode as base64 and add to the database
 			$data = base64_encode($data);
 			$this->model->update($fileId, ['thumbnail' => $data]);
-		else:
+		}
+		else
+		{
 			$errors = implode('. ', $thumbnails->getErrors());
 			log_message('debug', "Unable to create thumbnail for {$row['filename']}: {$errors}");
-		endif;
+		}
 		unlink($tmpfile);
 
-		if (! $this->request->isAJAX()):
+		if (! $this->request->isAJAX())
+		{
 			set_message('success', "Upload of {$row['filename']} successful.");
 			return redirect()->back();
-		endif;
+		}
 	}
 
 	protected function failure($errorCode, $errorMessage)
 	{
 		log_message('debug', $errorMessage);
 
-		if ($this->request->isAJAX()):
+		if ($this->request->isAJAX())
+		{
 			$response = ['error' => $errorMessage];
 			$this->response->setStatusCode($errorCode);
 			return $this->response->setJSON($response);
-		else:
+		}
+		else
+		{
 			alert('error', $errorMessage);
 			return redirect()->back();
-		endif;
+		}
 	}
 
 	// Merges all chunks in a target directory into a single file, returns the file path
@@ -422,7 +451,8 @@ class Files extends Controller
 		}
 
 		// Write each chunk to the temp file
-		foreach ($chunks as $file):
+		foreach ($chunks as $file)
+		{
 			$input = @fopen($file, 'rb');
 			if (! $input)
 			{
@@ -436,7 +466,7 @@ class Files extends Controller
 			}
 
 			fclose($input);
-		endforeach;
+		}
 
 		// close output handle
 		fclose($output);
@@ -450,17 +480,19 @@ class Files extends Controller
 		// Match the export handler
 		$exports = new ExportModel();
 		$handler = $exports->where('uid', $uid)->first();
-		if (empty($handler)):
+		if (empty($handler))
+		{
 			alert('warning', 'No handler found for ' . $uid);
 			return redirect()->back();
-		endif;
+		}
 
 		// Load the file
 		$file = $this->model->find($fileId);
-		if (empty($file)):
+		if (empty($file))
+		{
 			alert('warning', lang('Files.noFile'));
 			return redirect()->back();
-		endif;
+		}
 
 		// Pass to the handler
 		$response = $handler->process($file->path, $file->filename);
@@ -471,12 +503,15 @@ class Files extends Controller
 			return $response;
 		}
 
-		if ($response === true):
+		if ($response === true)
+		{
 			alert('success', lang('Files.noFile', [ucfirst($uid)]) );
-		elseif ($response === false):
+		}
+		elseif ($response === false)
+		{
 			$error = implode('. ', $handler->getErrors());
 			alert('error', $error);
-		endif;
+		}
 
 		return redirect()->back();
 	}

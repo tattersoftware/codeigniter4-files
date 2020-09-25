@@ -5,26 +5,31 @@ if (! function_exists('bytes2human'))
 	function bytes2human($bytes)
 	{
 		$unit = 'bytes';
-		if ($bytes > 1024):
+		if ($bytes > 1024)
+		{
 			$bytes /= 1024;
 			$unit   = 'KB';
-		endif;
-		if ($bytes > 1024):
+		}
+		if ($bytes > 1024)
+		{
 			$bytes /= 1024;
 			$unit   = 'MB';
-		endif;
-		if ($bytes > 1024):
+		}
+		if ($bytes > 1024)
+		{
 			$bytes /= 1024;
 			$unit   = 'GB';
-		endif;
-		if ($bytes > 1024):
+		}
+		if ($bytes > 1024)
+		{
 			$bytes /= 1024;
 			$unit   = 'TB';
-		endif;
-		if ($bytes > 1024):
+		}
+		if ($bytes > 1024)
+		{
 			$bytes /= 1024;
 			$unit   = 'PB';
-		endif;
+		}
 
 		return round($bytes, 1) . ' ' . $unit;
 	}
@@ -59,7 +64,7 @@ if (! function_exists('return_bytes'))
 		$unit = $val[strlen($val) - 1];
 		$val  = (int)rtrim($val, $unit);
 
-		switch($unit)
+		switch ($unit)
 		{
 			case 'g': $val *= 1024;
 			case 'm': $val *= 1024;
