@@ -1,8 +1,15 @@
 <?php
-// Outputs a human-friendly conversion of bytes
+
 if (! function_exists('bytes2human'))
 {
-	function bytes2human($bytes)
+	/**
+	 * Converts bytes to a human-friendly format.
+	 *
+	 * @param int $bytes
+	 *
+	 * @return string
+	 */
+	function bytes2human(int $bytes): string
 	{
 		$unit = 'bytes';
 		if ($bytes > 1024)
@@ -35,12 +42,16 @@ if (! function_exists('bytes2human'))
 	}
 }
 
-// Thanks to AoEmaster (https://stackoverflow.com/users/1732818/aoemaster)
-// https://stackoverflow.com/questions/2840755/how-to-determine-the-max-file-upload-limit-in-php
-
 if (! function_exists('max_file_upload_in_bytes'))
 {
-	function max_file_upload_in_bytes()
+	/**
+	 * Determines the maximum allowed file size for uploads.
+	 * Thanks to Thanks to AoEmaster (https://stackoverflow.com/users/1732818/aoemaster)
+	 *
+	 * @return int
+	 * @see https://stackoverflow.com/questions/2840755/how-to-determine-the-max-file-upload-limit-in-php
+	 */
+	function max_file_upload_in_bytes(): int
 	{
 		// Select maximum upload size
 		$max_upload = return_bytes(ini_get('upload_max_filesize'));
@@ -58,18 +69,25 @@ if (! function_exists('max_file_upload_in_bytes'))
 
 if (! function_exists('return_bytes'))
 {
-	function return_bytes($val)
+	/**
+	 * Converts ini-style sizes to bytes.
+	 *
+	 * @param string $value
+	 *
+	 * @return int
+	 */
+	function return_bytes(string $value): int
 	{
-		$val  = strtolower(trim($val));
-		$unit = $val[strlen($val) - 1];
-		$val  = (int)rtrim($val, $unit);
+		$value  = strtolower(trim($value));
+		$unit   = $value[strlen($value) - 1];
+		$num    = (int)rtrim($value, $unit);
 
 		switch ($unit)
 		{
-			case 'g': $val *= 1024;
-			case 'm': $val *= 1024;
-			case 'k': $val *= 1024;
+			case 'g': $num *= 1024;
+			case 'm': $num *= 1024;
+			case 'k': $num *= 1024;
 		}
-		return $val;
+		return $num;
 	}
 }

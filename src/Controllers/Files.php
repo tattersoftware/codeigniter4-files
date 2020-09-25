@@ -4,21 +4,29 @@ use CodeIgniter\Controller;
 use CodeIgniter\Files\File;
 use CodeIgniter\HTTP\ResponseInterface;
 use Tatter\Exports\Models\ExportModel;
+use Tatter\Files\Config\Files;
 use Tatter\Files\Exceptions\FilesException;
 use Tatter\Files\Models\FileModel;
 
 class Files extends Controller
 {
-	protected $helpers = [
-		'alerts',
-		'files',
-		'text',
-	];
+	/**
+	 * Files config.
+	 *
+	 * @var Files
+	 */
+	protected $config;
 
+	/**
+	 * Helpers to load.
+	 */
+	protected $helpers = ['alerts', 'files', 'text'];
+
+	/**
+	 * Preloads the configuration and verifies the storage directory.
+	 */
 	public function __construct()
 	{
-		// Preload the model & config
-		$this->model  = new FileModel();
 		$this->config = config('Files');
 
 		// Verify the storage directory
@@ -28,13 +36,17 @@ class Files extends Controller
 		}
 	}
 
-	// Displays a list of all files
-	public function index()
+	/**
+	 * Displays a list of all files.
+	 *
+	 * @return string
+	 */
+	public function index(): string
 	{
 		$exports = new ExportModel();
 
 		// If global listing is denied then try for the user's files
-		if (! $this->model->mayList())
+		if (! model(FileModel::class)->mayList())
 		{
 			return $this->user();
 		}
@@ -42,7 +54,7 @@ class Files extends Controller
 		// Check for universal write permission
 		if ($userId = session($this->config->userSource))
 		{
-			$access = $this->model->mayAdmin() ? 'manage' : 'display';
+			$access = model(FileModel::class)->mayAdmin() ? 'manage' : 'display';
 		}
 		else
 		{
@@ -52,7 +64,7 @@ class Files extends Controller
 		// Load data
 		$data = [
 			'config'  => $this->config,
-			'files'   => $this->model->orderBy('filename')->findAll(),
+			'files'   => model(FileModel::class)->orderBy('filename')->findAll(),
 			'source'  => 'index',
 			'format'  => $this->getFormat(),
 			'access'  => $access,
@@ -68,7 +80,14 @@ class Files extends Controller
 		return view('Tatter\Files\Views\index', $data);
 	}
 
-	// Displays files for a user (defaults to the current user)
+
+	/**
+	 * Displays files for a user (defaults to the current user).
+	 *
+	 * @param string|int|null $userId  ID of the target user
+	 *
+	 * @return string
+	 */
 	public function user($userId = null)
 	{
 		$exports = new ExportModel();
@@ -81,7 +100,7 @@ class Files extends Controller
 		if (! $userId)
 		{
 			// Check for list permission
-			if (! $this->model->mayList())
+			if (! model(FileModel::class)->mayList())
 			{
 				alert('warning', lang('Permits.notPermitted'));
 				return redirect()->back();
@@ -95,13 +114,13 @@ class Files extends Controller
 		elseif ($userId !== $currentUser)
 		{
 			// Check for list permission
-			if (! $this->model->mayList())
+			if (! model(FileModel::class)->mayList())
 			{
 				alert('warning', lang('Permits.notPermitted'));
 				return redirect()->back();
 			}
 
-			$access   = $this->model->mayAdmin() ? 'manage' : 'display';
+			$access   = model(FileModel::class)->mayAdmin() ? 'manage' : 'display';
 			$username = 'User';
 
 		// Looking at own files
@@ -115,7 +134,7 @@ class Files extends Controller
 		// Load data
 		$data = [
 			'config'   => $this->config,
-			'files'    => $this->model->getForUser($userId),
+			'files'    => model(FileModel::class)->getForUser($userId),
 			'source'   => 'user/' . $userId,
 			'format'   => $this->getFormat(),
 			'access'   => $access,
@@ -155,13 +174,13 @@ class Files extends Controller
 		// Figure out user & access
 		$currentUser = session($this->config->userSource);
 		// If no user or other user then check for list permission
-		if ((empty($userId) || $userId !== $currentUser) && ! $this->model->mayList())
+		if ((empty($userId) || $userId !== $currentUser) && ! model(FileModel::class)->mayList())
 		{
 			return lang('Permits.notPermitted');
 		}
 
 		// Filter for user files
-		$files = empty($userId) ? $this->model->orderBy('filename')->findAll() : $this->model->getForUser($userId);
+		$files = empty($userId) ? model(FileModel::class)->orderBy('filename')->findAll() : model(FileModel::class)->getForUser($userId);
 
 		$data = [
 			'config' => $this->config,
@@ -175,7 +194,7 @@ class Files extends Controller
 	{
 		// Load the request
 		$fileId = $this->request->getGetPost('file_id') ?? $fileId;
-		$file   = $this->model->find($fileId);
+		$file   = model(FileModel::class)->find($fileId);
 
 		// Handle missing info
 		if (empty($file))
@@ -195,7 +214,7 @@ class Files extends Controller
 		{
 			// Update the name
 			$file->filename = $filename;
-			$this->model->save($file);
+			model(FileModel::class)->save($file);
 
 			// AJAX requests are blank on success
 			if ($this->request->isAJAX())
@@ -226,13 +245,13 @@ class Files extends Controller
 	// Delete a file
 	public function delete($fileId)
 	{
-		$file = $this->model->find($fileId);
+		$file = model(FileModel::class)->find($fileId);
 		if (empty($file))
 		{
 			return redirect()->back();
 		}
 
-		$this->model->delete($fileId);
+		model(FileModel::class)->delete($fileId);
 		alert('success', 'Deleted ' . $file->filename);
 		return redirect()->back();
 	}
@@ -273,7 +292,7 @@ class Files extends Controller
 
 		// Bulk delete request
 		case 'delete':
-				$this->model->delete($fileIds);
+				model(FileModel::class)->delete($fileIds);
 		alert('success', 'Deleted ' . count($fileIds) . ' files.');
 		break;
 
@@ -372,13 +391,13 @@ class Files extends Controller
 		chmod($this->config->storagePath . $row['localname'], 0664); // WIP
 
 		// Record in the database
-		$fileId = $this->model->insert($row);
+		$fileId = model(FileModel::class)->insert($row);
 
 		// Associate with the current user
 		$userId = $userId ?? session($this->config->userSource) ?? 0;
 		if ($userId)
 		{
-			$this->model->addToUser($fileId, $userId);
+			model(FileModel::class)->addToUser($fileId, $userId);
 		}
 
 		// Try to create a thumbnail
@@ -393,7 +412,7 @@ class Files extends Controller
 
 			// Encode as base64 and add to the database
 			$data = base64_encode($data);
-			$this->model->update($fileId, ['thumbnail' => $data]);
+			model(FileModel::class)->update($fileId, ['thumbnail' => $data]);
 		}
 		else
 		{
@@ -487,7 +506,7 @@ class Files extends Controller
 		}
 
 		// Load the file
-		$file = $this->model->find($fileId);
+		$file = model(FileModel::class)->find($fileId);
 		if (empty($file))
 		{
 			alert('warning', lang('Files.noFile'));
@@ -519,7 +538,7 @@ class Files extends Controller
 	// Output a file's thumbnail directly as image data
 	public function thumbnail($fileId)
 	{
-		$file = $this->model->find($fileId);
+		$file = model(FileModel::class)->find($fileId);
 		$data = $file->getThumbnail('raw');
 		return $this->response->setHeader('Content-type', 'image/jpeg')->setBody($data);
 	}
