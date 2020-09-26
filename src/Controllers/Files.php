@@ -80,7 +80,6 @@ class Files extends Controller
 		return view('Tatter\Files\Views\index', $data);
 	}
 
-
 	/**
 	 * Displays files for a user (defaults to the current user).
 	 *
@@ -151,7 +150,11 @@ class Files extends Controller
 		return view('Tatter\Files\Views\index', $data);
 	}
 
-	// Determine the correct display format
+	/**
+	 * Determines the correct display format.
+	 *
+	 * @return string
+	 */
 	protected function getFormat(): string
 	{
 		$settings = service('settings');
@@ -162,17 +165,24 @@ class Files extends Controller
 		// Validate the determined format
 		$format = in_array($format, ['cards', 'list', 'select']) ? $format : 'cards';
 
-		// Upate user setting with the new preference
+		// Update user setting with the new preference
 		$settings->filesFormat = $format;
 
 		return $format;
 	}
 
-	// AJAX list of selectable files for form; optional user filter
+	/**
+	 * Lists selectable files for a form (AJAX).
+	 *
+	 * @param string|int|null $userId  Optional user to filter by
+	 *
+	 * @return string HTML view
+	 */
 	public function select($userId = null): string
 	{
 		// Figure out user & access
 		$currentUser = session($this->config->userSource);
+
 		// If no user or other user then check for list permission
 		if ((empty($userId) || $userId !== $currentUser) && ! model(FileModel::class)->mayList())
 		{
