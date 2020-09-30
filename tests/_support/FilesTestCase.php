@@ -1,8 +1,11 @@
 <?php namespace Tests\Support;
 
+use CodeIgniter\Config\Config;
 use CodeIgniter\Test\CIDatabaseTestCase;
 use Tatter\Files\Config\Files;
 use Tests\Support\Fakers\FileFaker;
+use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamDirectory;
 
 class FilesTestCase extends CIDatabaseTestCase
 {
@@ -44,19 +47,40 @@ class FilesTestCase extends CIDatabaseTestCase
 	protected $model;
 
 	/**
+	 * @var vfsStreamDirectory|null
+	 */
+	protected $root;
+
+	/**
 	 * A test file to work with
 	 *
 	 * @var string
 	 */
-	protected $testFile = SUPPORTPATH . 'image.jpg';
+	protected $testFile;
 
 	protected function setUp(): void
 	{
 		parent::setUp();
-
-		$this->config              = new Files();
-		$this->config->storagePath = SUPPORTPATH . 'storage/';
+		Config::reset();
 
 		$this->model = new FileFaker();
+
+		// Start the virtual filesystem
+		$this->root = vfsStream::setup();
+        vfsStream::copyFromFileSystem(SUPPORTPATH . 'storage/', $this->root);
+
+		// Force our config to the virtual path
+		$this->config              = new Files();
+		$this->config->storagePath = $this->root->url() . 'storage/';
+		Config::injectMock('Files', $this->config);
+
+		$this->testFile = $this->config->storagePath . 'image.jpg';
+	}
+
+	protected function tearDown(): void
+	{
+		parent::tearDown();
+
+		$this->root = null;
 	}
 }
