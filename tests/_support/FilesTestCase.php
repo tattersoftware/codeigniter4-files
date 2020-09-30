@@ -62,7 +62,9 @@ class FilesTestCase extends CIDatabaseTestCase
 	{
 		parent::setUp();
 		Config::reset();
+		helper('auth');
 
+		$_REQUEST    = [];
 		$this->model = new FileFaker();
 
 		// Start the virtual filesystem
@@ -71,7 +73,7 @@ class FilesTestCase extends CIDatabaseTestCase
 
 		// Force our config to the virtual path
 		$this->config              = new Files();
-		$this->config->storagePath = $this->root->url() . 'storage/';
+		$this->config->storagePath = $this->root->url() . '/storage/';
 		Config::injectMock('Files', $this->config);
 
 		$this->testFile = $this->config->storagePath . 'image.jpg';

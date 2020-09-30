@@ -4,7 +4,6 @@ use CodeIgniter\Controller;
 use CodeIgniter\Files\File;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\ResponseInterface;
-use Tatter\Exports\Models\ExportModel;
 use Tatter\Files\Config\Files as FilesConfig;
 use Tatter\Files\Exceptions\FilesException;
 use Tatter\Files\Models\FileModel;
@@ -19,69 +18,86 @@ class Files extends Controller
 	protected $config;
 
 	/**
+	 * The model to use, may be a child of this library's.
+	 *
+	 * @var FileModel
+	 */
+	protected $model;
+
+	/**
 	 * Helpers to load.
 	 */
-	protected $helpers = [
-		'alerts',
-		'files',
-		'text',
-	];
+	protected $helpers = ['alerts', 'files', 'handlers', 'text'];
 
 	/**
 	 * Preloads the configuration and verifies the storage directory.
+	 * Parameters are mostly for testing purposes.
+	 *
+	 * @param FilesConfig|null $config
+	 * @param FileModel|null $model
+	 *
+	 * @throws FilesException
 	 */
-	public function __construct()
+	public function __construct(FilesConfig $config = null, FileModel $model = null)
 	{
-		$this->config = config('Files');
+		$this->config = $config ?? config('Files');
+
+		// Use the short model name so a child may be loaded first
+		$this->model = $model ?? model('FileModel');
 
 		// Verify the storage directory
-		if (! is_dir($this->config->storagePath) && ! mkdir($this->config->storagePath, 0775, true))
+		if (! is_dir($this->config->storagePath) && ! @mkdir($this->config->storagePath, 0775, true))
 		{
 			throw FilesException::forDirFail($this->config->storagePath);
 		}
+
+		// Verify authentication is configured correctly
+		// @see https://codeigniter4.github.io/CodeIgniter4/extending/authentication.html
+		if (! function_exists('user_id') || ! empty($this->config->failNoAuth))
+		{
+			throw new FilesException(lang('Files.noAuth'));
+		}		
 	}
 
 	/**
-	 * Displays a list of all files.
+	 * Displays a list of all files. If global listing is not
+	 * permitted then falls back to the user's files.
 	 *
 	 * @return RedirectResponse|string
 	 */
 	public function index()
 	{
-		$exports = new ExportModel();
-
 		// If global listing is denied then try for the user's files
-		if (! model(FileModel::class)->mayList())
+		if (! $this->model->mayList())
 		{
 			return $this->user();
 		}
 
-		// Check for universal write permission
-		if ($userId = session($this->config->userSource))
-		{
-			$access = model(FileModel::class)->mayAdmin() ? 'manage' : 'display';
-		}
-		else
-		{
-			$access = 'display';
-		}
-
-		// Load data
+		// Prep metadata
 		$data = [
-			'config'  => $this->config,
-			'files'   => model(FileModel::class)->orderBy('filename')->findAll(),
 			'source'  => 'index',
+			'sort'    => $this->getSort(),
+			'order'   => $this->getOrder(),
 			'format'  => $this->getFormat(),
-			'access'  => $access,
+			'search'  => $this->request->getVar('search'),
+			'access'  => $this->model->mayAdmin() ? 'manage' : 'display',
 			'exports' => $exports->getByExtensions(),
 			'bulks'   => $exports->where('bulk', 1)->findAll(),
 		];
 
+		// Get the files
+		if ($data['search'])
+		{
+			$this->model->like('filename', $data['search']);
+		}
+		$data['files'] = $this->model->orderBy($data['sort'], $this->getOrder())->findAll();
+
 		// AJAX calls skip the wrapping
 		if ($this->request->isAJAX())
 		{
-			return view("Tatter\Files\Views\\formats\\{$data['format']}", $data);
+			return view('Tatter\Files\Views\Formats\\' . $data['format'], $data);
 		}
+
 		return view('Tatter\Files\Views\index', $data);
 	}
 
@@ -97,14 +113,13 @@ class Files extends Controller
 		$exports = new ExportModel();
 
 		// Figure out user & access
-		$currentUser = session($this->config->userSource);
-		$userId      = $userId ?? $currentUser ?? 0;
+		$userId = $userId ?? user_id() ?? 0;
 
 		// Not logged in
 		if (! $userId)
 		{
 			// Check for list permission
-			if (! model(FileModel::class)->mayList())
+			if (! $this->model->mayList())
 			{
 				alert('warning', lang('Permits.notPermitted'));
 				return redirect()->back();
@@ -118,13 +133,13 @@ class Files extends Controller
 		elseif ($userId !== $currentUser)
 		{
 			// Check for list permission
-			if (! model(FileModel::class)->mayList())
+			if (! $this->model->mayList())
 			{
 				alert('warning', lang('Permits.notPermitted'));
 				return redirect()->back();
 			}
 
-			$access   = model(FileModel::class)->mayAdmin() ? 'manage' : 'display';
+			$access   = $this->model->mayAdmin() ? 'manage' : 'display';
 			$username = 'User';
 
 			// Looking at own files
@@ -138,7 +153,7 @@ class Files extends Controller
 		// Load data
 		$data = [
 			'config'   => $this->config,
-			'files'    => model(FileModel::class)->getForUser($userId),
+			'files'    => $this->model->getForUser($userId),
 			'source'   => 'user/' . $userId,
 			'format'   => $this->getFormat(),
 			'access'   => $access,
@@ -150,30 +165,9 @@ class Files extends Controller
 		// AJAX calls skip the wrapping
 		if ($this->request->isAJAX())
 		{
-			return view("Tatter\Files\Views\\formats\\{$data['format']}", $data);
+			return view("Tatter\Files\Views\Formats\\{$data['format']}", $data);
 		}
 		return view('Tatter\Files\Views\index', $data);
-	}
-
-	/**
-	 * Determines the correct display format.
-	 *
-	 * @return string
-	 */
-	protected function getFormat(): string
-	{
-		$settings = service('settings');
-
-		// Check for a reformat request, then load from settings, fallback to the config default
-		$format = $this->request->getGetPost('format') ?? $settings->filesFormat ?? $this->config->defaultFormat;
-
-		// Validate the determined format
-		$format = in_array($format, ['cards', 'list', 'select']) ? $format : 'cards';
-
-		// Update user setting with the new preference
-		$settings->filesFormat = $format;
-
-		return $format;
 	}
 
 	/**
@@ -189,19 +183,19 @@ class Files extends Controller
 		$currentUser = session($this->config->userSource);
 
 		// If no user or other user then check for list permission
-		if ((empty($userId) || $userId !== $currentUser) && ! model(FileModel::class)->mayList())
+		if ((empty($userId) || $userId !== $currentUser) && ! $this->model->mayList())
 		{
 			return lang('Permits.notPermitted');
 		}
 
 		// Filter for user files
-		$files = empty($userId) ? model(FileModel::class)->orderBy('filename')->findAll() : model(FileModel::class)->getForUser($userId);
+		$files = empty($userId) ? $this->model->orderBy('filename')->findAll() : $this->model->getForUser($userId);
 
 		$data = [
 			'config' => $this->config,
 			'files'  => $files,
 		];
-		return view("Tatter\Files\Views\\formats\\select", $data);
+		return view("Tatter\Files\Views\Formats\\select", $data);
 	}
 
 	/**
@@ -215,7 +209,7 @@ class Files extends Controller
 	{
 		// Load the request
 		$fileId = $this->request->getGetPost('file_id') ?? $fileId;
-		$file   = model(FileModel::class)->find($fileId);
+		$file   = $this->model->find($fileId);
 
 		// Handle missing info
 		if (empty($file))
@@ -235,7 +229,7 @@ class Files extends Controller
 		{
 			// Update the name
 			$file->filename = $filename;
-			model(FileModel::class)->save($file);
+			$this->model->save($file);
 
 			// AJAX requests are blank on success
 			if ($this->request->isAJAX())
@@ -272,13 +266,13 @@ class Files extends Controller
 	 */
 	public function delete($fileId)
 	{
-		$file = model(FileModel::class)->find($fileId);
+		$file = $this->model->find($fileId);
 		if (empty($file))
 		{
 			return redirect()->back();
 		}
 
-		model(FileModel::class)->delete($fileId);
+		$this->model->delete($fileId);
 		alert('success', 'Deleted ' . $file->filename);
 		return redirect()->back();
 	}
@@ -323,7 +317,7 @@ class Files extends Controller
 
 			// Bulk delete request
 			case 'delete':
-				model(FileModel::class)->delete($fileIds);
+				$this->model->delete($fileIds);
 				alert('success', 'Deleted ' . count($fileIds) . ' files.');
 			break;
 
@@ -425,13 +419,13 @@ class Files extends Controller
 		chmod($this->config->storagePath . $row['localname'], 0664); // WIP
 
 		// Record in the database
-		$fileId = model(FileModel::class)->insert($row);
+		$fileId = $this->model->insert($row);
 
 		// Associate with the current user
 		$userId = $userId ?? session($this->config->userSource) ?? 0;
 		if ($userId)
 		{
-			model(FileModel::class)->addToUser($fileId, $userId);
+			$this->model->addToUser($fileId, $userId);
 		}
 
 		// Try to create a thumbnail
@@ -446,7 +440,7 @@ class Files extends Controller
 
 			// Encode as base64 and add to the database
 			$data = base64_encode($data);
-			model(FileModel::class)->update($fileId, ['thumbnail' => $data]);
+			$this->model->update($fileId, ['thumbnail' => $data]);
 		}
 		else
 		{
@@ -560,7 +554,7 @@ class Files extends Controller
 		}
 
 		// Load the file
-		$file = model(FileModel::class)->find($fileId);
+		$file = $this->model->find($fileId);
 		if (empty($file))
 		{
 			alert('warning', lang('Files.noFile'));
@@ -598,8 +592,118 @@ class Files extends Controller
 	 */
 	public function thumbnail($fileId)
 	{
-		$file = model(FileModel::class)->find($fileId);
+		$file = $this->model->find($fileId);
 		$data = $file->getThumbnail('raw');
 		return $this->response->setHeader('Content-type', 'image/jpeg')->setBody($data);
+	}
+
+	//--------------------------------------------------------------------
+
+	/**
+	 * Determines the sort field.
+	 *
+	 * @return string
+	 */
+	protected function getSort(): string
+	{
+		// Check for a request, then load from Settings
+		$sorts = [
+			$this->request->getVar('sort'),
+			service('settings')->filesSort,
+		];
+
+		foreach ($sorts as $sort)
+		{
+			// Validate
+			if (in_array($sort, $this->model->allowedFields))
+			{
+				// Update user setting with the new preference
+				service('settings')->filesSort = $sort;
+				return $sort;
+			}
+		}
+
+		return 'filename';
+	}
+
+	/**
+	 * Determines the sort order.
+	 *
+	 * @return string
+	 */
+	protected function getOrder(): string
+	{
+		// Check for a request, then load from Settings
+		$orders = [
+			$this->request->getVar('order'),
+			service('settings')->filesOrder,
+		];
+
+		foreach ($orders as $order)
+		{
+			$order = strtolower($order);
+
+			// Validate
+			if (in_array($order, ['asc', 'desc']))
+			{
+				// Update user setting with the new preference
+				service('settings')->filesOrder = $order;
+				return $order;
+			}
+		}
+
+		return 'asc';
+	}
+
+	/**
+	 * Determines the display format.
+	 *
+	 * @return string
+	 */
+	protected function getFormat(): string
+	{
+		// Check for a request, then load from Settings, fallback to the config default
+		$formats = [
+			$this->request->getVar('format'),
+			service('settings')->filesFormat,
+			$this->config->defaultFormat,
+		];
+
+		foreach ($formats as $format)
+		{
+			// Validate
+			if (in_array($format, ['cards', 'list', 'select']))
+			{
+				// Update user setting with the new preference
+				service('settings')->filesFormat = $format;
+				return $format;
+			}
+		}
+
+		return 'cards';
+	}
+
+	/**
+	 * Gets Export handlers indexed by the extension they support.
+	 *
+	 * @return array<string, array>
+	 */
+	protected function getExports(): array
+	{
+		$exports = [];
+		foreach (handlers('Exports') as $class)
+		{
+			$attributes = handlers()->attributes($class);
+
+			// Add the class name for easy access later
+			$attributes['class'] = $class;
+
+			foreach (explode(',', $attributes['extension']) as $extension)
+			{
+				$exports[$extension][] = $attributes;
+			}
+		}
+
+		return $exports;
 	}
 }
