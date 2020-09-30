@@ -5,13 +5,6 @@ use CodeIgniter\Config\BaseConfig;
 class Files extends BaseConfig
 {
 	/**
-	 * Session variable to check for a logged-in user ID
-	 *
-	 * @var string
-	 */
-	public $userSource = 'logged_in';
-
-	/**
 	 * Directory to store files (with trailing slash)
 	 *
 	 * @var string
@@ -34,7 +27,7 @@ class Files extends BaseConfig
 	 * @var string[]
 	 */
 	public $views = [
-		'dropzone' => 'Tatter\Files\Views\dropzone\config',
+		'dropzone' => 'Tatter\Files\Views\Dropzone\config',
 	];
 
 	/**
@@ -49,5 +42,5 @@ class Files extends BaseConfig
 	 *
 	 * @var string
 	 */
-	public $defaultThumbnail = '\\Tatter\\Files\\Assets\\Unavailable.jpg';
+	public $defaultThumbnail = 'Tatter\Files\Assets\Unavailable.jpg';
 }
