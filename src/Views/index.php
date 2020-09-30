@@ -1,4 +1,4 @@
-<?= $this->extend($config->layouts['public']) ?>
+<?= $this->extend(config('Files')->layouts['public']) ?>
 <?= $this->section('main') ?>
 
 	<div class="row">
@@ -36,7 +36,7 @@
 		</div>
 	</div>
 
-	<?= view('Tatter\Files\Views\dropzone\modal') ?>
+	<?= view('Tatter\Files\Views\Dropzone\modal') ?>
 
 	<!-- Modal -->
 	<div class="modal fade" id="globalModal" tabindex="-1" role="dialog" aria-labelledby="globalModalTitle" aria-hidden="true">
