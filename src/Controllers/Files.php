@@ -2,9 +2,10 @@
 
 use CodeIgniter\Controller;
 use CodeIgniter\Files\File;
+use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\ResponseInterface;
 use Tatter\Exports\Models\ExportModel;
-use Tatter\Files\Config\Files;
+use Tatter\Files\Config\Files as FilesConfig;
 use Tatter\Files\Exceptions\FilesException;
 use Tatter\Files\Models\FileModel;
 
@@ -13,7 +14,7 @@ class Files extends Controller
 	/**
 	 * Files config.
 	 *
-	 * @var Files
+	 * @var FilesConfig
 	 */
 	protected $config;
 
@@ -39,9 +40,9 @@ class Files extends Controller
 	/**
 	 * Displays a list of all files.
 	 *
-	 * @return string
+	 * @return RedirectResponse|string
 	 */
-	public function index(): string
+	public function index()
 	{
 		$exports = new ExportModel();
 
@@ -85,7 +86,7 @@ class Files extends Controller
 	 *
 	 * @param string|int|null $userId  ID of the target user
 	 *
-	 * @return string
+	 * @return RedirectResponse|string
 	 */
 	public function user($userId = null)
 	{
@@ -199,7 +200,13 @@ class Files extends Controller
 		return view("Tatter\Files\Views\\formats\\select", $data);
 	}
 
-	// Display or process the form to rename a file
+	/**
+	 * Displays or processes the form to rename a file.
+	 *
+	 * @param string|null $fileId
+	 *
+	 * @return RedirectResponse|string
+	 */
 	public function rename($fileId = null)
 	{
 		// Load the request
@@ -212,7 +219,7 @@ class Files extends Controller
 			if ($this->request->isAJAX())
 			{
 				echo lang('Files.noFile');
-				return;
+				return '';
 			}
 
 			alert('warning', lang('Files.noFile'));
@@ -229,7 +236,7 @@ class Files extends Controller
 			// AJAX requests are blank on success
 			if ($this->request->isAJAX())
 			{
-				return;
+				return '';
 			}
 
 			// Set the message and return
@@ -252,7 +259,13 @@ class Files extends Controller
 		return view('Tatter\Files\Views\rename', $data);
 	}
 
-	// Delete a file
+	/**
+	 * Deletes a file.
+	 *
+	 * @param string $fileId
+	 *
+	 * @return RedirectResponse
+	 */
 	public function delete($fileId)
 	{
 		$file = model(FileModel::class)->find($fileId);
@@ -266,8 +279,12 @@ class Files extends Controller
 		return redirect()->back();
 	}
 
-	// Handle bulk actions
-	public function bulk()
+	/**
+	 * Handles bulk actions.
+	 *
+	 * @return RedirectResponse
+	 */
+	public function bulk(): RedirectResponse
 	{
 		// Load post data
 		$post = $this->request->getPost();
@@ -298,34 +315,38 @@ class Files extends Controller
 		switch ($action):
 			case '':
 				alert('warning', 'No valid action.');
-		break;
+			break;
 
-		// Bulk delete request
-		case 'delete':
+			// Bulk delete request
+			case 'delete':
 				model(FileModel::class)->delete($fileIds);
-		alert('success', 'Deleted ' . count($fileIds) . ' files.');
-		break;
+				alert('success', 'Deleted ' . count($fileIds) . ' files.');
+			break;
 
 		default:
-				// Match the export handler
-				$exports = new ExportModel();
-		$handler = $exports->where('uid', $action)->first();
-		if (empty($handler))
-		{
-			alert('warning', 'No handler found for ' . $uid);
-			return redirect()->back();
-		}
+			// Match the export handler
+			$exports = new ExportModel();
+			$handler = $exports->where('uid', $action)->first();
+			if (empty($handler))
+			{
+				alert('warning', 'No handler found for ' . $action);
+				return redirect()->back();
+			}
 
-		// Pass to the handler
-		//$response = $handler->process($file->path, $file->filename);
+			// Pass to the handler
+			//$response = $handler->process($file->path, $file->filename);
 
-		alert('success', 'Processed ' . count($fileIds) . ' files.');
+			alert('success', 'Processed ' . count($fileIds) . ' files.');
 		endswitch;
 
 		return redirect()->back();
 	}
 
-	// Receives uploads from Dropzone
+	/**
+	 * Receives uploads from Dropzone.
+	 *
+	 * @return ResponseInterface|string|null
+	 */
 	public function upload()
 	{
 		// Verify upload succeeded
@@ -361,7 +382,7 @@ class Files extends Controller
 			// Check for more chunks
 			if ($chunkIndex < $totalChunks - 1)
 			{
-				return;
+				return null;
 			}
 
 			// Save client name from last chunk
@@ -433,12 +454,19 @@ class Files extends Controller
 
 		if (! $this->request->isAJAX())
 		{
-			set_message('success', "Upload of {$row['filename']} successful.");
+			alert('success', "Upload of {$row['filename']} successful.");
 			return redirect()->back();
 		}
+
+		return '';
 	}
 
-	protected function failure($errorCode, $errorMessage)
+	/**
+	 * Handles failures.
+	 *
+	 * @return ResponseInterface
+	 */
+	protected function failure($errorCode, $errorMessage): ResponseInterface
 	{
 		log_message('debug', $errorMessage);
 
@@ -455,8 +483,14 @@ class Files extends Controller
 		}
 	}
 
-	// Merges all chunks in a target directory into a single file, returns the file path
-	protected function mergeChunks($dir)
+	/**
+	 * Merges all chunks in a target directory into a single file, returns the file path.
+	 *
+	 * @return string
+	 *
+	 * @throws FilesException
+	 */
+	protected function mergeChunks($dir): string
 	{
 		helper('filesystem');
 		helper('text');
@@ -503,15 +537,22 @@ class Files extends Controller
 		return $tmpfile;
 	}
 
-	// Process an export request
-	public function export($uid, $fileId)
+	/**
+	 * Processes Export requests.
+	 *
+	 * @param string $slug       The slug to match to Exports attribute
+	 * @param string|int $fileId
+	 *
+	 * @return ResponseInterface
+	 */
+	public function export(string $slug, $fileId): ResponseInterface
 	{
 		// Match the export handler
 		$exports = new ExportModel();
-		$handler = $exports->where('uid', $uid)->first();
+		$handler = $exports->where('slug', $slug)->first();
 		if (empty($handler))
 		{
-			alert('warning', 'No handler found for ' . $uid);
+			alert('warning', 'No handler found for ' . $slug);
 			return redirect()->back();
 		}
 
@@ -534,7 +575,7 @@ class Files extends Controller
 
 		if ($response === true)
 		{
-			alert('success', lang('Files.noFile', [ucfirst($uid)]) );
+			alert('success', lang('Files.noFile', [ucfirst($slug)]) );
 		}
 		elseif ($response === false)
 		{
@@ -545,7 +586,13 @@ class Files extends Controller
 		return redirect()->back();
 	}
 
-	// Output a file's thumbnail directly as image data
+	/**
+	 * Outputs a file thumbnail directly as image data.
+	 *
+	 * @param string|int $fileId
+	 *
+	 * @return ResponseInterface
+	 */
 	public function thumbnail($fileId)
 	{
 		$file = model(FileModel::class)->find($fileId);

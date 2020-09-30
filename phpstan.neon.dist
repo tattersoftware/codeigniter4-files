@@ -10,9 +10,11 @@ parameters:
 		- src/Config/Routes.php
 		- src/Views/*
 	ignoreErrors:
+		- '#Cannot access property \$[a-z]+ on array\|object#'
 		- '#Unsafe usage of new static\(\)*#'
 	scanDirectories:
 		- vendor/codeigniter4/codeigniter4/system/Helpers
+		- vendor/tatter/alerts/src/Helpers
 	dynamicConstantNames:
 		- APP_NAMESPACE
 		- CI_DEBUG
