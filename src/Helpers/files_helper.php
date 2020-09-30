@@ -5,7 +5,7 @@ if (! function_exists('bytes2human'))
 	/**
 	 * Converts bytes to a human-friendly format.
 	 *
-	 * @param int $bytes
+	 * @param integer $bytes
 	 *
 	 * @return string
 	 */
@@ -48,8 +48,8 @@ if (! function_exists('max_file_upload_in_bytes'))
 	 * Determines the maximum allowed file size for uploads.
 	 * Thanks to Thanks to AoEmaster (https://stackoverflow.com/users/1732818/aoemaster)
 	 *
-	 * @return int
-	 * @see https://stackoverflow.com/questions/2840755/how-to-determine-the-max-file-upload-limit-in-php
+	 * @return integer
+	 * @see    https://stackoverflow.com/questions/2840755/how-to-determine-the-max-file-upload-limit-in-php
 	 */
 	function max_file_upload_in_bytes(): int
 	{
@@ -74,13 +74,13 @@ if (! function_exists('return_bytes'))
 	 *
 	 * @param string $value
 	 *
-	 * @return int
+	 * @return integer
 	 */
 	function return_bytes(string $value): int
 	{
-		$value  = strtolower(trim($value));
-		$unit   = $value[strlen($value) - 1];
-		$num    = (int)rtrim($value, $unit);
+		$value = strtolower(trim($value));
+		$unit  = $value[strlen($value) - 1];
+		$num   = (int)rtrim($value, $unit);
 
 		switch ($unit)
 		{

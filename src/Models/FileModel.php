@@ -16,8 +16,12 @@ class FileModel extends Model
 	protected $skipValidation = false;
 
 	protected $allowedFields = [
-		'filename', 'localname', 'clientname',
-		'type', 'size', 'thumbnail',
+		'filename',
+		'localname',
+		'clientname',
+		'type',
+		'size',
+		'thumbnail',
 	];
 
 	protected $validationRules = [
@@ -39,10 +43,10 @@ class FileModel extends Model
 	/**
 	 * Associates a file with a user
 	 *
-	 * @param int $fileId
-	 * @param int $userId
+	 * @param integer $fileId
+	 * @param integer $userId
 	 *
-	 * @return bool
+	 * @return boolean
 	 */
 	public function addToUser(int $fileId, int $userId): bool
 	{
@@ -55,7 +59,7 @@ class FileModel extends Model
 	/**
 	 * Returns an array of all a user's Files
 	 *
-	 * @param int $userId
+	 * @param integer $userId
 	 *
 	 * @return array
 	 */

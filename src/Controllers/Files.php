@@ -21,7 +21,11 @@ class Files extends Controller
 	/**
 	 * Helpers to load.
 	 */
-	protected $helpers = ['alerts', 'files', 'text'];
+	protected $helpers = [
+		'alerts',
+		'files',
+		'text',
+	];
 
 	/**
 	 * Preloads the configuration and verifies the storage directory.
@@ -84,7 +88,7 @@ class Files extends Controller
 	/**
 	 * Displays files for a user (defaults to the current user).
 	 *
-	 * @param string|int|null $userId  ID of the target user
+	 * @param string|integer|null $userId ID of the target user
 	 *
 	 * @return RedirectResponse|string
 	 */
@@ -109,7 +113,7 @@ class Files extends Controller
 			$access   = 'display';
 			$username = 'User';
 
-		// Logged in, looking at another user
+			// Logged in, looking at another user
 		}
 		elseif ($userId !== $currentUser)
 		{
@@ -123,7 +127,7 @@ class Files extends Controller
 			$access   = model(FileModel::class)->mayAdmin() ? 'manage' : 'display';
 			$username = 'User';
 
-		// Looking at own files
+			// Looking at own files
 		}
 		else
 		{
@@ -175,7 +179,7 @@ class Files extends Controller
 	/**
 	 * Lists selectable files for a form (AJAX).
 	 *
-	 * @param string|int|null $userId  Optional user to filter by
+	 * @param string|integer|null $userId Optional user to filter by
 	 *
 	 * @return string HTML view
 	 */
@@ -323,20 +327,20 @@ class Files extends Controller
 				alert('success', 'Deleted ' . count($fileIds) . ' files.');
 			break;
 
-		default:
-			// Match the export handler
-			$exports = new ExportModel();
-			$handler = $exports->where('uid', $action)->first();
-			if (empty($handler))
-			{
-				alert('warning', 'No handler found for ' . $action);
-				return redirect()->back();
-			}
+			default:
+				// Match the export handler
+				$exports = new ExportModel();
+				$handler = $exports->where('uid', $action)->first();
+				if (empty($handler))
+				{
+					alert('warning', 'No handler found for ' . $action);
+					return redirect()->back();
+				}
 
-			// Pass to the handler
-			//$response = $handler->process($file->path, $file->filename);
+				// Pass to the handler
+				//$response = $handler->process($file->path, $file->filename);
 
-			alert('success', 'Processed ' . count($fileIds) . ' files.');
+				alert('success', 'Processed ' . count($fileIds) . ' files.');
 		endswitch;
 
 		return redirect()->back();
@@ -363,7 +367,6 @@ class Files extends Controller
 		// Check for chunks
 		if ($this->request->getPost('chunkIndex') !== null)
 		{
-
 			// Gather chunk info
 			$chunkIndex  = $this->request->getPost('chunkIndex');
 			$totalChunks = $this->request->getPost('totalChunks');
@@ -401,7 +404,7 @@ class Files extends Controller
 				'size'       => $file->getSize(),
 			];
 
-		// No chunks, handle as a straight upload
+			// No chunks, handle as a straight upload
 		}
 		else
 		{
@@ -540,8 +543,8 @@ class Files extends Controller
 	/**
 	 * Processes Export requests.
 	 *
-	 * @param string $slug       The slug to match to Exports attribute
-	 * @param string|int $fileId
+	 * @param string         $slug   The slug to match to Exports attribute
+	 * @param string|integer $fileId
 	 *
 	 * @return ResponseInterface
 	 */
@@ -589,7 +592,7 @@ class Files extends Controller
 	/**
 	 * Outputs a file thumbnail directly as image data.
 	 *
-	 * @param string|int $fileId
+	 * @param string|integer $fileId
 	 *
 	 * @return ResponseInterface
 	 */

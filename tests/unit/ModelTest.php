@@ -25,9 +25,9 @@ class ModelTest extends FilesTestCase
 
 		$result = $this->model->getForUser(10);
 		$this->assertCount(2, $result);
-		
+
 		$ids = array_column($result, 'id');
-		
+
 		$this->assertEquals([$file1->id, $file2->id], $ids);
 	}
 }

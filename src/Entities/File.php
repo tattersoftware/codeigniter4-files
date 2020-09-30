@@ -6,7 +6,11 @@ use CodeIgniter\Files\File as CIFile;
 
 class File extends Entity
 {
-	protected $dates = ['created_at', 'updated_at', 'deleted_at'];
+	protected $dates = [
+		'created_at',
+		'updated_at',
+		'deleted_at',
+	];
 
 	/**
 	 * Resolved path to the default thumbnail

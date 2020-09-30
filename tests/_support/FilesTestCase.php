@@ -43,7 +43,7 @@ class FilesTestCase extends CIDatabaseTestCase
 	{
 		parent::setUp();
 
-		$this->config = new Files();
+		$this->config              = new Files();
 		$this->config->storagePath = SUPPORTPATH . 'storage/';
 
 		$this->model = new FileFaker();
