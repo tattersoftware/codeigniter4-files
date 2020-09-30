@@ -56,7 +56,7 @@
 	},
 	"scripts": {
 		"analyze": "phpstan analyze",
-		"style": "phpcs --standard=./vendor/codeigniter4/codeigniter4-standard/CodeIgniter4 src/ tests/",
+		"style": "phpcbf --standard=./vendor/codeigniter4/codeigniter4-standard/CodeIgniter4 src/ tests/",
 		"test": "phpunit",
 		"post-update-cmd": [
 			"composer dump-autoload"
