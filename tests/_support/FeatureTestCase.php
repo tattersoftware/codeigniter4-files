@@ -8,6 +8,7 @@ use Config\Services;
 class FeatureTestCase extends FilesTestCase
 {
 	use \CodeIgniter\Test\FeatureTestTrait;
+	use \Myth\Auth\Test\AuthTestTrait;
 
 	/**
 	 * If present, will override application
@@ -31,4 +32,11 @@ class FeatureTestCase extends FilesTestCase
 	 * @var boolean
 	 */
 	protected $clean = true;
+
+	protected function setUp(): void
+	{
+		parent::setUp();
+
+		$this->resetAuthServices();
+	}
 }

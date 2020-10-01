@@ -28,8 +28,8 @@
 
 <?php else: ?>
 				<form name="files-form" method="post" action="<?= site_url('files/bulk') ?>">
-					<?= $format === 'select' ? view('Tatter\Files\Views\actions\bulk', ['access' => $access, 'bulks' => $bulks]) : '' ?>
-					<?= view("Tatter\Files\Views\\formats\\{$format}", ['files' => $files, 'access' => $access, 'exports' => $exports]); ?>
+					<?= $format === 'select' ? view('Tatter\Files\Views\Actions\bulk', ['access' => $access, 'bulks' => $bulks]) : '' ?>
+					<?= view('Tatter\Files\Views\Formats\\' . $format, ['files' => $files, 'access' => $access, 'exports' => $exports]); ?>
 				</form>
 <?php endif; ?>
 			</div>
@@ -56,6 +56,6 @@
 		</div>
 	</div>
 
-	<?= view($config->views['dropzone']) ?>
+	<?= view(config('Files')->views['dropzone']) ?>
 
 <?= $this->endSection() ?>

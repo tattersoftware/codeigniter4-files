@@ -81,8 +81,8 @@ class Files extends Controller
 			'format'  => $this->getFormat(),
 			'search'  => $this->request->getVar('search'),
 			'access'  => $this->model->mayAdmin() ? 'manage' : 'display',
-			'exports' => $exports->getByExtensions(),
-			'bulks'   => $exports->where('bulk', 1)->findAll(),
+			'exports' => $this->getExports(),
+			'bulks'   => handlers()->where(['bulk' => 1])->findAll(),
 		];
 
 		// Get the files
