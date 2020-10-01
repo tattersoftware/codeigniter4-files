@@ -30,6 +30,13 @@ class Files extends Controller
 	protected $helpers = ['alerts', 'files', 'handlers', 'text'];
 
 	/**
+	 * Overriding data for views.
+	 *
+	 * @var array
+	 */
+	protected $data = [];
+
+	/**
 	 * Preloads the configuration and verifies the storage directory.
 	 * Parameters are mostly for testing purposes.
 	 *
@@ -67,30 +74,20 @@ class Files extends Controller
 	 */
 	public function index()
 	{
-		// If global listing is denied then try for the user's files
-		if (! $this->model->mayList())
-		{
-			return $this->user();
-		}
+		// Gather defaults and apply any overrides
+		$data = array_merge($this->gatherData(), $this->data);
 
-		// Prep metadata
-		$data = [
-			'source'  => 'index',
-			'sort'    => $this->getSort(),
-			'order'   => $this->getOrder(),
-			'format'  => $this->getFormat(),
-			'search'  => $this->request->getVar('search'),
-			'access'  => $this->model->mayAdmin() ? 'manage' : 'display',
-			'exports' => $this->getExports(),
-			'bulks'   => handlers()->where(['bulk' => 1])->findAll(),
-		];
-
-		// Get the files
-		if ($data['search'])
+		// Get the Files
+		if (! isset($data['files']))
 		{
-			$this->model->like('filename', $data['search']);
+			// Apply any requested search filters
+			if ($data['search'])
+			{
+				$this->model->like('filename', $data['search']);
+			}
+
+			$data['files'] = $this->model->orderBy($data['sort'], $data['order'])->findAll();
 		}
-		$data['files'] = $this->model->orderBy($data['sort'], $this->getOrder())->findAll();
 
 		// AJAX calls skip the wrapping
 		if ($this->request->isAJAX())
@@ -110,8 +107,6 @@ class Files extends Controller
 	 */
 	public function user($userId = null)
 	{
-		$exports = new ExportModel();
-
 		// Figure out user & access
 		$userId = $userId ?? user_id() ?? 0;
 
@@ -125,12 +120,11 @@ class Files extends Controller
 				return redirect()->back();
 			}
 
-			$access   = 'display';
-			$username = 'User';
-
-			// Logged in, looking at another user
+			$this->data['access'] = 'display';
+			$this->data['title']  = 'User Files';
 		}
-		elseif ($userId !== $currentUser)
+		// Logged in, looking at another user
+		elseif ($userId !== user_id())
 		{
 			// Check for list permission
 			if (! $this->model->mayList())
@@ -139,35 +133,22 @@ class Files extends Controller
 				return redirect()->back();
 			}
 
-			$access   = $this->model->mayAdmin() ? 'manage' : 'display';
-			$username = 'User';
-
-			// Looking at own files
+			$this->data['access'] = $this->model->mayAdmin() ? 'manage' : 'display';
+			$this->data['title']  = 'User Files';
 		}
+		// Looking at own files
 		else
 		{
-			$access   = 'manage';
-			$username = 'My';
+			$this->data['access'] = 'manage';
+			$this->data['title']  = 'My Files';
 		}
 
-		// Load data
-		$data = [
-			'config'   => $this->config,
-			'files'    => $this->model->getForUser($userId),
-			'source'   => 'user/' . $userId,
-			'format'   => $this->getFormat(),
-			'access'   => $access,
-			'username' => $username,
-			'exports'  => $exports->getByExtensions(),
-			'bulks'    => $exports->where('bulk', 1)->findAll(),
-		];
+		$this->data['source'] = 'user/' . $userId;
 
-		// AJAX calls skip the wrapping
-		if ($this->request->isAJAX())
-		{
-			return view("Tatter\Files\Views\Formats\\{$data['format']}", $data);
-		}
-		return view('Tatter\Files\Views\index', $data);
+		// Prep the model for the target user
+		$this->model->whereUser($userId);
+
+		return $this->index();
 	}
 
 	/**
@@ -600,6 +581,25 @@ class Files extends Controller
 	//--------------------------------------------------------------------
 
 	/**
+	 * Gathers the metadata.
+	 *
+	 * @return array
+	 */
+	protected function gatherData(): array
+	{
+		return [
+			'source'  => 'index',
+			'sort'    => $this->getSort(),
+			'order'   => $this->getOrder(),
+			'format'  => $this->getFormat(),
+			'search'  => $this->request->getVar('search'),
+			'access'  => $this->model->mayAdmin() ? 'manage' : 'display',
+			'exports' => $this->getExports(),
+			'bulks'   => handlers()->where(['bulk' => 1])->findAll(),
+		];
+	}
+
+	/**
 	 * Determines the sort field.
 	 *
 	 * @return string
@@ -615,7 +615,7 @@ class Files extends Controller
 		foreach ($sorts as $sort)
 		{
 			// Validate
-			if (in_array($sort, $this->model->allowedFields))
+			if (in_array($sort, $this->model->allowedFields)) // @phpstan-ignore-line
 			{
 				// Update user setting with the new preference
 				service('settings')->filesSort = $sort;
@@ -691,14 +691,14 @@ class Files extends Controller
 	protected function getExports(): array
 	{
 		$exports = [];
-		foreach (handlers('Exports') as $class)
+		foreach (handlers('Exports')->findAll() as $class)
 		{
-			$attributes = handlers()->attributes($class);
+			$attributes = handlers()->getAttributes($class);
 
 			// Add the class name for easy access later
 			$attributes['class'] = $class;
 
-			foreach (explode(',', $attributes['extension']) as $extension)
+			foreach (explode(',', $attributes['extensions']) as $extension)
 			{
 				$exports[$extension][] = $attributes;
 			}

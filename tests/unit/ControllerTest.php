@@ -8,7 +8,7 @@ use Tests\Support\Models\FileModel;
 
 class ControllerTest extends FilesTestCase
 {
-	use CodeIgniter\Test\ControllerTester;
+	use \CodeIgniter\Test\ControllerTester;
 
 	/**
 	 * Our Controller set by the trait
@@ -27,7 +27,7 @@ class ControllerTest extends FilesTestCase
 	public function testThrowsWithoutAuthFunction()
 	{
 		// Since we cannot un-define a function we use the config override cheat
-		$this->config->failNoAuth = true;
+		$this->config->failNoAuth = true; // @phpstan-ignore-line
 
 		$this->expectException(FilesException::class);
 		$this->expectExceptionMessage(lang('Files.noAuth'));

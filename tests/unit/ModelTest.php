@@ -30,4 +30,19 @@ class ModelTest extends FilesTestCase
 
 		$this->assertEquals([$file1->id, $file2->id], $ids);
 	}
+
+	public function testGetForUserBuilds()
+	{
+		$file1 = fake(FileFaker::class);
+		$file2 = fake(FileFaker::class);
+
+		$this->model->addToUser($file1->id, 10);
+		$this->model->addToUser($file2->id, 10);
+
+		$this->model->where(['filename' => $file2->filename]);
+		$result = $this->model->getForUser(10);
+
+		$this->assertCount(1, $result);
+		$this->assertEquals($file2->id, $result[0]->id);
+	}
 }

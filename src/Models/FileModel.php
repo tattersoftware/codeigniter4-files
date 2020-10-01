@@ -57,6 +57,22 @@ class FileModel extends Model
 	}
 
 	/**
+	 * Adds a where filter for a specific user.
+	 *
+	 * @param integer $userId
+	 *
+	 * @return $this
+	 */
+	public function whereUser(int $userId): self
+	{
+		$this->select('files.*')
+			->join('files_users', 'files_users.file_id = files.id', 'left')
+			->where('user_id', $userId);
+
+		return $this;
+	}
+
+	/**
 	 * Returns an array of all a user's Files
 	 *
 	 * @param integer $userId
@@ -65,11 +81,6 @@ class FileModel extends Model
 	 */
 	public function getForUser(int $userId): array
 	{
-		return $this->builder()
-			->select('files.*')
-			->join('files_users', 'files_users.file_id = files.id', 'left')
-			->where('user_id', $userId)
-			->where('deleted_at IS NULL')
-			->get()->getResult($this->returnType);
+		return $this->whereUser($userId)->findAll();
 	}
 }
