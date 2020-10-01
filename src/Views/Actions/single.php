@@ -25,9 +25,11 @@ if (empty($matched) && $access === 'display')
 	</button>
 	<div class="dropdown-menu" aria-labelledby="export-<?= $file->id ?>">
 
-<?php if (! empty($matched)): ?>
+		<?php if (! empty($matched)): ?>
 		<h6 class="dropdown-header">Send To</h6>
-	<?php foreach ($matched as $export): ?>
+		<?php foreach ($matched as $class): ?>
+	
+		<?php $export = new $class(); ?>
 		<?php if ($export->ajax): ?>
 		<a class="dropdown-item" href="<?= site_url('files/export/' . $export->uid . '/' . $file->id) ?>" onclick="$('#globalModal .modal-body').load('<?= site_url('files/export/' . $export->uid . '/' . $file->id) ?>'); $('#globalModal').modal(); return false;"><?= $export->name ?></a>
 		
@@ -35,14 +37,14 @@ if (empty($matched) && $access === 'display')
 		<a class="dropdown-item" href="<?= site_url('files/export/' . $export->uid . '/' . $file->id) ?>"><?= $export->name ?></a>
 		
 		<?php endif; ?>
-	<?php endforeach; ?>
-<?php endif; ?>
+		<?php endforeach; ?>
+		<?php endif; ?>
 
-<?php if ($access === 'manage'): ?>
+		<?php if ($access === 'manage'): ?>
 		<div class="dropdown-divider"></div>
 		<h6 class="dropdown-header">Manage</h6>
 		<a class="dropdown-item" href="<?= site_url('files/rename/' . $file->id) ?>" onclick="$('#globalModal .modal-body').load('<?= site_url('files/rename/' . $file->id) ?>'); $('#globalModal').modal(); return false;">Rename</a>
 		<a class="dropdown-item" href="<?= site_url('files/delete/' . $file->id) ?>">Delete</a>
-<?php endif; ?>
+		<?php endif; ?>
 
 	</div>

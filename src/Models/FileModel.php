@@ -1,6 +1,9 @@
 <?php namespace Tatter\Files\Models;
 
-use Tatter\Permits\Model;
+use CodeIgniter\Files\File as CIFile;
+use CodeIgniter\Model;
+use Tatter\Files\Entities\File;
+use Tatter\Thumbnails\Exceptions\ThumbnailsException;
 
 class FileModel extends Model
 {
@@ -9,7 +12,7 @@ class FileModel extends Model
 
 	protected $table      = 'files';
 	protected $primaryKey = 'id';
-	protected $returnType = 'Tatter\Files\Entities\File';
+	protected $returnType = File::class;
 
 	protected $useTimestamps  = true;
 	protected $useSoftDeletes = true;
@@ -40,6 +43,8 @@ class FileModel extends Model
 	protected $pivotKey   = 'file_id';
 	protected $usersPivot = 'files_users';
 
+	//--------------------------------------------------------------------
+
 	/**
 	 * Associates a file with a user
 	 *
@@ -54,6 +59,18 @@ class FileModel extends Model
 			'file_id' => $fileId,
 			'user_id' => $userId,
 		]);
+	}
+
+	/**
+	 * Returns an array of all a user's Files
+	 *
+	 * @param integer $userId
+	 *
+	 * @return array
+	 */
+	public function getForUser(int $userId): array
+	{
+		return $this->whereUser($userId)->findAll();
 	}
 
 	/**
@@ -72,15 +89,84 @@ class FileModel extends Model
 		return $this;
 	}
 
+	//--------------------------------------------------------------------
+
 	/**
-	 * Returns an array of all a user's Files
+	 * Creates a new File from a path File. See createFromFile().
 	 *
-	 * @param integer $userId
+	 * @param string $path
+	 * @param string|null $originalName A name to use for clientname
 	 *
-	 * @return array
+	 * @return File
 	 */
-	public function getForUser(int $userId): array
+	public function createFromPath(string $path, string $originalName = null): File
 	{
-		return $this->whereUser($userId)->findAll();
+		return $this->createFromFile(new CIFile($path, true), $originalName);
+	}
+
+	/**
+	 * Creates a new File from a framework File. Adds it to the
+	 * database and moves it into storage (if it is not already).
+	 *
+	 * @param CIFile $file
+	 * @param string|null $originalName A name to use for clientname
+	 *
+	 * @return File
+	 */
+	public function createFromFile(CIFile $file, string $originalName = null): File
+	{
+		$originalName = $originalName ?? $file->getFilename();
+
+		// Gather file info
+		$row = [
+			'filename'   => $originalName,
+			'localname'  => $file->getRandomName(),
+			'clientname' => $originalName,
+			'type'       => $file->getMimeType(),
+			'size'       => $file->getSize(),
+		];
+
+		// Normalize paths
+		$storage  = realpath(config('Files')->storagePath) ?: config('Files')->storagePath;
+		$storage  = rtrim($storage, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+		$filePath = $file->getRealPath() ?: $file->__toString();
+
+		// Determine if we need to move the file
+		if (strpos($filePath, $storage) === false)
+		{
+			// Move the file
+			$file->move($storage, $row['localname']);
+			chmod($storage . $row['localname'], 0664);
+		}
+
+		// Record it in the database
+		$fileId = $this->insert($row);
+
+		// If a user is logged in then associate the File
+		if ($userId = user_id())
+		{
+			$this->addToUser($fileId, $userId);
+		}
+
+		// Try to create a Thumbnail
+		$thumbnail = pathinfo($row['localname'], PATHINFO_FILENAME);
+		$thumbPath = $storage . 'thumbnails' . DIRECTORY_SEPARATOR . $thumbnail;
+		try
+		{
+			service('thumbnails')->create($filePath, $thumbPath);
+
+			// If it succeeds then update the database
+			$this->update($fileId, [
+				'thumbnail' => $thumbnail,
+			]);
+		}
+		catch (ThumbnailsException $e)
+		{
+			log_message('debug', $e->getMessage());
+			log_message('debug', 'Unable to create thumbnail for ' . $row['filename']);
+		}
+
+		// Return the File entity
+		return $this->find($fileId);
 	}
 }

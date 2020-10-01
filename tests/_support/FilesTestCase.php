@@ -2,6 +2,8 @@
 
 use CodeIgniter\Config\Config;
 use CodeIgniter\Test\CIDatabaseTestCase;
+use Myth\Auth\Entities\User;
+use Myth\Auth\Test\Fakers\UserFaker;
 use Tatter\Files\Config\Files;
 use Tests\Support\Fakers\FileFaker;
 use org\bovigo\vfs\vfsStream;
@@ -9,6 +11,8 @@ use org\bovigo\vfs\vfsStreamDirectory;
 
 class FilesTestCase extends CIDatabaseTestCase
 {
+	use \Myth\Auth\Test\AuthTestTrait;
+
 	/**
 	 * Should the database be refreshed before each test?
 	 *
@@ -52,31 +56,32 @@ class FilesTestCase extends CIDatabaseTestCase
 	protected $root;
 
 	/**
-	 * A test file to work with
+	 * Path to a test file to work with
 	 *
 	 * @var string
 	 */
-	protected $testFile;
+	protected $testPath;
 
 	protected function setUp(): void
 	{
 		parent::setUp();
 		Config::reset();
 		helper('auth');
+		$this->resetAuthServices();
+		$_REQUEST = [];
 
-		$_REQUEST    = [];
 		$this->model = new FileFaker();
 
 		// Start the virtual filesystem
 		$this->root = vfsStream::setup();
-        vfsStream::copyFromFileSystem(SUPPORTPATH . 'storage/', $this->root);
+        vfsStream::copyFromFileSystem(SUPPORTPATH . 'vfs/', $this->root);
 
 		// Force our config to the virtual path
 		$this->config              = new Files();
 		$this->config->storagePath = $this->root->url() . '/storage/';
 		Config::injectMock('Files', $this->config);
 
-		$this->testFile = $this->config->storagePath . 'image.jpg';
+		$this->testPath = $this->config->storagePath . 'image.jpg';
 	}
 
 	protected function tearDown(): void
@@ -84,5 +89,19 @@ class FilesTestCase extends CIDatabaseTestCase
 		parent::tearDown();
 
 		$this->root = null;
+	}
+	/**
+	 * Create a random user and log it in.
+	 *
+	 * $return User
+	 */
+	protected function login(): User
+	{
+		// Create a new random user
+		$user = fake(UserFaker::class);
+
+		$_SESSION['logged_in'] = $user->id;
+
+		return $user;
 	}
 }

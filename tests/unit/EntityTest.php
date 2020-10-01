@@ -6,6 +6,15 @@ use Tests\Support\FilesTestCase;
 
 class EntityTest extends FilesTestCase
 {
+	public function testGetPathReturnsAbsolutePath()
+	{
+		$file = $this->model->createFromPath($this->testPath);
+
+		$expected = $this->config->storagePath . $file->localname;
+
+		$this->assertEquals($expected, $file->getPath());
+	}
+
 	public function testGetThumbnailUsesDefault()
 	{
 		$expected = HOMEPATH . 'src/Assets/Unavailable.jpg';
@@ -15,4 +24,5 @@ class EntityTest extends FilesTestCase
 
 		$this->assertEquals($expected, $file->getThumbnail());
 	}
+		
 }

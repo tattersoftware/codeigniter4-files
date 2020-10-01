@@ -1,5 +1,6 @@
 <?php
 
+use Tatter\Files\Entities\File;
 use Tests\Support\Fakers\FileFaker;
 use Tests\Support\FilesTestCase;
 
@@ -31,7 +32,7 @@ class ModelTest extends FilesTestCase
 		$this->assertEquals([$file1->id, $file2->id], $ids);
 	}
 
-	public function testGetForUserBuilds()
+	public function testGetForUserBuildsOnModelMethods()
 	{
 		$file1 = fake(FileFaker::class);
 		$file2 = fake(FileFaker::class);
@@ -44,5 +45,30 @@ class ModelTest extends FilesTestCase
 
 		$this->assertCount(1, $result);
 		$this->assertEquals($file2->id, $result[0]->id);
+	}
+
+	public function testCreateFromPathReturnsFile()
+	{
+		$result = $this->model->createFromPath($this->testPath);
+
+		$this->assertInstanceOf(File::class, $result);
+	}
+
+	public function testCreateFromPathAddsToDatabase()
+	{
+		$result = $this->model->createFromPath($this->testPath);
+
+		$this->seeInDatabase('files', ['filename' => $result->filename]);
+	}
+
+	public function testCreateFromPathAssignsToUser()
+	{
+		$user = $this->login();
+
+		$this->model->createFromPath($this->testPath);
+
+		$result = $this->model->getForUser($user->id);
+
+		$this->assertCount(1, $result);
 	}
 }
