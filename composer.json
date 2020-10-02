@@ -36,13 +36,17 @@
 	"prefer-stable": true,
 	"require": {
 		"php" : ">=7.2",
-        "enyo/dropzone": "^5.5",
 		"tatter/alerts": "^2.0",
+		"tatter/assets": "^2.2",
 		"tatter/audits": "^1.0",
 		"tatter/exports": "^2.0",
 		"tatter/permits": "^2.0",
 		"tatter/settings": "^1.0",
-		"tatter/thumbnails": "^1.2"
+		"tatter/thumbnails": "^1.2",
+		"components/jquery": "^3.3",
+        "enyo/dropzone": "^5.7",
+		"fortawesome/font-awesome": "^5.8",
+		"twbs/bootstrap": "^4.5"
 	},
 	"require-dev": {
 		"codeigniter4/codeigniter4": "dev-develop",
