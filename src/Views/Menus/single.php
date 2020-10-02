@@ -1,21 +1,8 @@
 <?php
-// Determine eligible exports for this file
-$extension = pathinfo($file->filename, PATHINFO_EXTENSION);
-$matched   = [];
-
-// Universally-available exports
-if (isset($exports['*']))
-{
-	$matched = array_merge($matched, $exports['*']);
-}
-// Exports specific to this extension
-if (isset($exports[$extension]))
-{
-	$matched = array_merge($matched, $exports[$extension]);
-}
+$exports = $file->getExports();
 
 // Make sure there is something to display
-if (empty($matched) && $access === 'display')
+if (empty($exports) && $access === 'display')
 {
 	return;
 }
@@ -25,9 +12,9 @@ if (empty($matched) && $access === 'display')
 	</button>
 	<div class="dropdown-menu" aria-labelledby="export-<?= $file->id ?>">
 
-		<?php if (! empty($matched)): ?>
+		<?php if (! empty($exports)): ?>
 		<h6 class="dropdown-header">Send To</h6>
-		<?php foreach ($matched as $class): ?>
+		<?php foreach ($exports as $class): ?>
 	
 		<?php $export = new $class(); ?>
 		<?php if ($export->ajax): ?>

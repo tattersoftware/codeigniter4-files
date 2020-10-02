@@ -20,18 +20,18 @@
 			<h1><?= $access === 'manage' ? 'Manage' : 'Browse' ?> <?= $username ?? '' ?> Files</h1>
 			
 			<div id="files-wrapper">
-<?php if (empty($files)): ?>
+				<?php if (empty($files)): ?>
 				<p>
 					You have no files! Would you like to
 					<a class="dropzone-button" href="<?= site_url('files/new') ?>" data-toggle="modal" data-target="#dropzoneModal">add some now</a>?
 				</p>
 
-<?php else: ?>
+				<?php else: ?>
 				<form name="files-form" method="post" action="<?= site_url('files/bulk') ?>">
-					<?= $format === 'select' ? view('Tatter\Files\Views\Actions\bulk', ['access' => $access, 'bulks' => $bulks]) : '' ?>
+					<?= $format === 'select' ? view('Tatter\Files\Views\Menus\bulk', ['access' => $access, 'bulks' => $bulks]) : '' ?>
 					<?= view('Tatter\Files\Views\Formats\\' . $format, ['files' => $files, 'access' => $access, 'exports' => $exports]); ?>
 				</form>
-<?php endif; ?>
+				<?php endif; ?>
 			</div>
 		</div>
 	</div>
