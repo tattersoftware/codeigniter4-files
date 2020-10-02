@@ -1,4 +1,4 @@
-<?php namespace Tests\Support\Models;
+<?php namespace App\Models;
 
 /**
  * A dummy class to prove that the Files controller

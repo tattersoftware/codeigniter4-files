@@ -1,6 +1,7 @@
 <?php namespace Tests\Support;
 
 use CodeIgniter\Config\Config;
+use CodeIgniter\Database\ModelFactory;
 use CodeIgniter\Test\CIDatabaseTestCase;
 use Myth\Auth\Entities\User;
 use Myth\Auth\Test\Fakers\UserFaker;
@@ -66,6 +67,7 @@ class FilesTestCase extends CIDatabaseTestCase
 	{
 		parent::setUp();
 		Config::reset();
+		ModelFactory::reset();
 		helper('auth');
 		$this->resetAuthServices();
 		$_REQUEST = [];

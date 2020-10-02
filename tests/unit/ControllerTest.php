@@ -59,11 +59,13 @@ class ControllerTest extends FilesTestCase
 
 	public function testUsesExternalModelIfFound()
 	{
+		require_once SUPPORTPATH . 'app/Models/FileModel.php';
+
 		$this->controller(Files::class);
 
 		$result = $this->getPrivateProperty($this->controller, 'model');
 
-		$this->assertInstanceOf(FileModel::class, $result);
+		$this->assertInstanceOf('App\Models\FileModel', $result);
 	}
 
 	//--------------------------------------------------------------------

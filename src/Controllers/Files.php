@@ -3,7 +3,9 @@
 use CodeIgniter\Controller;
 use CodeIgniter\Files\File;
 use CodeIgniter\HTTP\RedirectResponse;
+use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use Tatter\Files\Config\Files as FilesConfig;
 use Tatter\Files\Exceptions\FilesException;
 use Tatter\Files\Models\FileModel;
@@ -57,14 +59,29 @@ class Files extends Controller
 		{
 			throw FilesException::forDirFail($this->config->storagePath);
 		}
+	}
 
-		// Verify authentication is configured correctly
-		// @see https://codeigniter4.github.io/CodeIgniter4/extending/authentication.html
+	/**
+	 * Verify authentication is configured correctly *after* parent calls loadHelpers().
+	 *
+	 * @param RequestInterface         $request
+	 * @param ResponseInterface        $response
+	 * @param \Psr\Log\LoggerInterface $logger
+	 *
+	 * @throws \CodeIgniter\HTTP\Exceptions\HTTPException
+	 * @see https://codeigniter4.github.io/CodeIgniter4/extending/authentication.html
+	 */
+	public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
+	{
+		parent::initController($request, $response, $logger);
+
 		if (! function_exists('user_id') || ! empty($this->config->failNoAuth))
 		{
 			throw new FilesException(lang('Files.noAuth'));
-		}		
+		}
 	}
+
+	//--------------------------------------------------------------------
 
 	/**
 	 * Displays a list of all files. If global listing is not
