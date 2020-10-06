@@ -84,43 +84,69 @@ class Files extends Controller
 	//--------------------------------------------------------------------
 
 	/**
-	 * Displays a list of all files. If global listing is not
-	 * permitted then falls back to the user's files.
+	 * Handles the final display of files based on $data.
+	 *
+	 * @return string
+	 */
+	public function display(): string
+	{
+		// Apply any defaults for missing metadata
+		$this->setDefaults();
+
+		// Get the Files
+		if (! isset($this->data['files']))
+		{
+			// Apply a target user
+			if ($this->data['userId'])
+			{
+				$this->model->whereUser($this->data['userId']);
+			}
+
+			// Apply any requested search filters
+			if ($this->data['search'])
+			{
+				$this->model->like('filename', $this->data['search']);
+			}
+
+			$this->setData([
+				'files' => $this->model->orderBy($this->data['sort'], $this->data['order'])->findAll()
+			]);
+		}
+
+		// AJAX calls skip the wrapping
+		if ($this->data['ajax'])
+		{
+			return view('Tatter\Files\Views\Formats\\' . $this->data['format'], $this->data);
+		}
+
+		return view('Tatter\Files\Views\index', $this->data);
+	}
+
+	//--------------------------------------------------------------------
+
+	/**
+	 * Lists of files; if global listing is not permitted then
+	 * falls back to user().
 	 *
 	 * @return RedirectResponse|string
 	 */
 	public function index()
 	{
-		// Gather defaults and apply any overrides
-		$data = array_merge($this->gatherData(), $this->data);
-
-		// Get the Files
-		if (! isset($data['files']))
+		// Check for list permission
+		if (! $this->model->mayList())
 		{
-			// Apply any requested search filters
-			if ($data['search'])
-			{
-				$this->model->like('filename', $data['search']);
-			}
-
-			$data['files'] = $this->model->orderBy($data['sort'], $data['order'])->findAll();
+			return $this->user();
 		}
 
-		// AJAX calls skip the wrapping
-		if ($this->request->isAJAX())
-		{
-			return view('Tatter\Files\Views\Formats\\' . $data['format'], $data);
-		}
-
-		return view('Tatter\Files\Views\index', $data);
+		return $this->display();
 	}
 
 	/**
-	 * Displays files for a user (defaults to the current user).
+	 * Filters files for a user (defaults to the current user).
 	 *
 	 * @param string|integer|null $userId ID of the target user
 	 *
-	 * @return RedirectResponse|string
+	 * @return ResponseInterface|ResponseInterface|string
 	 */
 	public function user($userId = null)
 	{
@@ -133,12 +159,13 @@ class Files extends Controller
 			// Check for list permission
 			if (! $this->model->mayList())
 			{
-				alert('warning', lang('Permits.notPermitted'));
-				return redirect()->back();
+				return $this->failure(403, lang('Permits.notPermitted'));
 			}
 
-			$this->data['access'] = 'display';
-			$this->data['title']  = 'User Files';
+			$this->setData([
+				'access' => 'display',
+				'title'  => 'User Files'
+			]);
 		}
 		// Logged in, looking at another user
 		elseif ($userId !== user_id())
@@ -146,26 +173,29 @@ class Files extends Controller
 			// Check for list permission
 			if (! $this->model->mayList())
 			{
-				alert('warning', lang('Permits.notPermitted'));
-				return redirect()->back();
+				return $this->failure(403, lang('Permits.notPermitted'));
 			}
 
-			$this->data['access'] = $this->model->mayAdmin() ? 'manage' : 'display';
-			$this->data['title']  = 'User Files';
+			$this->setData([
+				'access' => $this->model->mayAdmin() ? 'manage' : 'display',
+				'title'  => 'User Files'
+			]);
 		}
 		// Looking at own files
 		else
 		{
-			$this->data['access'] = 'manage';
-			$this->data['title']  = 'My Files';
+			$this->setData([
+				'access' => 'manage',
+				'title'  => 'My Files'
+			]);
 		}
 
-		$this->data['source'] = 'user/' . $userId;
+		$this->setData([
+			'userId' => $userId,
+			'source' => 'user/' . $userId,
+		]);
 
-		// Prep the model for the target user
-		$this->model->whereUser($userId);
-
-		return $this->index();
+		return $this->display();
 	}
 
 	/**
@@ -173,35 +203,29 @@ class Files extends Controller
 	 *
 	 * @param string|integer|null $userId Optional user to filter by
 	 *
-	 * @return string HTML view
+	 * @return RedirectResponse|string
 	 */
-	public function select($userId = null): string
+	public function select($userId = null)
 	{
-		// Figure out user & access
-		$currentUser = session($this->config->userSource);
+		$this->setData(['format' => 'select']);
 
-		// If no user or other user then check for list permission
-		if ((empty($userId) || $userId !== $currentUser) && ! $this->model->mayList())
+		// If a list of File IDs was passed then pre-select them
+		if ($ids = $this->request->getVar('selected'))
 		{
-			return lang('Permits.notPermitted');
+			$this->setData(['selected' => explode(',', $ids)]);
 		}
 
-		// Filter for user files
-		$files = empty($userId) ? $this->model->orderBy('filename')->findAll() : $this->model->getForUser($userId);
-
-		$data = [
-			'config' => $this->config,
-			'files'  => $files,
-		];
-		return view("Tatter\Files\Views\Formats\\select", $data);
+		return $userId ? $this->user($userId) : $this->index();
 	}
+
+	//--------------------------------------------------------------------
 
 	/**
 	 * Displays or processes the form to rename a file.
 	 *
 	 * @param string|null $fileId
 	 *
-	 * @return RedirectResponse|string
+	 * @return ResponseInterface|string
 	 */
 	public function rename($fileId = null)
 	{
@@ -212,14 +236,7 @@ class Files extends Controller
 		// Handle missing info
 		if (empty($file))
 		{
-			if ($this->request->isAJAX())
-			{
-				echo lang('Files.noFile');
-				return '';
-			}
-
-			alert('warning', lang('Files.noFile'));
-			return redirect()->back();
+			return $this->failure(400, lang('Files.noFile'));
 		}
 
 		// Check for form submission
@@ -230,29 +247,19 @@ class Files extends Controller
 			$this->model->save($file);
 
 			// AJAX requests are blank on success
-			if ($this->request->isAJAX())
-			{
-				return '';
-			}
-
-			// Set the message and return
-			alert('success', lang('Files.renameSuccess', [$filename]));
-			return redirect()->back();
+			return $this->request->isAJAX()
+				? ''
+				: redirect()->back()->with('message', lang('Files.renameSuccess', [$filename]));
 		}
 
-		$data = [
-			'config' => $this->config,
-			'file'   => $file,
-		];
-
-		// Display only the form for AJAX
-		if ($this->request->isAJAX())
-		{
-			return view('Tatter\Files\Views\forms\rename', $data);
-		}
-
-		// Display the form
-		return view('Tatter\Files\Views\rename', $data);
+		// AJAX skips the wrapper
+		return view(
+			$this->request->isAJAX() ? 'Tatter\Files\Views\Forms\rename' : 'Tatter\Files\Views\rename',
+			[
+				'config' => $this->config,
+				'file'   => $file,
+			]
+		);
 	}
 
 	/**
@@ -260,25 +267,33 @@ class Files extends Controller
 	 *
 	 * @param string $fileId
 	 *
-	 * @return RedirectResponse
+	 * @return ResponseInterface
 	 */
 	public function delete($fileId)
 	{
 		$file = $this->model->find($fileId);
 		if (empty($file))
 		{
-			return redirect()->back();
+			return $this->failure(400, lang('Files.noFile'));
+		}
+		if (! $this->model->mayDelete($file))
+		{
+			return $this->failure(403, lang('Permits.notPermitted'));
 		}
 
-		$this->model->delete($fileId);
-		alert('success', 'Deleted ' . $file->filename);
-		return redirect()->back();
+		if ($this->model->delete($fileId))
+		{
+			return redirect()->back()->with('message', lang('Files.deleteSuccess'));
+		}
+
+		return $this->failure(400, implode('. ', $this->model->errors()));
 	}
 
 	/**
 	 * Handles bulk actions.
 	 *
 	 * @return RedirectResponse
+	 * @todo Needs better bulk processing with error handling
 	 */
 	public function bulk(): RedirectResponse
 	{
@@ -303,12 +318,12 @@ class Files extends Controller
 		// Make sure some files where checked
 		if (empty($fileIds))
 		{
-			alert('warning', lang('File.nofile'));
-			return redirect()->back();
+			return redirect()->back()->with('error', lang('File.nofile'));
 		}
 
 		// Handle actions
-		switch ($action):
+		switch ($action)
+		{
 			case '':
 				alert('warning', 'No valid action.');
 			break;
@@ -319,21 +334,26 @@ class Files extends Controller
 				alert('success', 'Deleted ' . count($fileIds) . ' files.');
 			break;
 
+			// Bulk export of some kind
 			default:
-				// Match the export handler
-				$exports = new ExportModel();
-				$handler = $exports->where('uid', $action)->first();
+				// Match the handler
+				$handler = handlers('Exports')->where(['slug' => $action])->first();
 				if (empty($handler))
 				{
-					alert('warning', 'No handler found for ' . $action);
-					return redirect()->back();
+					return redirect()->back()->with('danger', 'No handler found for ' . $action);
+				}
+				$export = new $handler();
+
+				foreach ($fileIds as $fileId)
+				{
+					if ($file = $this->model->find($fileId))
+					{
+						$export->setFile($file->object)->process();
+					}
 				}
 
-				// Pass to the handler
-				//$response = $handler->process($file->path, $file->filename);
-
 				alert('success', 'Processed ' . count($fileIds) . ' files.');
-		endswitch;
+		}
 
 		return redirect()->back();
 	}
@@ -341,19 +361,19 @@ class Files extends Controller
 	/**
 	 * Receives uploads from Dropzone.
 	 *
-	 * @return ResponseInterface|string|null
+	 * @return ResponseInterface|string
 	 */
 	public function upload()
 	{
 		// Verify upload succeeded
-		$file = $this->request->getFile('file');
-		if (empty($file))
+		$upload = $this->request->getFile('file');
+		if (empty($upload))
 		{
-			return $this->failure(400, 'No file supplied.');
+			return $this->failure(400, lang('Files.noFile'));
 		}
-		if (! $file->isValid())
+		if (! $upload->isValid())
 		{
-			return ($file->getErrorString() . '(' . $file->getError() . ')');
+			return $upload->getErrorString() . '(' . $upload->getError() . ')';
 		}
 
 		// Check for chunks
@@ -372,110 +392,24 @@ class Files extends Controller
 			}
 
 			// Move the file
-			$file->move($chunkDir, $chunkIndex . '.' . $file->getExtension());
+			$upload->move($chunkDir, $chunkIndex . '.' . $upload->getExtension());
 
 			// Check for more chunks
 			if ($chunkIndex < $totalChunks - 1)
 			{
-				return null;
+				return '';
 			}
-
-			// Save client name from last chunk
-			$clientname = $file->getClientName();
 
 			// Merge the chunks
 			$path = $this->mergeChunks($chunkDir);
-			$file = new File($path);
-
-			// Gather merged file data
-			$row = [
-				'filename'   => $clientname,
-				'localname'  => $file->getRandomName(),
-				'clientname' => $clientname,
-				'type'       => $file->getMimeType(),
-				'size'       => $file->getSize(),
-			];
-
-			// No chunks, handle as a straight upload
-		}
-		else
-		{
-			log_message('debug', 'New file upload: ' . $file->getClientName());
-
-			// Gather file info
-			$row = [
-				'filename'   => $file->getClientName(),
-				'localname'  => $file->getRandomName(),
-				'clientname' => $file->getClientName(),
-				'type'       => $file->getMimeType(),
-				'size'       => $file->getSize(),
-			];
 		}
 
-		// Move the file
-		$file->move($this->config->storagePath, $row['localname']);
-		chmod($this->config->storagePath . $row['localname'], 0664); // WIP
+		// Accept the file
+		$file = $this->model->createFromPath($path ?? $upload->getRealPath(), $upload->getClientName());
 
-		// Record in the database
-		$fileId = $this->model->insert($row);
-
-		// Associate with the current user
-		$userId = $userId ?? session($this->config->userSource) ?? 0;
-		if ($userId)
-		{
-			$this->model->addToUser($fileId, $userId);
-		}
-
-		// Try to create a thumbnail
-		$thumbnails = service('thumbnails');
-		$tmpfile    = tempnam(sys_get_temp_dir(), random_string());
-		if ($thumbnails->create($this->config->storagePath . $row['localname'], $tmpfile))
-		{
-			// Read in file binary data
-			$handle = fopen($tmpfile, 'rb');
-			$data   = fread($handle, filesize($tmpfile));
-			fclose($handle);
-
-			// Encode as base64 and add to the database
-			$data = base64_encode($data);
-			$this->model->update($fileId, ['thumbnail' => $data]);
-		}
-		else
-		{
-			$errors = implode('. ', $thumbnails->getErrors());
-			log_message('debug', "Unable to create thumbnail for {$row['filename']}: {$errors}");
-		}
-		unlink($tmpfile);
-
-		if (! $this->request->isAJAX())
-		{
-			alert('success', "Upload of {$row['filename']} successful.");
-			return redirect()->back();
-		}
-
-		return '';
-	}
-
-	/**
-	 * Handles failures.
-	 *
-	 * @return ResponseInterface
-	 */
-	protected function failure($errorCode, $errorMessage): ResponseInterface
-	{
-		log_message('debug', $errorMessage);
-
-		if ($this->request->isAJAX())
-		{
-			$response = ['error' => $errorMessage];
-			$this->response->setStatusCode($errorCode);
-			return $this->response->setJSON($response);
-		}
-		else
-		{
-			alert('error', $errorMessage);
-			return redirect()->back();
-		}
+		return $this->request->isAJAX()
+			? ''
+			: redirect()->back()->with('message', lang('File.uploadSucces', [$file->clientname]));;
 	}
 
 	/**
@@ -543,8 +477,7 @@ class Files extends Controller
 	public function export(string $slug, $fileId): ResponseInterface
 	{
 		// Match the export handler
-		$exports = new ExportModel();
-		$handler = $exports->where('slug', $slug)->first();
+		$handler = handlers('Exports')->where(['slug' => $slug])->first();
 		if (empty($handler))
 		{
 			alert('warning', 'No handler found for ' . $slug);
@@ -560,22 +493,13 @@ class Files extends Controller
 		}
 
 		// Pass to the handler
-		$response = $handler->process($file->path, $file->filename);
+		$export   = new $handler($file);
+		$response = $export->setFilename($file->filename)->process();
 
 		// If the handler returned a response then we're done
 		if ($response instanceof ResponseInterface)
 		{
 			return $response;
-		}
-
-		if ($response === true)
-		{
-			alert('success', lang('Files.noFile', [ucfirst($slug)]) );
-		}
-		elseif ($response === false)
-		{
-			$error = implode('. ', $handler->getErrors());
-			alert('error', $error);
 		}
 
 		return redirect()->back();
@@ -598,22 +522,71 @@ class Files extends Controller
 	//--------------------------------------------------------------------
 
 	/**
-	 * Gathers the metadata.
+	 * Handles failures.
 	 *
-	 * @return array
+	 * @param int $code
+	 * @param string $message
+	 * @param boolean|null $isAjax
+	 *
+	 * @return ResponseInterface|RedirectResponse
 	 */
-	protected function gatherData(): array
+	protected function failure(int $code, string $message, bool $isAjax = null): ResponseInterface
 	{
-		return [
-			'source'  => 'index',
-			'sort'    => $this->getSort(),
-			'order'   => $this->getOrder(),
-			'format'  => $this->getFormat(),
-			'search'  => $this->request->getVar('search'),
-			'access'  => $this->model->mayAdmin() ? 'manage' : 'display',
-			'exports' => $this->getExports(),
-			'bulks'   => handlers()->where(['bulk' => 1])->findAll(),
-		];
+		log_message('debug', $message);
+
+		if ($isAjax ?? $this->request->isAJAX())
+		{
+			return $this->response
+				->setStatusCode($code)
+				->setJSON(['error' => $message]);
+		}
+
+		return redirect()->back()->with('error', $message);
+	}
+
+	/**
+	 * Sets a value in $this->data, overwrites optional.
+	 *
+	 * @param array<string, mixed> $data
+	 * @param boolean $overwrite
+	 *
+	 * @return $this
+	 */
+	protected function setData(array $data, bool $overwrite = false): self
+	{
+		if ($overwrite)
+		{
+			$this->data = array_merge($this->data, $data);
+		}
+		else
+		{
+			$this->data = array_merge($data, $this->data);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Merges in the default metadata.
+	 *
+	 * @return $this
+	 */
+	protected function setDefaults(): self
+	{
+		return $this->setData([
+			'source'   => 'index',
+			'files'    => null,
+			'selected' => null,
+			'userId'   => null,
+			'ajax'     => $this->request->isAJAX(),
+			'sort'     => $this->getSort(),
+			'order'    => $this->getOrder(),
+			'format'   => $this->getFormat(),
+			'search'   => $this->request->getVar('search'),
+			'access'   => $this->model->mayAdmin() ? 'manage' : 'display',
+			'exports'  => $this->getExports(),
+			'bulks'    => handlers()->where(['bulk' => 1])->findAll(),
+		]);
 	}
 
 	/**

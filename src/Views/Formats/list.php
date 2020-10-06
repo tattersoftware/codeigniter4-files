@@ -21,7 +21,7 @@
 						<td class="align-middle"><?= bytes2human($file->size) ?></td>
 						<td class="align-middle"><?= $file->created_at->humanize(); ?></td>
 						<td class="align-middle">
-							<?= view('Tatter\Files\Views\actions\single', ['file' => $file, 'access' => $access]) ?>
+							<?= view('Tatter\Files\Views\Menus\single', ['file' => $file, 'access' => $access]) ?>
 						</td>
 					</tr>
 	<?php endforeach; ?>
