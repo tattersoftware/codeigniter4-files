@@ -2,7 +2,7 @@ name: PHPUnit
 
 on:
   pull_request:
-    branches: 
+    branches:
       - develop
 
 jobs:
@@ -45,5 +45,5 @@ jobs:
         env:
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
 
-      - name: Test with phpunit
+      - name: Test with PHPUnit
         run: vendor/bin/phpunit --verbose --coverage-text
