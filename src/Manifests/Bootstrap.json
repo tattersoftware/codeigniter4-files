@@ -1,0 +1,12 @@
+{
+	"source": "twbs/bootstrap/dist",
+	"destination": "vendor/bootstrap",
+	"resources": [
+		{
+			"source": "css"
+		},
+		{
+			"source": "js"
+		}
+	]
+}

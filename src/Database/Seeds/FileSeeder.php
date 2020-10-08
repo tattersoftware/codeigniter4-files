@@ -6,20 +6,37 @@ class FileSeeder extends \CodeIgniter\Database\Seeder
 {
 	public function run()
 	{
-		// Check for format setting
-		$settings = new SettingModel();
-		$setting = $settings->where('name', 'filesFormat')->first();
-		if (empty($setting)):
-			// No setting - add the template
-			$row = [
-				'name'       => 'filesFormat',
-				'scope'      => 'user',
-				'content'    => 'cards',
-				'protected'  => 0,
-				'summary'    => 'Default file index display format',
-			];
+		$templates = [
+			[
+					'name'      => 'filesFormat',
+					'scope'     => 'user',
+					'content'   => 'cards',
+					'protected' => 0,
+					'summary'   => 'Display format for listing files',
+			],
+			[
+					'name'      => 'filesSort',
+					'scope'     => 'user',
+					'content'   => 'filename',
+					'protected' => 0,
+					'summary'   => 'Sort field for listing files',
+			],
+			[
+					'name'      => 'filesOrder',
+					'scope'     => 'user',
+					'content'   => 'asc',
+					'protected' => 0,
+					'summary'   => 'Sort order for listing files',
+			],
+		];
 
-			$settings->save($row);			
-		endif;
+		// Check for each template and create it if it is missing
+		foreach ($templates as $template)
+		{
+			if (! model(SettingModel::class)->where('name', $template['name'])->first())
+			{
+				model(SettingModel::class)->insert($template);
+			}
+		}
 	}
 }

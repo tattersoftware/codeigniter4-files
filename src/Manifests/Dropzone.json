@@ -1,0 +1,11 @@
+{
+	"source": "enyo/dropzone/dist",
+	"destination": "vendor/dropzone",
+	"resources": [
+		{
+			"source": ".",
+			"recursive": true,
+    		"flatten": true
+		}
+	]
+}

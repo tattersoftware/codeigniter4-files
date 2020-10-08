@@ -4,26 +4,43 @@ use CodeIgniter\Config\BaseConfig;
 
 class Files extends BaseConfig
 {
-	// Whether to continue instead of throwing exceptions
-	public $silent = true;
-
-	// Session variable to check for a logged-in user ID
-	public $userSource = 'logged_in';
-
-	// Directory to store files (with trailing slash)
+	/**
+	 * Directory to store files (with trailing slash)
+	 *
+	 * @var string
+	 */
 	public $storagePath = ROOTPATH . 'writable/files/';
 
-	// Layouts to use for general access and for administration
+	/**
+	 * Layouts to use for general access and for administration
+	 *
+	 * @var string[]
+	 */
 	public $layouts = [
 		'public' => 'Tatter\Files\Views\layout',
 		'manage' => 'Tatter\Files\Views\layout',
 	];
 
-	// Views to display for each function
+	/**
+	 * View file aliases
+	 *
+	 * @var string[]
+	 */
 	public $views = [
-		'dropzone'  => 'Tatter\Files\Views\dropzone\config',
+		'dropzone' => 'Tatter\Files\Views\Dropzone\config',
 	];
 
-	// Default display format; built in are 'cards', 'list', 'select'
+	/**
+	 * Default display format; built in are 'cards', 'list', 'select'
+	 *
+	 * @var string
+	 */
 	public $defaultFormat = 'cards';
+
+	/**
+	 * Path to the default thumbnail file
+	 *
+	 * @var string
+	 */
+	public $defaultThumbnail = 'Tatter\Files\Assets\Unavailable.jpg';
 }

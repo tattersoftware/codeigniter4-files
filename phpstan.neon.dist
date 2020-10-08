@@ -1,0 +1,24 @@
+parameters:
+	tmpDir: build/phpstan
+	level: 5
+	paths:
+		- src
+		- tests
+	bootstrapFiles:
+		- vendor/codeigniter4/codeigniter4/system/Test/bootstrap.php
+	excludes_analyse:
+		- src/Config/Routes.php
+		- src/Views/*
+	ignoreErrors:
+		- '#Access to an undefined property Tatter\\Files\\Entities\\[A-Za-z]+::\$[a-z]+#'
+		- '#Cannot access property \$[a-z]+ on array\|object#'
+		- '#Unsafe usage of new static\(\)*#'
+	scanDirectories:
+		- vendor/codeigniter4/codeigniter4/system/Helpers
+		- vendor/myth/auth/src/Helpers
+		- vendor/tatter/alerts/src/Helpers
+		- vendor/tatter/handlers/src/Helpers
+	dynamicConstantNames:
+		- APP_NAMESPACE
+		- CI_DEBUG
+		- ENVIRONMENT

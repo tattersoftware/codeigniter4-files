@@ -15,13 +15,13 @@
 				<tbody>
 	<?php foreach ($files as $file): ?>
 					<tr>
-						<td><img src="<?= $file->thumbnail ?>" class="img-fluid rounded" alt="<?= $file->filename ?>" style="max-height:40px;"></td>
+						<td><img src="<?= img_data($file->thumbnail) ?>" class="img-fluid rounded" alt="<?= $file->filename ?>" style="max-height:40px;"></td>
 						<td class="align-middle"><?= $file->filename ?></td>
 						<td class="align-middle"><?= $file->type ?></td>
 						<td class="align-middle"><?= bytes2human($file->size) ?></td>
 						<td class="align-middle"><?= $file->created_at->humanize(); ?></td>
 						<td class="align-middle">
-							<?= view('Tatter\Files\Views\actions\single', ['file' => $file, 'access' => $access]) ?>
+							<?= view('Tatter\Files\Views\Menus\single', ['file' => $file, 'access' => $access]) ?>
 						</td>
 					</tr>
 	<?php endforeach; ?>

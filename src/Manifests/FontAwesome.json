@@ -1,0 +1,14 @@
+{
+	"source": "fortawesome/font-awesome",
+	"destination": "vendor/font-awesome",
+	"resources": [
+		{
+			"source": "css",
+			"destination": "css"
+		},
+		{
+			"source": "webfonts",
+			"destination": "webfonts"
+		}
+	]
+}
