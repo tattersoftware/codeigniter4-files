@@ -135,7 +135,7 @@ class FileModel extends Model
 		if (strpos($filePath, $storage) === false)
 		{
 			// Move the file
-			$file->move($storage, $row['localname']);
+			$file = $file->move($storage, $row['localname']);
 			chmod($storage . $row['localname'], 0664);
 		}
 
@@ -160,7 +160,7 @@ class FileModel extends Model
 				'thumbnail' => $thumbnail,
 			]);
 		}
-		catch (ThumbnailsException $e)
+		catch (\Throwable $e)
 		{
 			log_message('debug', $e->getMessage());
 			log_message('debug', 'Unable to create thumbnail for ' . $row['filename']);

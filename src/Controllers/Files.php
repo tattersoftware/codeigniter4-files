@@ -29,7 +29,7 @@ class Files extends Controller
 	/**
 	 * Helpers to load.
 	 */
-	protected $helpers = ['alerts', 'files', 'handlers', 'text'];
+	protected $helpers = ['alerts', 'files', 'handlers', 'html', 'text'];
 
 	/**
 	 * Overriding data for views.
@@ -110,7 +110,7 @@ class Files extends Controller
 
 			$this->setData([
 				'files' => $this->model->orderBy($this->data['sort'], $this->data['order'])->findAll()
-			]);
+			], true);
 		}
 
 		// AJAX calls skip the wrapping
@@ -493,7 +493,7 @@ class Files extends Controller
 		}
 
 		// Pass to the handler
-		$export   = new $handler($file);
+		$export   = new $handler($file->object);
 		$response = $export->setFilename($file->filename)->process();
 
 		// If the handler returned a response then we're done

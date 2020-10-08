@@ -18,10 +18,10 @@ if (empty($exports) && $access === 'display')
 	
 		<?php $export = new $class(); ?>
 		<?php if ($export->ajax): ?>
-		<a class="dropdown-item" href="<?= site_url('files/export/' . $export->uid . '/' . $file->id) ?>" onclick="$('#globalModal .modal-body').load('<?= site_url('files/export/' . $export->uid . '/' . $file->id) ?>'); $('#globalModal').modal(); return false;"><?= $export->name ?></a>
+		<a class="dropdown-item" href="<?= site_url('files/export/' . $export->slug . '/' . $file->id) ?>" onclick="$('#globalModal .modal-body').load('<?= site_url('files/export/' . $export->slug . '/' . $file->id) ?>'); $('#globalModal').modal(); return false;"><?= $export->name ?></a>
 		
 		<?php else: ?>
-		<a class="dropdown-item" href="<?= site_url('files/export/' . $export->uid . '/' . $file->id) ?>"><?= $export->name ?></a>
+		<a class="dropdown-item" href="<?= site_url('files/export/' . $export->slug . '/' . $file->id) ?>"><?= $export->name ?></a>
 		
 		<?php endif; ?>
 		<?php endforeach; ?>

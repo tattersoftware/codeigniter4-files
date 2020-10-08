@@ -145,7 +145,8 @@ class File extends Entity
 	}
 
 	/**
-	 * Returns the path to this file's thumbnail, or the default from config
+	 * Returns the path to this file's thumbnail, or the default from config.
+	 * Should always return a path to a valid file to be safe for img_data()
 	 *
 	 * @return string
 	 */

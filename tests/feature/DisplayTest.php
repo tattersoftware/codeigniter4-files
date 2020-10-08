@@ -6,7 +6,7 @@ use Tatter\Files\Exceptions\FilesException;
 use Tests\Support\FeatureTestCase;
 use Tests\Support\Fakers\FileFaker;
 
-class IndexTest extends FeatureTestCase
+class DisplayTest extends FeatureTestCase
 {
 	public function testNoFiles()
 	{
