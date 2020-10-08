@@ -92,17 +92,44 @@ class FilesTestCase extends CIDatabaseTestCase
 
 		$this->root = null;
 	}
+
 	/**
-	 * Create a random user and log it in.
+	 * Login a user, optionally created at random.
+	 *
+	 * @param int $userId
 	 *
 	 * $return User
 	 */
-	protected function login(): User
+	protected function login(int $userId = null): User
 	{
-		// Create a new random user
-		$user = fake(UserFaker::class);
+		// Get or create the user
+		$user = $userId ? model('UserModel')->find($userId) : fake(UserFaker::class);
 
 		$_SESSION['logged_in'] = $user->id;
+
+		return $user;
+	}
+
+	/**
+	 * Create a random user and give it some random files.
+	 *
+	 * @param array $data    Overriding array of user data for the faker
+	 * @param int $fileCount Number of files to create
+	 *
+	 * @return User
+	 */
+	protected function createUserWithFiles(array $data = [], int $fileCount = 2): User
+	{
+		// Create the user
+		$user = fake(UserFaker::class, $data);
+
+		// Create files and assign them to the user
+		for ($i = 0; $i < abs($fileCount); $i++)
+		{
+			$file = fake(FileFaker::class);
+
+			$this->model->addToUser($file->id, $user->id);
+		}
 
 		return $user;
 	}

@@ -25,16 +25,4 @@ class DisplayTest extends FeatureTestCase
 		$result->assertStatus(200);
 		$result->assertSee($file->filename);
 	}
-
-	public function testUserDisplaysUserFiles()
-	{
-		$file = fake(FileFaker::class);
-		$user = fake(UserFaker::class);
-		service('authentication')->loginByID($user->id);
-		
-		$result = $this->get('files');
-
-		$result->assertStatus(200);
-		$result->assertSee($file->filename);
-	}
 }

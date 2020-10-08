@@ -1,5 +1,6 @@
 <?php namespace App\Controllers;
 
+use CodeIgniter\HTTP\RedirectResponse;
 use Tatter\Files\Controllers\Files;
 
 /**
@@ -14,6 +15,6 @@ class Widgets extends Files
 	 */
 	public function files()
 	{
-		
+		return '';
 	}
 }

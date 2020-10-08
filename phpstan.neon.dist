@@ -10,8 +10,9 @@ parameters:
 		- src/Config/Routes.php
 		- src/Views/*
 	ignoreErrors:
-		- '#Access to an undefined property Tatter\\Files\\Entities\\[A-Za-z]+::\$[a-z]+#'
+		- '#Access to an undefined property [A-Za-z\\]+\\Entities\\[A-Za-z]+::\$[a-z]+#'
 		- '#Cannot access property \$[a-z]+ on array\|object#'
+		- '#Cannot call method [A-Za-z]+\(\) on array\|object#'
 		- '#Unsafe usage of new static\(\)*#'
 	scanDirectories:
 		- vendor/codeigniter4/codeigniter4/system/Helpers
