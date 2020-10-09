@@ -57,17 +57,6 @@ class ControllerTest extends FilesTestCase
 		$this->assertDirectoryIsWritable($this->config->storagePath);
 	}
 
-	public function testUsesExternalModelIfFound()
-	{
-		require_once SUPPORTPATH . 'app/Models/FileModel.php';
-
-		$this->controller(Files::class);
-
-		$result = $this->getPrivateProperty($this->controller, 'model');
-
-		$this->assertInstanceOf('App\Models\FileModel', $result);
-	}
-
 	//--------------------------------------------------------------------
 
 	public function testGetSortUsesInput()
