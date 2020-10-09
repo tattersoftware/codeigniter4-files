@@ -50,4 +50,25 @@ class DisplayTest extends FeatureTestCase
 		$result->assertStatus(200);
 		$this->assertEquals($configSort, service('settings')->filesSort);
 	}
+
+	public function provideOrder()
+	{
+		yield ['asc', 'asc'];
+		yield ['desc', 'desc'];
+		yield ['invalid', 'asc'];
+	}
+
+	/**
+	 * @dataProvider provideOrder
+	 */
+	public function testOrders(string $order, string $configOrder)
+	{
+		$_REQUEST['order'] = $order;
+
+		$file = fake(FileFaker::class);
+		$result = $this->get('files');
+
+		$result->assertStatus(200);
+		$this->assertEquals($configOrder, service('settings')->filesOrder);
+	}
 }
