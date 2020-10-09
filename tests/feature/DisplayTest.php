@@ -71,4 +71,29 @@ class DisplayTest extends FeatureTestCase
 		$result->assertStatus(200);
 		$this->assertEquals($configOrder, service('settings')->filesOrder);
 	}
+
+	public function provideSearch()
+	{
+		yield ['Heathcote'];
+	}
+
+	/**
+	 * @dataProvider provideSearch
+	 */
+	public function testSearches(string $keyword)
+	{
+		$_REQUEST['search'] = $keyword;
+
+		$file = fake(FileFaker::class);
+		$result = $this->get('files');
+
+		$result->assertStatus(200);
+		$content = $result->response->getBody();
+
+		if (strpos($content, $keyword) !== false) {
+			$result->assertSee($keyword);
+		} else {
+			$result->assertSee('You have no files!');
+		}
+	}
 }
