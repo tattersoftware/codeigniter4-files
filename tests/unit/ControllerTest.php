@@ -24,17 +24,6 @@ class ControllerTest extends FilesTestCase
 		$this->controller = null;
 	}
 
-	public function testThrowsWithoutAuthFunction()
-	{
-		// Since we cannot un-define a function we use the config override cheat
-		$this->config->failNoAuth = true; // @phpstan-ignore-line
-
-		$this->expectException(FilesException::class);
-		$this->expectExceptionMessage(lang('Files.noAuth'));
-
-		$controller = new Files($this->config);
-	}
-
 	public function testThrowsWithInvalidStoragePath()
 	{
 		$this->config->storagePath = HOMEPATH . 'README.md';
