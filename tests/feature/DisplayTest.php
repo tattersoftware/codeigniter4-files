@@ -1,6 +1,5 @@
 <?php
 
-use Config\Services;
 use Myth\Auth\Test\Fakers\UserFaker;
 use Tatter\Files\Controllers\Files;
 use Tatter\Files\Exceptions\FilesException;
