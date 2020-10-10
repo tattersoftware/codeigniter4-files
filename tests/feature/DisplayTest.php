@@ -26,6 +26,29 @@ class DisplayTest extends FeatureTestCase
 		$result->assertSee($file->filename);
 	}
 
+	public function provideFormat()
+	{
+		yield ['cards', 'cards'];
+		yield ['list', 'list'];
+		yield ['select', 'select'];
+		yield ['invalid', config('Files')->defaultFormat];
+	}
+
+	/**
+	 * @dataProvider provideFormat
+	 */
+
+	public function testFormatsSelect(string $format, string $configFormat)
+	{
+		$_REQUEST['format'] = $format;
+
+		$file = fake(FileFaker::class);
+		$result = $this->get('files');
+
+		$result->assertStatus(200);
+		$this->assertEquals($configFormat, service('settings')->filesFormat);
+	}
+
 	public function provideSort()
 	{
 		yield ['filename', 'filename'];
