@@ -38,7 +38,7 @@ class DisplayTest extends FeatureTestCase
 	 * @dataProvider provideFormat
 	 */
 
-	public function testFormatsSelect(string $format, string $configFormat)
+	public function testFormat(string $format, string $configFormat)
 	{
 		$_REQUEST['format'] = $format;
 
