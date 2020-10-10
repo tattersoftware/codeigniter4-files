@@ -3,6 +3,7 @@
 use CodeIgniter\Config\Config;
 use Tatter\Files\Controllers\Files;
 use Tatter\Files\Exceptions\FilesException;
+use Tests\Support\Fakers\FileFaker;
 use Tests\Support\FilesTestCase;
 use Tests\Support\Models\FileModel;
 
@@ -176,5 +177,22 @@ class ControllerTest extends FilesTestCase
 		$result = $method();
 
 		$this->assertEquals('cards', $result);
+	}
+
+	public function testDataUsesVar()
+	{
+		$file = fake(FileFaker::class);
+
+		$result = $this->controller(Files::class)
+				       ->execute('display');
+
+		$method = $this->getPrivateMethodInvoker($this->controller, 'setData');
+		$method([
+			'files' => [
+				(array) $file,
+			],
+		]);
+
+		$this->assertTrue($result->see($file->filename));
 	}
 }
