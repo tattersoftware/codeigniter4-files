@@ -98,6 +98,7 @@ class DisplayTest extends FeatureTestCase
 	public function provideSearch()
 	{
 		yield ['Heathcote'];
+		yield ['will never be found'];
 	}
 
 	/**
