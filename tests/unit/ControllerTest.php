@@ -183,16 +183,17 @@ class ControllerTest extends FilesTestCase
 	{
 		$file = fake(FileFaker::class);
 
-		$result = $this->controller(Files::class)
-				       ->execute('display');
+		$controller = new Files();
+		$controller->initController(service('request'), service('response'), service('logger'));
 
-		$method = $this->getPrivateMethodInvoker($this->controller, 'setData');
+		$method = $this->getPrivateMethodInvoker($controller, 'setData');
 		$method([
 			'files' => [
-				(array) $file,
+				0 => $file
 			],
 		]);
 
-		$this->assertTrue($result->see($file->filename));
+		$result = $controller->display();
+		$this->assertStringContainsString($file->filename, $result);
 	}
 }
