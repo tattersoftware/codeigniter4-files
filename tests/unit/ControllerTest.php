@@ -1,6 +1,7 @@
 <?php
 
 use CodeIgniter\Config\Config;
+use CodeIgniter\Files\Exceptions\FileNotFoundException;
 use Tatter\Files\Controllers\Files;
 use Tatter\Files\Exceptions\FilesException;
 use Tests\Support\Fakers\FileFaker;
@@ -195,5 +196,26 @@ class ControllerTest extends FilesTestCase
 
 		$result = $controller->display();
 		$this->assertStringContainsString($file->filename, $result);
+	}
+
+	public function testDataUsesVarGotFileNotFound()
+	{
+		$file = fake(FileFaker::class);
+
+		$controller = new Files();
+		$controller->initController(service('request'), service('response'), service('logger'));
+
+		$method = $this->getPrivateMethodInvoker($controller, 'setData');
+		$method([
+			'files' => [
+				0 => (object) [
+					'filename' => 'foo.txt',
+					'thumbnail' => '',
+				]
+			],
+		]);
+
+		$this->expectException(FileNotFoundException::class);
+		$controller->display();
 	}
 }

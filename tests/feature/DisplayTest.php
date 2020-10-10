@@ -126,9 +126,12 @@ class DisplayTest extends FeatureTestCase
 		$result->assertStatus(200);
 		$content = $result->response->getBody();
 
-		if (strpos($content, $keyword) !== false) {
+		if (strpos($content, $keyword) !== false)
+		{
 			$result->assertSee($keyword);
-		} else {
+		}
+		else
+		{
 			$result->assertSee('You have no files!');
 		}
 	}
