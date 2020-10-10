@@ -26,6 +26,18 @@ class DisplayTest extends FeatureTestCase
 		$result->assertSee($file->filename);
 	}
 
+	public function testDataUsesSettings()
+	{
+		service('settings')->filesSort = 'type';
+		service('settings')->filesOrder = 'asc';
+		service('settings')->filesFormat = 'cards';
+
+		$file = fake(FileFaker::class);
+		$result = $this->get('files');
+		$result->assertStatus(200);
+		$result->assertSee($file->filename);
+	}
+
 	public function provideFormat()
 	{
 		yield ['cards', 'cards'];
