@@ -15,7 +15,7 @@
 				<tbody>
 	<?php foreach ($files as $file): ?>
 					<tr>
-						<td><img src="<?= img_data($file->thumbnail) ?>" class="img-fluid rounded" alt="<?= $file->filename ?>" style="max-height:40px;"></td>
+						<td><img src="<?= img_data($file->getThumbnail()) ?>" class="img-fluid rounded" alt="<?= $file->filename ?>" style="max-height:40px;"></td>
 						<td class="align-middle"><?= $file->filename ?></td>
 						<td class="align-middle"><?= $file->type ?></td>
 						<td class="align-middle"><?= bytes2human($file->size) ?></td>
