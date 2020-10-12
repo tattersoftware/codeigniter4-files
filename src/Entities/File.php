@@ -41,7 +41,7 @@ class File extends Entity
 			}
 		}
 
-		return self::$defaultThumbnail;
+		return (string) self::$defaultThumbnail;
 	}
 
 	//--------------------------------------------------------------------

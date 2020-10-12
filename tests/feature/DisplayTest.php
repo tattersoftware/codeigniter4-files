@@ -26,6 +26,41 @@ class DisplayTest extends FeatureTestCase
 		$result->assertSee($file->filename);
 	}
 
+	public function testDataUsesSettings()
+	{
+		service('settings')->filesSort = 'type';
+		service('settings')->filesOrder = 'asc';
+		service('settings')->filesFormat = 'cards';
+
+		$file = fake(FileFaker::class);
+		$result = $this->get('files');
+		$result->assertStatus(200);
+		$result->assertSee($file->filename);
+	}
+
+	public function provideFormat()
+	{
+		yield ['cards', 'cards'];
+		yield ['list', 'list'];
+		yield ['select', 'select'];
+		yield ['invalid', config('Files')->defaultFormat];
+	}
+
+	/**
+	 * @dataProvider provideFormat
+	 */
+
+	public function testFormat(string $format, string $configFormat)
+	{
+		$_REQUEST['format'] = $format;
+
+		$file = fake(FileFaker::class);
+		$result = $this->get('files');
+
+		$result->assertStatus(200);
+		$this->assertEquals($configFormat, service('settings')->filesFormat);
+	}
+
 	public function provideSort()
 	{
 		yield ['filename', 'filename'];
@@ -75,6 +110,7 @@ class DisplayTest extends FeatureTestCase
 	public function provideSearch()
 	{
 		yield ['Heathcote'];
+		yield ['will never be found'];
 	}
 
 	/**
@@ -90,9 +126,12 @@ class DisplayTest extends FeatureTestCase
 		$result->assertStatus(200);
 		$content = $result->response->getBody();
 
-		if (strpos($content, $keyword) !== false) {
+		if (strpos($content, $keyword) !== false)
+		{
 			$result->assertSee($keyword);
-		} else {
+		}
+		else
+		{
 			$result->assertSee('You have no files!');
 		}
 	}

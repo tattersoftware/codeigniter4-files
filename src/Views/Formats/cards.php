@@ -4,7 +4,7 @@
 			<div class="card-deck">
 	<?php foreach ($files as $file): ?>
 				<div class="card mb-4" style="min-width: 10rem; max-width: 200px;">
-					<img src="<?= img_data($file->thumbnail) ?>" class="card-img-top img-thumbnail" alt="<?= $file->filename ?>">
+					<img src="<?= img_data($file->getThumbnail()) ?>" class="card-img-top img-thumbnail" alt="<?= $file->filename ?>">
 					<div class="card-header">
 						<?= view('Tatter\Files\Views\Menus\single', ['file' => $file, 'access' => $access]) ?>
 					</div>
