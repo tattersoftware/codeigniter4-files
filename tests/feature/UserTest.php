@@ -15,4 +15,15 @@ class UserTest extends FeatureTestCase
 		$result = $this->get('files/user/' . $user->id);
 		$result->assertSee($file->filename);
 	}
+
+	public function testShowsOtherFiles()
+	{
+		$file = fake(FileFaker::class);
+		$user = $this->login();
+
+		model('FileModel')->addToUser($file->id, $user->id);
+
+		$result = $this->get('files/user/1000');
+		$result->assertDontSee($file->filename);
+	}
 }
