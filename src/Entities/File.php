@@ -27,7 +27,7 @@ class File extends Entity
 	 *
 	 * @throws FileNotFoundException
 	 */
-	protected static function locateDefaultThumbnail(): string
+	public static function locateDefaultThumbnail(): string
 	{
 		// If the path has not been resolved yet then try to now
 		if (is_null(self::$defaultThumbnail))

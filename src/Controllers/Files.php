@@ -1,13 +1,14 @@
 <?php namespace Tatter\Files\Controllers;
 
 use CodeIgniter\Controller;
-use CodeIgniter\Files\File;
+use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Tatter\Files\Config\Files as FilesConfig;
 use Tatter\Files\Exceptions\FilesException;
+use Tatter\Files\Entities\File;
 use Tatter\Files\Models\FileModel;
 
 class Files extends Controller
@@ -512,11 +513,18 @@ class Files extends Controller
 	 *
 	 * @return ResponseInterface
 	 */
-	public function thumbnail($fileId)
+	public function thumbnail($fileId): ResponseInterface
 	{
-		$file = $this->model->find($fileId);
-		$data = $file->getThumbnail('raw');
-		return $this->response->setHeader('Content-type', 'image/jpeg')->setBody($data);
+		if ($file = $this->model->find($fileId))
+		{
+			$path = $file->getThumbnail();
+		}
+		else
+		{
+			$path = File::locateDefaultThumbnail();
+		}
+
+		return $this->response->setHeader('Content-type', 'image/jpeg')->setBody(file_get_contents($path));
 	}
 
 	//--------------------------------------------------------------------
