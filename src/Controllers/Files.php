@@ -56,10 +56,7 @@ class Files extends Controller
 		$this->model = $model ?? model('FileModel');
 
 		// Verify the storage directory
-		if (! is_dir($this->config->storagePath) && ! @mkdir($this->config->storagePath, 0775, true))
-		{
-			throw FilesException::forDirFail($this->config->storagePath);
-		}
+		FileModel::storage();
 	}
 
 	/**

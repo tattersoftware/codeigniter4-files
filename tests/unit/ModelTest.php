@@ -71,4 +71,17 @@ class ModelTest extends FilesTestCase
 
 		$this->assertCount(1, $result);
 	}
+
+	public function testCreateAddsThumbnail()
+	{
+		helper('filesystem');
+		$file = $this->model->createFromPath($this->testPath);
+
+		$thumbnail = pathinfo($file->localname, PATHINFO_FILENAME);
+		$array     = $file->toRawArray();
+		$this->assertEquals($thumbnail, $array['thumbnail']);
+
+		$path = FileFaker::storage() . 'thumbnails' . DIRECTORY_SEPARATOR . $thumbnail;
+		$this->assertFileExists($path);
+	}
 }

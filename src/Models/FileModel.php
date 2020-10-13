@@ -3,6 +3,7 @@
 use CodeIgniter\Files\File as CIFile;
 use CodeIgniter\Model;
 use Tatter\Files\Entities\File;
+use Tatter\Files\Exceptions\FilesException;
 use Tatter\Thumbnails\Exceptions\ThumbnailsException;
 
 class FileModel extends Model
@@ -42,6 +43,35 @@ class FileModel extends Model
 	protected $mode       = 04660;
 	protected $pivotKey   = 'file_id';
 	protected $usersPivot = 'files_users';
+
+	//--------------------------------------------------------------------
+
+	/**
+	 * Normalizes and creates (if necessary) the storage and thumbnail paths.
+	 *
+	 * @return string The normalized storage path
+	 *
+	 * @throws FilesException
+	 */
+	public static function storage(): string
+	{
+		// Normalize the path
+		$storage = realpath(config('Files')->storagePath) ?: config('Files')->storagePath;
+		$storage = rtrim($storage, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+		if (! is_dir($storage) && ! @mkdir($storage, 0775, true))
+		{
+			throw FilesException::forDirFail($storage);
+		}
+
+		// Normalize the path
+		$thumbnails = $storage . 'thumbnails';
+		if (! is_dir($thumbnails) && ! @mkdir($thumbnails, 0775, true))
+		{
+			throw FilesException::forDirFail($thumbnails);
+		}
+
+		return $storage;
+	}
 
 	//--------------------------------------------------------------------
 
@@ -127,8 +157,7 @@ class FileModel extends Model
 		];
 
 		// Normalize paths
-		$storage  = realpath(config('Files')->storagePath) ?: config('Files')->storagePath;
-		$storage  = rtrim($storage, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+		$storage  = self::storage();
 		$filePath = $file->getRealPath() ?: $file->__toString();
 
 		// Determine if we need to move the file
@@ -150,10 +179,11 @@ class FileModel extends Model
 
 		// Try to create a Thumbnail
 		$thumbnail = pathinfo($row['localname'], PATHINFO_FILENAME);
-		$thumbPath = $storage . 'thumbnails' . DIRECTORY_SEPARATOR . $thumbnail;
+		$output    = $storage . 'thumbnails' . DIRECTORY_SEPARATOR . $thumbnail;
+
 		try
 		{
-			service('thumbnails')->create($filePath, $thumbPath);
+			service('thumbnails')->create($file->__toString(), $output);
 
 			// If it succeeds then update the database
 			$this->update($fileId, [
@@ -162,8 +192,8 @@ class FileModel extends Model
 		}
 		catch (\Throwable $e)
 		{
-			log_message('debug', $e->getMessage());
-			log_message('debug', 'Unable to create thumbnail for ' . $row['filename']);
+			log_message('error', $e->getMessage());
+			log_message('error', 'Unable to create thumbnail for ' . $row['filename']);
 		}
 
 		// Return the File entity
