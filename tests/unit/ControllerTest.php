@@ -29,7 +29,7 @@ class ControllerTest extends FilesTestCase
 
 	public function testThrowsWithInvalidStoragePath()
 	{
-		$this->config->storagePath = HOMEPATH . 'README.md';
+		$this->config->storagePath = realpath(HOMEPATH . 'README.md') ?: HOMEPATH . 'README.md';
 
 		$this->expectException(FilesException::class);
 		$this->expectExceptionMessage(lang('Files.dirFail', [$this->config->storagePath]));
