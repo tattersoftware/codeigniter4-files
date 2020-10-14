@@ -9,7 +9,7 @@ class Files extends BaseConfig
 	 *
 	 * @var string
 	 */
-	public $storagePath = ROOTPATH . 'writable/files/';
+	public $storagePath = WRITEPATH . 'files/';
 
 	/**
 	 * Layouts to use for general access and for administration

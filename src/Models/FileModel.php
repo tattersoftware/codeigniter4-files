@@ -158,7 +158,7 @@ class FileModel extends Model
 
 		// Normalize paths
 		$storage  = self::storage();
-		$filePath = $file->getRealPath() ?: $file->__toString();
+		$filePath = $file->getRealPath() ?: (string) $file;
 
 		// Determine if we need to move the file
 		if (strpos($filePath, $storage) === false)
@@ -183,7 +183,7 @@ class FileModel extends Model
 
 		try
 		{
-			service('thumbnails')->create($file->__toString(), $output);
+			service('thumbnails')->create((string) $file, $output);
 
 			// If it succeeds then update the database
 			$this->update($fileId, [
