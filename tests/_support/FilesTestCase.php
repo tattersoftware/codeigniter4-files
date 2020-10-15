@@ -103,7 +103,7 @@ class FilesTestCase extends CIDatabaseTestCase
 	protected function login(int $userId = null): User
 	{
 		// Get or create the user
-		$user = $userId ? model(UserModel::class)->find($userId) : fake(UserFaker::class);
+		$user = $userId ? model(Models\UserModel::class)->find($userId) : fake(UserFaker::class);
 
 		$_SESSION['logged_in'] = $user->id;
 

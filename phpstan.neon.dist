@@ -9,11 +9,13 @@ parameters:
 	excludes_analyse:
 		- src/Config/Routes.php
 		- src/Views/*
+		- tests/_support/Models/UserModel.php
 	ignoreErrors:
 		- '#Access to an undefined property [A-Za-z\\]+\\Entities\\[A-Za-z]+::\$[a-z]+#'
 		- '#Cannot access property \$[a-z]+ on array\|object#'
 		- '#Cannot call method [A-Za-z]+\(\) on array\|object#'
 		- '#Unsafe usage of new static\(\)*#'
+		- '#Call to an undefined static method Config\\Services::authentication\(\)#'
 	scanDirectories:
 		- vendor/codeigniter4/codeigniter4/system/Helpers
 		- vendor/myth/auth/src/Helpers
