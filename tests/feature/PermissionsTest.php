@@ -51,19 +51,19 @@ class PermissionsTest extends FeatureTestCase
 		// Set permissions
 		model(PermitModel::class)->insertBatch([
 			[
-				'name'    => 'mayList',
+				'name'    => 'listFiles',
 				'user_id' => $this->proctor->id,
 			],
 			[
-				'name'    => 'mayList',
+				'name'    => 'listFiles',
 				'user_id' => $this->super->id,
 			],
 			[
-				'name'    => 'mayRead',
+				'name'    => 'readFiles',
 				'user_id' => $this->super->id,
 			],
 			[
-				'name'    => 'mayAdmin',
+				'name'    => 'adminFiles',
 				'user_id' => $this->admin->id,
 			],
 		]);
@@ -100,5 +100,17 @@ class PermissionsTest extends FeatureTestCase
 
 		$result->assertStatus(403);
 		$result->assertJSONFragment(['error' => lang('Permits.notPermitted')]);
+	}
+
+	public function testProctorListsAllFiles()
+	{
+		$this->setMode(00660);
+		$this->login($this->proctor->id);
+
+		$result = $this->withSession()->get('files');
+		$result->assertStatus(200);
+
+		$files = $this->model->getForUser($this->admin->id);
+		$result->assertSee($files[0]->filename);
 	}
 }
