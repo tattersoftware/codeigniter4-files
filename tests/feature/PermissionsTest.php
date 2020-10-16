@@ -10,10 +10,6 @@ use Tatter\Permits\Models\PermitModel;
 use Tests\Support\FeatureTestCase;
 use Tests\Support\Fakers\FileFaker;
 
-/**
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
- */
 class PermissionsTest extends FeatureTestCase
 {
 	/**
@@ -172,7 +168,7 @@ class PermissionsTest extends FeatureTestCase
 
 		$modelClass = get_class($this->model);
 		p\redefine($modelClass . '::createFromPath', function($args) {
-			return new File('tests/_support/vfs/file.txt');
+			return fake(FileFaker::class);
 		});
 
 		$result = $this->withSession()
