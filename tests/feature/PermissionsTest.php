@@ -1,6 +1,11 @@
 <?php
 
+require './vendor/antecedent/patchwork/Patchwork.php';
+
+use CodeIgniter\Files\File;
+use CodeIgniter\HTTP\Files\UploadedFile;
 use Myth\Auth\Entities\User;
+use Patchwork as p;
 use Tatter\Permits\Models\PermitModel;
 use Tests\Support\FeatureTestCase;
 use Tests\Support\Fakers\FileFaker;
@@ -136,6 +141,41 @@ class PermissionsTest extends FeatureTestCase
                  	   ->withHeaders(['X-Requested-With' => 'XMLHttpRequest'])
 		               ->post('files/upload');
 		$result->assertSee('The file uploaded with success.(0)');
+	}
+
+	public function testAuthenticatedAddOnlyWithValidFile()
+	{
+		$this->setMode(04664);
+		$this->login($this->admin->id);
+
+		$_FILES = [
+			'file' => [
+				'name'     => 'file.txt',
+				'type'     => 'text/plain',
+				'size'     => '33',
+				'tmp_name' => 'tests/_support/vfs/file.txt',
+				'error'    => 0,
+			],
+		];
+
+		p\redefine(UploadedFile::class . '::isValid', function() {
+			return true;
+		});
+
+		p\redefine(File::class . '::move', function($args) {
+			return new File('tests/_support/vfs/file.txt');
+		});
+
+		$modelClass = get_class($this->model);
+		p\redefine($modelClass . '::createFromPath', function($args) {
+			return new File('tests/_support/vfs/file.txt');
+		});
+
+		$result = $this->withSession()
+                 	   ->withHeaders(['X-Requested-With' => 'XMLHttpRequest'])
+					   ->post('files/upload');
+
+		$this->assertEquals('',	$result->response->getBody());
 	}
 
 	public function testProctorListsAllFiles()
