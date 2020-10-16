@@ -113,4 +113,27 @@ class PermissionsTest extends FeatureTestCase
 		$files = $this->model->getForUser($this->admin->id);
 		$result->assertSee($files[0]->filename);
 	}
+
+	public function provideAccess()
+	{
+		yield ['read' => 00444];
+		yield ['write' => 00222];
+		yield ['execute' => 00111];
+		yield ['read write execute' => 00777];
+	}
+
+	/**
+	 * @dataProvider provideAccess
+	 */
+	public function testAdminAccess($mode)
+	{
+		$this->setMode($mode);
+		$this->login($this->admin->id);
+
+		$result = $this->withSession()->get('files');
+		$result->assertStatus(200);
+
+		$files = $this->model->getForUser($this->admin->id);
+		$result->assertSee($files[0]->filename);
+	}
 }
