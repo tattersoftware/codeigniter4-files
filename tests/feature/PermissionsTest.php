@@ -52,6 +52,10 @@ class PermissionsTest extends FeatureTestCase
 		model(PermitModel::class)->insertBatch([
 			[
 				'name'    => 'listFiles',
+				'user_id' => $this->user->id,
+			],
+			[
+				'name'    => 'listFiles',
 				'user_id' => $this->proctor->id,
 			],
 			[
