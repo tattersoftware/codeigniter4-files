@@ -106,7 +106,7 @@ class PermissionsTest extends FeatureTestCase
 		$result->assertJSONFragment(['error' => lang('Permits.notPermitted')]);
 	}
 
-	public function testAuthenticatedAddOnly()
+	public function testAuthenticatedAddOnlyEmptyFile()
 	{
 		$this->setMode(04664);
 		$this->login($this->admin->id);
@@ -115,6 +115,27 @@ class PermissionsTest extends FeatureTestCase
                  		->withHeaders(['X-Requested-With' => 'XMLHttpRequest'])
 		                ->post('files/upload');
 		$result->assertStatus(400);
+	}
+
+	public function testAuthenticatedAddOnlyWithInvalidFile()
+	{
+		$this->setMode(04664);
+		$this->login($this->admin->id);
+
+		$_FILES = [
+			'file' => [
+				'name'     => 'someFile.txt',
+				'type'     => 'text/plain',
+				'size'     => '124',
+				'tmp_name' => '/tmp/myTempFile.txt',
+				'error'    => 0,
+			],
+		];
+
+		$result = $this->withSession()
+                 	   ->withHeaders(['X-Requested-With' => 'XMLHttpRequest'])
+		               ->post('files/upload');
+		$result->assertSee('The file uploaded with success.(0)');
 	}
 
 	public function testProctorListsAllFiles()
