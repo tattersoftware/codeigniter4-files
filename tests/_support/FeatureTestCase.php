@@ -1,9 +1,8 @@
 <?php namespace Tests\Support;
 
-use App\Entities\Card;
-use App\Models\CardModel;
-use CodeIgniter\Test\Fabricator;
+use CodeIgniter\Config\Factories;
 use Config\Services;
+use Tatter\Files\Models\FileModel;
 
 class FeatureTestCase extends FilesTestCase
 {
@@ -38,5 +37,18 @@ class FeatureTestCase extends FilesTestCase
 		parent::setUp();
 
 		$this->resetAuthServices();
+	}
+
+	/**
+	 * Injects a permission mode into the shared FileModel.
+	 *
+	 * @param int $mode Octal mode
+	 */
+	protected function setMode(int $mode)
+	{
+		$model = new FileModel();
+		$model->setMode($mode);
+
+		Factories::injectMock('models', FileModel::class, $model);
 	}
 }

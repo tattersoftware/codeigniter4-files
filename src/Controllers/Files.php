@@ -363,6 +363,12 @@ class Files extends Controller
 	 */
 	public function upload()
 	{
+		// Check for create permission
+		if (! $this->model->mayCreate())
+		{
+			return $this->failure(403, lang('Permits.notPermitted'));
+		}
+
 		// Verify upload succeeded
 		$upload = $this->request->getFile('file');
 		if (empty($upload))

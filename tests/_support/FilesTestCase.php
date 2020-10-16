@@ -1,12 +1,13 @@
 <?php namespace Tests\Support;
 
-use CodeIgniter\Config\Config;
-use CodeIgniter\Database\ModelFactory;
+use CodeIgniter\Config\Factories;
 use CodeIgniter\Test\CIDatabaseTestCase;
+use Config\Services;
 use Myth\Auth\Entities\User;
 use Myth\Auth\Test\Fakers\UserFaker;
 use Tatter\Files\Config\Files;
 use Tests\Support\Fakers\FileFaker;
+use Tests\Support\Models;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 
@@ -66,8 +67,7 @@ class FilesTestCase extends CIDatabaseTestCase
 	protected function setUp(): void
 	{
 		parent::setUp();
-		Config::reset();
-		ModelFactory::reset();
+
 		helper('auth');
 		$this->resetAuthServices();
 		$_REQUEST = [];
@@ -81,7 +81,7 @@ class FilesTestCase extends CIDatabaseTestCase
 		// Force our config to the virtual path
 		$this->config              = new Files();
 		$this->config->storagePath = $this->root->url() . '/storage/';
-		Config::injectMock('Files', $this->config);
+		Factories::injectMock('config', 'Files', $this->config);
 
 		$this->testPath = $this->config->storagePath . 'image.jpg';
 	}
@@ -103,9 +103,13 @@ class FilesTestCase extends CIDatabaseTestCase
 	protected function login(int $userId = null): User
 	{
 		// Get or create the user
-		$user = $userId ? model('UserModel')->find($userId) : fake(UserFaker::class);
+		$user = $userId ? model(Models\UserModel::class)->find($userId) : fake(UserFaker::class);
 
 		$_SESSION['logged_in'] = $user->id;
+
+		$auth = Services::authentication();
+		$auth->login($user);
+		Services::injectMock('authentication', $auth);
 
 		return $user;
 	}
