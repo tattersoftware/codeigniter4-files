@@ -114,6 +114,29 @@ class PermissionsTest extends FeatureTestCase
 		$result->assertSee($files[0]->filename);
 	}
 
+	public function testAuthenticatedListOwnOnly()
+	{
+		$this->setMode(00660);
+		$this->login($this->proctor->id);
+
+		$fileOwnByProctor = fake(FileFaker::class);
+		model('FileModel')->addToUser($fileOwnByProctor->id, $this->proctor->id);
+
+		$fileOwnByProctor2 = fake(FileFaker::class);
+		model('FileModel')->addToUser($fileOwnByProctor2->id, $this->proctor->id);
+
+		$fileOwnByAdmin = fake(FileFaker::class);
+		model('FileModel')->addToUser($fileOwnByAdmin->id, $this->admin->id);
+
+		$result = $this->withSession()->get('files/user/' . $this->proctor->id);
+		$result->assertStatus(200);
+
+		$files = $this->model->getForUser($this->proctor->id);
+		$result->assertSee($fileOwnByProctor->filename);
+		$result->assertSee($fileOwnByProctor2->filename);
+		$result->assertDontSee($fileOwnByAdmin->filename);
+	}
+
 	public function provideAccess()
 	{
 		yield ['read' => 00444];
