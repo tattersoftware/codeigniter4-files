@@ -10,6 +10,10 @@ use Tatter\Permits\Models\PermitModel;
 use Tests\Support\FeatureTestCase;
 use Tests\Support\Fakers\FileFaker;
 
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ */
 class PermissionsTest extends FeatureTestCase
 {
 	/**
