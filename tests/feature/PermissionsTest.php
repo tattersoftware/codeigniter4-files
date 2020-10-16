@@ -106,6 +106,15 @@ class PermissionsTest extends FeatureTestCase
 		$result->assertJSONFragment(['error' => lang('Permits.notPermitted')]);
 	}
 
+	public function testAuthenticatedAddOnly()
+	{
+		$this->setMode(04664);
+		$this->login($this->admin->id);
+
+		$result = $this->withSession()->get('files/upload');
+		$result->assertStatus(400);
+	}
+
 	public function testProctorListsAllFiles()
 	{
 		$this->setMode(00660);
