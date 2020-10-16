@@ -111,7 +111,9 @@ class PermissionsTest extends FeatureTestCase
 		$this->setMode(04664);
 		$this->login($this->admin->id);
 
-		$result = $this->withSession()->get('files/upload');
+		$result = $this->withSession()
+                 		->withHeaders(['X-Requested-With' => 'XMLHttpRequest'])
+		                ->post('files/upload');
 		$result->assertStatus(400);
 	}
 
