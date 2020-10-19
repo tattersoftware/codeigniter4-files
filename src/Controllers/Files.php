@@ -1,7 +1,6 @@
 <?php namespace Tatter\Files\Controllers;
 
 use CodeIgniter\Controller;
-use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -594,6 +593,7 @@ class Files extends Controller
 			'order'    => $this->getOrder(),
 			'format'   => $this->getFormat(),
 			'search'   => $this->request->getVar('search'),
+			'page'     => $this->request->getVar('page'),
 			'access'   => $this->model->mayAdmin() ? 'manage' : 'display',
 			'exports'  => $this->getExports(),
 			'bulks'    => handlers()->where(['bulk' => 1])->findAll(),
