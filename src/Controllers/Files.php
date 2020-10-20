@@ -5,6 +5,7 @@ use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use Tatter\Exports\Exceptions\ExportsException;
 use Tatter\Files\Config\Files as FilesConfig;
 use Tatter\Files\Exceptions\FilesException;
 use Tatter\Files\Entities\File;
@@ -105,9 +106,23 @@ class Files extends Controller
 				$this->model->like('filename', $this->data['search']);
 			}
 
-			$this->setData([
-				'files' => $this->model->orderBy($this->data['sort'], $this->data['order'])->findAll()
-			], true);
+			// Sort and order
+			$this->model->orderBy($this->data['sort'], $this->data['order']);
+
+			// Paginate non-select formats
+			if ($this->data['format'] !== 'select')
+			{
+				$this->setData([
+					'files' => $this->model->paginate($this->data['perPage'], 'default', $this->data['page']),
+					'pager' => $this->model->pager,
+				], true);
+			}
+			else
+			{
+				$this->setData([
+					'files' => $this->model->findAll()
+				], true);
+			}
 		}
 
 		// AJAX calls skip the wrapping
@@ -292,7 +307,7 @@ class Files extends Controller
 	 * @return RedirectResponse
 	 * @todo Needs better bulk processing with error handling
 	 */
-	public function bulk(): RedirectResponse
+	public function bulk(): ResponseInterface
 	{
 		// Load post data
 		$post = $this->request->getPost();
@@ -315,44 +330,48 @@ class Files extends Controller
 		// Make sure some files where checked
 		if (empty($fileIds))
 		{
-			return redirect()->back()->with('error', lang('File.nofile'));
+			return $this->failure(400, lang('Files.noFile'));
 		}
 
 		// Handle actions
-		switch ($action)
+		if (empty($action))
 		{
-			case '':
-				alert('warning', 'No valid action.');
-			break;
-
-			// Bulk delete request
-			case 'delete':
-				$this->model->delete($fileIds);
-				alert('success', 'Deleted ' . count($fileIds) . ' files.');
-			break;
-
-			// Bulk export of some kind
-			default:
-				// Match the handler
-				$handler = handlers('Exports')->where(['slug' => $action])->first();
-				if (empty($handler))
-				{
-					return redirect()->back()->with('danger', 'No handler found for ' . $action);
-				}
-				$export = new $handler();
-
-				foreach ($fileIds as $fileId)
-				{
-					if ($file = $this->model->find($fileId))
-					{
-						$export->setFile($file->object)->process();
-					}
-				}
-
-				alert('success', 'Processed ' . count($fileIds) . ' files.');
+			return $this->failure(400, 'No valid action');
 		}
 
-		return redirect()->back();
+		// Bulk delete request
+		if ($action === 'delete')
+		{
+			$this->model->delete($fileIds);
+			return redirect()->back->with('success', 'Deleted ' . count($fileIds) . ' files.');
+		}
+
+		// Bulk export of some kind, match the handler
+		if (! $handler = handlers('Exports')->where(['slug' => $action])->first())
+		{
+			return $this->failure(400, 'No handler found for ' . $action);
+		}
+
+		$export = new $handler();
+		foreach ($fileIds as $fileId)
+		{
+			if ($file = $this->model->find($fileId))
+			{
+				$export->setFile($file->object);
+			}
+		}
+
+		try
+		{
+			$result = $export->process();
+		}
+		catch (ExportsException $e)
+		{
+			return $this->failure(400, $e->getMessage());
+		}
+
+		alert('success', 'Processed ' . count($fileIds) . ' files.');
+		return $result;
 	}
 
 	/**
@@ -591,14 +610,16 @@ class Files extends Controller
 		return $this->setData([
 			'source'   => 'index',
 			'files'    => null,
-			'selected' => null,
+			'selected' => explode(',', $this->request->getVar('selected') ?? ''),
 			'userId'   => null,
 			'ajax'     => $this->request->isAJAX(),
 			'sort'     => $this->getSort(),
 			'order'    => $this->getOrder(),
 			'format'   => $this->getFormat(),
 			'search'   => $this->request->getVar('search'),
+			'perPage'  => service('settings')->perPage,
 			'page'     => $this->request->getVar('page'),
+			'pager'    => null,
 			'access'   => $this->model->mayAdmin() ? 'manage' : 'display',
 			'exports'  => $this->getExports(),
 			'bulks'    => handlers()->where(['bulk' => 1])->findAll(),

@@ -18,7 +18,16 @@
 			</div>
 			
 			<h1><?= $access === 'manage' ? 'Manage' : 'Browse' ?> <?= $username ?? '' ?> Files</h1>
-			
+
+			<form class="form-inline mb-3" name="files-search" method="get" action="<?= current_url() ?>">
+				<div class="input-group">
+					<input name="search" type="search" class="form-control" id="files-search" placeholder="Search" value="<?= $search ?>">
+			        <div class="input-group-append">
+						<button type="submit" class="btn btn-primary">Search</button>
+					</div>
+				</div>
+			</form>
+
 			<div id="files-wrapper">
 				<?php if (empty($files)): ?>
 				<p>
