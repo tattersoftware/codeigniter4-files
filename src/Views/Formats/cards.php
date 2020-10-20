@@ -1,4 +1,4 @@
-	<?= $pager->only(['search'])->links('default', 'files_bootstrap') ?>
+	<?= $page ? $pager->only(['search'])->links('default', 'files_bootstrap') : '' ?>
 
 	<?php if (empty($files)): ?>
 	<p>No files to display.</p>
