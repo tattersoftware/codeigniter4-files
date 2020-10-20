@@ -304,8 +304,7 @@ class Files extends Controller
 	/**
 	 * Handles bulk actions.
 	 *
-	 * @return RedirectResponse
-	 * @todo Needs better bulk processing with error handling
+	 * @return ResponseInterface
 	 */
 	public function bulk(): ResponseInterface
 	{
@@ -343,7 +342,7 @@ class Files extends Controller
 		if ($action === 'delete')
 		{
 			$this->model->delete($fileIds);
-			return redirect()->back->with('success', 'Deleted ' . count($fileIds) . ' files.');
+			return redirect()->back()->with('success', 'Deleted ' . count($fileIds) . ' files.');
 		}
 
 		// Bulk export of some kind, match the handler
