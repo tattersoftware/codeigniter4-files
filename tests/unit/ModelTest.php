@@ -84,4 +84,13 @@ class ModelTest extends FilesTestCase
 		$path = FileFaker::storage() . 'thumbnails' . DIRECTORY_SEPARATOR . $thumbnail;
 		$this->assertFileExists($path);
 	}
+
+	public function testCreateUsesAdditionalData()
+	{
+		$file = $this->model->createFromPath($this->testPath, [
+			'size' => 42,
+		]);
+
+		$this->assertEquals(42, $file->size);
+	}
 }

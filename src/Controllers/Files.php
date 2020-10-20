@@ -407,8 +407,13 @@ class Files extends Controller
 			$path = $this->mergeChunks($chunkDir);
 		}
 
+		// Get additional post data to pass to model
+		$data = $this->request->getPost();
+		$data['filename']   = $data['filename'] ?? $upload->getClientName();
+		$data['clientname'] = $data['clientname'] ?? $upload->getClientName();
+
 		// Accept the file
-		$file = $this->model->createFromPath($path ?? $upload->getRealPath(), $upload->getClientName());
+		$file = $this->model->createFromPath($path ?? $upload->getRealPath(), $data);
 
 		return $this->request->isAJAX()
 			? ''
