@@ -356,7 +356,7 @@ class Files extends Controller
 		{
 			if ($file = $this->model->find($fileId))
 			{
-				$export->setFile($file->object);
+				$export->setFile($file->object->setBasename($file->filename));
 			}
 		}
 
