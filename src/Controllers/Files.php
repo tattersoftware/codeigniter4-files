@@ -213,26 +213,6 @@ class Files extends Controller
 		return $this->display();
 	}
 
-	/**
-	 * Lists selectable files for a form (AJAX).
-	 *
-	 * @param string|integer|null $userId Optional user to filter by
-	 *
-	 * @return RedirectResponse|string
-	 */
-	public function select($userId = null)
-	{
-		$this->setData(['format' => 'select']);
-
-		// If a list of File IDs was passed then pre-select them
-		if ($ids = $this->request->getVar('selected'))
-		{
-			$this->setData(['selected' => explode(',', $ids)]);
-		}
-
-		return $userId ? $this->user($userId) : $this->index();
-	}
-
 	//--------------------------------------------------------------------
 
 	/**
@@ -611,6 +591,7 @@ class Files extends Controller
 	{
 		return $this->setData([
 			'source'   => 'index',
+			'layout'   => 'public',
 			'files'    => null,
 			'selected' => explode(',', $this->request->getVar('selected') ?? ''),
 			'userId'   => null,

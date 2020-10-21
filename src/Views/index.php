@@ -1,4 +1,4 @@
-<?= $this->extend(config('Files')->layouts['public']) ?>
+<?= $this->extend(config('Files')->layouts[$layout ?? 'public']) ?>
 <?= $this->section('main') ?>
 
 	<div class="row">
