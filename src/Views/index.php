@@ -16,7 +16,7 @@
 					<a class="btn <?= $format === 'select' ? 'btn-secondary' : 'btn-outline-secondary' ?>" href="<?= site_url("files/{$source}") ?>?format=select" role="button"><i class="fas fa-tasks"></i></a>
 				</div>
 			</div>
-			
+
 			<h1><?= $access === 'manage' ? 'Manage' : 'Browse' ?> <?= $username ?? '' ?> Files</h1>
 
 			<form class="form-inline mb-3" name="files-search" method="get" action="<?= current_url() ?>">

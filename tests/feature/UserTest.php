@@ -13,6 +13,7 @@ class UserTest extends FeatureTestCase
 		model('FileModel')->addToUser($file->id, $user->id);
 
 		$result = $this->get('files/user/' . $user->id);
+		$result->assertSee('Manage My Files', 'h1');
 		$result->assertSee($file->filename);
 	}
 
@@ -24,6 +25,7 @@ class UserTest extends FeatureTestCase
 		model('FileModel')->addToUser($file->id, $user->id);
 
 		$result = $this->get('files/user/1000');
+		$result->assertSee('Browse User Files', 'h1');
 		$result->assertDontSee($file->filename);
 	}
 }

@@ -175,12 +175,13 @@ class Files extends Controller
 			}
 
 			$this->setData([
-				'access' => 'display',
-				'title'  => 'User Files'
+				'access'   => 'display',
+				'title'    => 'User Files',
+				'username' => 'User',
 			]);
 		}
 		// Logged in, looking at another user
-		elseif ($userId !== user_id())
+		elseif ($userId != user_id())
 		{
 			// Check for list permission
 			if (! $this->model->mayList())
@@ -189,16 +190,18 @@ class Files extends Controller
 			}
 
 			$this->setData([
-				'access' => $this->model->mayAdmin() ? 'manage' : 'display',
-				'title'  => 'User Files'
+				'access'   => $this->model->mayAdmin() ? 'manage' : 'display',
+				'title'    => 'User Files',
+				'username' => 'User',
 			]);
 		}
 		// Looking at own files
 		else
 		{
 			$this->setData([
-				'access' => 'manage',
-				'title'  => 'My Files'
+				'access'   => 'manage',
+				'title'    => 'My Files',
+				'username' => 'My',
 			]);
 		}
 
@@ -611,6 +614,7 @@ class Files extends Controller
 			'files'    => null,
 			'selected' => explode(',', $this->request->getVar('selected') ?? ''),
 			'userId'   => null,
+			'username' => '',
 			'ajax'     => $this->request->isAJAX(),
 			'sort'     => $this->getSort(),
 			'order'    => $this->getOrder(),
