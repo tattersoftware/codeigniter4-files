@@ -36,6 +36,9 @@
 				</p>
 
 				<?php else: ?>
+
+				<?= $pager ? view('Tatter\Files\Views\pages') : '' ?>
+
 				<form name="files-form" method="post" action="<?= site_url('files/bulk') ?>">
 					<?= $format === 'select' ? view('Tatter\Files\Views\Menus\bulk', ['access' => $access, 'bulks' => $bulks]) : '' ?>
 					<?= view('Tatter\Files\Views\Formats\\' . $format, ['files' => $files, 'access' => $access, 'exports' => $exports]); ?>

@@ -616,11 +616,11 @@ class Files extends Controller
 			'userId'   => null,
 			'username' => '',
 			'ajax'     => $this->request->isAJAX(),
+			'search'   => $this->request->getVar('search'),
 			'sort'     => $this->getSort(),
 			'order'    => $this->getOrder(),
 			'format'   => $this->getFormat(),
-			'search'   => $this->request->getVar('search'),
-			'perPage'  => service('settings')->perPage,
+			'perPage'  => $this->getPerPage(),
 			'page'     => $this->request->getVar('page'),
 			'pager'    => null,
 			'access'   => $this->model->mayAdmin() ? 'manage' : 'display',
@@ -683,6 +683,33 @@ class Files extends Controller
 		}
 
 		return 'asc';
+	}
+
+	/**
+	 * Determines items per page.
+	 *
+	 * @return int
+	 */
+	protected function getPerPage(): int
+	{
+		// Check for a request, then load from Settings
+		$nums = [
+			$this->request->getVar('perPage'),
+			service('settings')->perPage,
+		];
+
+		foreach ($nums as $num)
+		{
+			// Validate
+			if (is_numeric($num) && (int) $num > 0)
+			{
+				// Update user setting with the new preference
+				service('settings')->perPage = $num;
+				return $num;
+			}
+		}
+
+		return 10;
 	}
 
 	/**
