@@ -67,10 +67,12 @@ class FilesTestCase extends CIDatabaseTestCase
 	protected function setUp(): void
 	{
 		parent::setUp();
-
 		helper('auth');
 		$this->resetAuthServices();
+
 		$_REQUEST = [];
+		$_POST    = [];
+		$_GET     = [];
 
 		$this->model = new FileFaker();
 
