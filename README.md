@@ -1,12 +1,19 @@
 # Tatter\Files
 File uploads and management, for CodeIgniter 4
 
+[![](https://github.com/tattersoftware/codeigniter4-files/workflows/PHPUnit/badge.svg)](https://github.com/tattersoftware/codeigniter4-files/actions?query=workflow%3A%22PHPUnit%22)
+[![](https://github.com/tattersoftware/codeigniter4-files/workflows/PHPStan/badge.svg)](https://github.com/tattersoftware/codeigniter4-files/actions?query=workflow%3A%PHPStan%22)
+
 ## Quick Start
 
 1. Install with Composer: `> composer require tatter/files`
 2. Migrate the database: `> php spark migrate -all`
 2. Seed the database: `> php spark db:seed "Tatter\Files\Database\Seeds\FileSeeder"`
 3. Start managing files: https://example.com/files
+
+![image](https://user-images.githubusercontent.com/17572847/96811765-ff82c500-13e9-11eb-9f1d-c9461ef1a438.png)
+![image](https://user-images.githubusercontent.com/17572847/96811782-00b3f200-13ea-11eb-9f39-df56362e1d2b.png)
+![image](https://user-images.githubusercontent.com/17572847/96811800-01e51f00-13ea-11eb-8a2d-f06ae5dff469.png)
 
 ## Features
 
