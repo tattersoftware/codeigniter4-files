@@ -135,4 +135,27 @@ class DisplayTest extends FeatureTestCase
 			$result->assertSee('You have no files!');
 		}
 	}
+
+	public function testPages()
+	{
+		for ($i = 0; $i < 12; $i++)
+		{
+			$file = fake(FileFaker::class);
+		}
+
+		// Make a file to be sorted last
+		$file = fake(FileFaker::class, [
+			'filename' => 'ZZZZZZZZZ',
+		]);
+
+		// Last file should be on the next page
+		$result = $this->get('files');
+		$result->assertStatus(200);
+		$result->assertDontSee($file->filename);
+
+		$_GET['page'] = 2;
+		$result = $this->get('files');
+		$result->assertStatus(200);
+		$result->assertSee($file->filename);
+	}
 }

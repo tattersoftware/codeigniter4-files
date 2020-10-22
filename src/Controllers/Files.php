@@ -1,11 +1,11 @@
 <?php namespace Tatter\Files\Controllers;
 
 use CodeIgniter\Controller;
-use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use Tatter\Exports\Exceptions\ExportsException;
 use Tatter\Files\Config\Files as FilesConfig;
 use Tatter\Files\Exceptions\FilesException;
 use Tatter\Files\Entities\File;
@@ -106,9 +106,23 @@ class Files extends Controller
 				$this->model->like('filename', $this->data['search']);
 			}
 
-			$this->setData([
-				'files' => $this->model->orderBy($this->data['sort'], $this->data['order'])->findAll()
-			], true);
+			// Sort and order
+			$this->model->orderBy($this->data['sort'], $this->data['order']);
+
+			// Paginate non-select formats
+			if ($this->data['format'] !== 'select')
+			{
+				$this->setData([
+					'files' => $this->model->paginate($this->data['perPage'], 'default', $this->data['page']),
+					'pager' => $this->model->pager,
+				], true);
+			}
+			else
+			{
+				$this->setData([
+					'files' => $this->model->findAll()
+				], true);
+			}
 		}
 
 		// AJAX calls skip the wrapping
@@ -161,12 +175,13 @@ class Files extends Controller
 			}
 
 			$this->setData([
-				'access' => 'display',
-				'title'  => 'User Files'
+				'access'   => 'display',
+				'title'    => 'All Files',
+				'username' => '',
 			]);
 		}
 		// Logged in, looking at another user
-		elseif ($userId !== user_id())
+		elseif ($userId != user_id())
 		{
 			// Check for list permission
 			if (! $this->model->mayList())
@@ -175,16 +190,18 @@ class Files extends Controller
 			}
 
 			$this->setData([
-				'access' => $this->model->mayAdmin() ? 'manage' : 'display',
-				'title'  => 'User Files'
+				'access'   => $this->model->mayAdmin() ? 'manage' : 'display',
+				'title'    => 'User Files',
+				'username' => 'User',
 			]);
 		}
 		// Looking at own files
 		else
 		{
 			$this->setData([
-				'access' => 'manage',
-				'title'  => 'My Files'
+				'access'   => 'manage',
+				'title'    => 'My Files',
+				'username' => 'My',
 			]);
 		}
 
@@ -196,27 +213,23 @@ class Files extends Controller
 		return $this->display();
 	}
 
-	/**
-	 * Lists selectable files for a form (AJAX).
-	 *
-	 * @param string|integer|null $userId Optional user to filter by
-	 *
-	 * @return RedirectResponse|string
-	 */
-	public function select($userId = null)
-	{
-		$this->setData(['format' => 'select']);
+	//--------------------------------------------------------------------
 
-		// If a list of File IDs was passed then pre-select them
-		if ($ids = $this->request->getVar('selected'))
+	/**
+	 * Display the Dropzone uploader.
+	 *
+	 * @return ResponseInterface|string
+	 */
+	public function new()
+	{
+		// Check for create permission
+		if (! $this->model->mayCreate())
 		{
-			$this->setData(['selected' => explode(',', $ids)]);
+			return $this->failure(403, lang('Permits.notPermitted'));
 		}
 
-		return $userId ? $this->user($userId) : $this->index();
+		return view('Tatter\Files\Views\new');
 	}
-
-	//--------------------------------------------------------------------
 
 	/**
 	 * Displays or processes the form to rename a file.
@@ -290,10 +303,9 @@ class Files extends Controller
 	/**
 	 * Handles bulk actions.
 	 *
-	 * @return RedirectResponse
-	 * @todo Needs better bulk processing with error handling
+	 * @return ResponseInterface
 	 */
-	public function bulk(): RedirectResponse
+	public function bulk(): ResponseInterface
 	{
 		// Load post data
 		$post = $this->request->getPost();
@@ -316,44 +328,48 @@ class Files extends Controller
 		// Make sure some files where checked
 		if (empty($fileIds))
 		{
-			return redirect()->back()->with('error', lang('File.nofile'));
+			return $this->failure(400, lang('Files.noFile'));
 		}
 
 		// Handle actions
-		switch ($action)
+		if (empty($action))
 		{
-			case '':
-				alert('warning', 'No valid action.');
-			break;
-
-			// Bulk delete request
-			case 'delete':
-				$this->model->delete($fileIds);
-				alert('success', 'Deleted ' . count($fileIds) . ' files.');
-			break;
-
-			// Bulk export of some kind
-			default:
-				// Match the handler
-				$handler = handlers('Exports')->where(['slug' => $action])->first();
-				if (empty($handler))
-				{
-					return redirect()->back()->with('danger', 'No handler found for ' . $action);
-				}
-				$export = new $handler();
-
-				foreach ($fileIds as $fileId)
-				{
-					if ($file = $this->model->find($fileId))
-					{
-						$export->setFile($file->object)->process();
-					}
-				}
-
-				alert('success', 'Processed ' . count($fileIds) . ' files.');
+			return $this->failure(400, 'No valid action');
 		}
 
-		return redirect()->back();
+		// Bulk delete request
+		if ($action === 'delete')
+		{
+			$this->model->delete($fileIds);
+			return redirect()->back()->with('success', 'Deleted ' . count($fileIds) . ' files.');
+		}
+
+		// Bulk export of some kind, match the handler
+		if (! $handler = handlers('Exports')->where(['slug' => $action])->first())
+		{
+			return $this->failure(400, 'No handler found for ' . $action);
+		}
+
+		$export = new $handler();
+		foreach ($fileIds as $fileId)
+		{
+			if ($file = $this->model->find($fileId))
+			{
+				$export->setFile($file->object->setBasename($file->filename));
+			}
+		}
+
+		try
+		{
+			$result = $export->process();
+		}
+		catch (ExportsException $e)
+		{
+			return $this->failure(400, $e->getMessage());
+		}
+
+		alert('success', 'Processed ' . count($fileIds) . ' files.');
+		return $result;
 	}
 
 	/**
@@ -408,8 +424,13 @@ class Files extends Controller
 			$path = $this->mergeChunks($chunkDir);
 		}
 
+		// Get additional post data to pass to model
+		$data = $this->request->getPost();
+		$data['filename']   = $data['filename'] ?? $upload->getClientName();
+		$data['clientname'] = $data['clientname'] ?? $upload->getClientName();
+
 		// Accept the file
-		$file = $this->model->createFromPath($path ?? $upload->getRealPath(), $upload->getClientName());
+		$file = $this->model->createFromPath($path ?? $upload->getRealPath(), $data);
 
 		return $this->request->isAJAX()
 			? ''
@@ -586,14 +607,19 @@ class Files extends Controller
 	{
 		return $this->setData([
 			'source'   => 'index',
+			'layout'   => 'public',
 			'files'    => null,
-			'selected' => null,
+			'selected' => explode(',', $this->request->getVar('selected') ?? ''),
 			'userId'   => null,
+			'username' => '',
 			'ajax'     => $this->request->isAJAX(),
+			'search'   => $this->request->getVar('search'),
 			'sort'     => $this->getSort(),
 			'order'    => $this->getOrder(),
 			'format'   => $this->getFormat(),
-			'search'   => $this->request->getVar('search'),
+			'perPage'  => $this->getPerPage(),
+			'page'     => $this->request->getVar('page'),
+			'pager'    => null,
 			'access'   => $this->model->mayAdmin() ? 'manage' : 'display',
 			'exports'  => $this->getExports(),
 			'bulks'    => handlers()->where(['bulk' => 1])->findAll(),
@@ -654,6 +680,33 @@ class Files extends Controller
 		}
 
 		return 'asc';
+	}
+
+	/**
+	 * Determines items per page.
+	 *
+	 * @return int
+	 */
+	protected function getPerPage(): int
+	{
+		// Check for a request, then load from Settings
+		$nums = [
+			$this->request->getVar('perPage'),
+			service('settings')->perPage,
+		];
+
+		foreach ($nums as $num)
+		{
+			// Validate
+			if (is_numeric($num) && (int) $num > 0)
+			{
+				// Update user setting with the new preference
+				service('settings')->perPage = $num;
+				return $num;
+			}
+		}
+
+		return 10;
 	}
 
 	/**

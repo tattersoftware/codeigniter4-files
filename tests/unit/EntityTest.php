@@ -1,6 +1,5 @@
 <?php
 
-use CodeIgniter\Files\File as CIFile;
 use Tatter\Files\Entities\File;
 use Tests\Support\FilesTestCase;
 

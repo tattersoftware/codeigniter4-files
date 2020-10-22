@@ -1,8 +1,16 @@
-<?php namespace Tatter\Files\Config;
+<?php namespace Config;
 
-use CodeIgniter\Config\BaseConfig;
+/***
+*
+* This file contains example values to alter default library behavior.
+* Recommended usage:
+*	1. Copy the file to app/Config/Files.php
+*	2. Change any values
+*	3. Remove any lines to fallback to defaults
+*
+***/
 
-class Files extends BaseConfig
+class Files extends \Tatter\Files\Config\Files
 {
 	/**
 	 * Directory to store files (with trailing slash)

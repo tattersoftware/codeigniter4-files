@@ -41,6 +41,7 @@ class FileModel extends Model
 
 	// Permits
 	protected $mode       = 04660;
+	protected $userKey    = 'user_id';
 	protected $pivotKey   = 'file_id';
 	protected $usersPivot = 'files_users';
 
@@ -125,13 +126,13 @@ class FileModel extends Model
 	 * Creates a new File from a path File. See createFromFile().
 	 *
 	 * @param string $path
-	 * @param string|null $originalName A name to use for clientname
+	 * @param array  $data Additional data to pass to insert()
 	 *
 	 * @return File
 	 */
-	public function createFromPath(string $path, string $originalName = null): File
+	public function createFromPath(string $path, array $data = []): File
 	{
-		return $this->createFromFile(new CIFile($path, true), $originalName);
+		return $this->createFromFile(new CIFile($path, true), $data);
 	}
 
 	/**
@@ -139,22 +140,23 @@ class FileModel extends Model
 	 * database and moves it into storage (if it is not already).
 	 *
 	 * @param CIFile $file
-	 * @param string|null $originalName A name to use for clientname
+	 * @param array  $data Additional data to pass to insert()
 	 *
 	 * @return File
 	 */
-	public function createFromFile(CIFile $file, string $originalName = null): File
+	public function createFromFile(CIFile $file, array $data = []): File
 	{
-		$originalName = $originalName ?? $file->getFilename();
-
 		// Gather file info
 		$row = [
-			'filename'   => $originalName,
+			'filename'   => $file->getFilename(),
 			'localname'  => $file->getRandomName(),
-			'clientname' => $originalName,
+			'clientname' => $file->getFilename(),
 			'type'       => $file->getMimeType(),
 			'size'       => $file->getSize(),
 		];
+
+		// Merge additional data
+		$row = array_merge($row, $data);
 
 		// Normalize paths
 		$storage  = self::storage();

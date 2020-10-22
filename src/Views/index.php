@@ -1,4 +1,4 @@
-<?= $this->extend(config('Files')->layouts['public']) ?>
+<?= $this->extend(config('Files')->layouts[$layout ?? 'public']) ?>
 <?= $this->section('main') ?>
 
 	<div class="row">
@@ -16,9 +16,18 @@
 					<a class="btn <?= $format === 'select' ? 'btn-secondary' : 'btn-outline-secondary' ?>" href="<?= site_url("files/{$source}") ?>?format=select" role="button"><i class="fas fa-tasks"></i></a>
 				</div>
 			</div>
-			
+
 			<h1><?= $access === 'manage' ? 'Manage' : 'Browse' ?> <?= $username ?? '' ?> Files</h1>
-			
+
+			<form class="form-inline mb-3" name="files-search" method="get" action="<?= current_url() ?>">
+				<div class="input-group">
+					<input name="search" type="search" class="form-control" id="files-search" placeholder="Search" value="<?= $search ?>">
+			        <div class="input-group-append">
+						<button type="submit" class="btn btn-primary">Search</button>
+					</div>
+				</div>
+			</form>
+
 			<div id="files-wrapper">
 				<?php if (empty($files)): ?>
 				<p>
@@ -27,6 +36,9 @@
 				</p>
 
 				<?php else: ?>
+
+				<?= $pager ? view('Tatter\Files\Views\pages') : '' ?>
+
 				<form name="files-form" method="post" action="<?= site_url('files/bulk') ?>">
 					<?= $format === 'select' ? view('Tatter\Files\Views\Menus\bulk', ['access' => $access, 'bulks' => $bulks]) : '' ?>
 					<?= view('Tatter\Files\Views\Formats\\' . $format, ['files' => $files, 'access' => $access, 'exports' => $exports]); ?>

@@ -2,8 +2,8 @@
 
 use CodeIgniter\Entity;
 use CodeIgniter\Files\Exceptions\FileNotFoundException;
-use CodeIgniter\Files\File as CIFile;
 use Config\Mimes;
+use Tatter\Files\Structures\FileObject;
 
 class File extends Entity
 {
@@ -101,15 +101,15 @@ class File extends Entity
 	}
 
 	/**
-	 * Returns a framework File object for the local file
+	 * Returns a FileObject (CIFile/SplFileInfo) for the local file
 	 *
-	 * @return CIFile|null  `null` for missing file
+	 * @return FileObject|null  `null` for missing file
 	 */
-	public function getObject(): ?CIFile
+	public function getObject(): ?FileObject
 	{
 		try
 		{
-			return new CIFile($this->getPath(), true);
+			return new FileObject($this->getPath(), true);
 		}
 		catch (FileNotFoundException $e)
 		{

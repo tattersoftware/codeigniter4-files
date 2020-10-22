@@ -5,7 +5,7 @@ if (empty($bulks) && $access === 'display')
 	return;
 }
 ?>
-	<button class="btn btn-primary btn-sm mb-3 dropdown-toggle" type="button" id="export-bulk" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	<button class="btn btn-primary btn-sm mb-3 dropdown-toggle float-right" type="button" id="export-bulk" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 		<i class="fas fa-share-square"></i> Actions
 	</button>
 	<div class="dropdown-menu" aria-labelledby="export-bulk">
