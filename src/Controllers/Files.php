@@ -176,8 +176,8 @@ class Files extends Controller
 
 			$this->setData([
 				'access'   => 'display',
-				'title'    => 'User Files',
-				'username' => 'User',
+				'title'    => 'All Files',
+				'username' => '',
 			]);
 		}
 		// Logged in, looking at another user
@@ -214,6 +214,22 @@ class Files extends Controller
 	}
 
 	//--------------------------------------------------------------------
+
+	/**
+	 * Display the Dropzone uploader.
+	 *
+	 * @return ResponseInterface|string
+	 */
+	public function new()
+	{
+		// Check for create permission
+		if (! $this->model->mayCreate())
+		{
+			return $this->failure(403, lang('Permits.notPermitted'));
+		}
+
+		return view('Tatter\Files\Views\new');
+	}
 
 	/**
 	 * Displays or processes the form to rename a file.

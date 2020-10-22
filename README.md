@@ -52,7 +52,8 @@ Default routes:
 * **files/thumbnail/{fileId}** - Displays the thumbnail for a file
 
 CRUD:
-* **files/upload** - Accepts upload requests from Dropzone
+* **files/new** - Basic Dropzone form
+* **files/upload** - Accepts AJAX upload requests from Dropzone
 * **files/delete/{fileId}** - Removes a file
 * **files/rename/{fileId}** - Accepts POST data to rename a file
 

@@ -7,7 +7,7 @@ $menu = $menu ?? '';
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta name="description" content="">
 	<meta name="author" content="Matthew Gatner">
-	<title>Files</title>
+	<title><?= $title ?? 'Files' ?></title>
 
 	<?= service('assets')->tag('vendor/jquery/jquery.min.js') ?>
 	<?= service('assets')->tag('vendor/bootstrap/bootstrap.min.css') ?>
@@ -15,6 +15,9 @@ $menu = $menu ?? '';
 	<?= service('assets')->tag('vendor/dropzone/dropzone.min.css') ?>
 
 	<?= service('alerts')->css() ?>
+
+	<?= $this->renderSection('headerAssets') ?>
+
 </head>
 <body>
 	<nav class="navbar navbar-expand-md navbar-dark bg-dark">
@@ -31,6 +34,9 @@ $menu = $menu ?? '';
 				<li class="nav-item <?= ($menu === 'user') ? 'active' : '' ?>">
 					<a class="nav-link" href="<?= site_url('files/user') ?>">User Files <?= ($menu === 'user') ? '<span class="sr-only">(current)</span>' : '' ?></a>
 				</li>
+				<li class="nav-item <?= ($menu === 'new') ? 'active' : '' ?>">
+					<a class="nav-link" href="<?= site_url('files/new') ?>" data-toggle="modal" data-target="#dropzoneModal">Add Files</a>
+				</li>
 			</ul>
 		</div>
 	</nav>
@@ -45,6 +51,8 @@ $menu = $menu ?? '';
 
 	<?= service('assets')->tag('vendor/bootstrap/bootstrap.bundle.min.js') ?>
 	<?= service('assets')->tag('vendor/dropzone/dropzone.min.js') ?>
+
+	<?= $this->renderSection('footerAssets') ?>
 
 </body>
 </html>
