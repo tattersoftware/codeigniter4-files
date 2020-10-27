@@ -417,6 +417,7 @@ class Files extends Controller
 			// Check for more chunks
 			if ($chunkIndex < $totalChunks - 1)
 			{
+				session_write_close();
 				return '';
 			}
 
@@ -432,9 +433,13 @@ class Files extends Controller
 		// Accept the file
 		$file = $this->model->createFromPath($path ?? $upload->getRealPath(), $data);
 
-		return $this->request->isAJAX()
-			? ''
-			: redirect()->back()->with('message', lang('File.uploadSucces', [$file->clientname]));;
+		if ($this->request->isAJAX())
+		{
+			session_write_close();
+			return '';
+		}
+
+		return redirect()->back()->with('message', lang('File.uploadSucces', [$file->clientname]));
 	}
 
 	/**

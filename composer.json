@@ -72,9 +72,6 @@
 	"minimum-stability": "dev",
 	"prefer-stable": true,
 	"scripts": {
-		"post-update-cmd": [
-			"composer dump-autoload"
-		],
 		"analyze": "phpstan analyze",
 		"style": "phpcbf --standard=./vendor/codeigniter4/codeigniter4-standard/CodeIgniter4 src/ tests/",
 		"test": "phpunit"

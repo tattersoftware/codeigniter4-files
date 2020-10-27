@@ -10,7 +10,7 @@
 
 	// Limit files to the MB equivalent of 500 chunks
 	$maxFileSize = round($chunkSize * 500 / 1024 / 1024, 1);
-	?>
+?>
 		Dropzone.options.filesDropzone = {
 		
 			// Reload file list after uploads
@@ -22,10 +22,7 @@
 			
 			// Maximum file size in MB
 			maxFilesize: <?= $maxFileSize ?>,
-
-			// Disable parallel uploads
-			// (CodeIgniter4 Sessions chokes on interspersed AJAX calls)
-			parallelUploads: 1,
+			timeout: 0,
 
 			// Enable chunking
 			chunking: true,
