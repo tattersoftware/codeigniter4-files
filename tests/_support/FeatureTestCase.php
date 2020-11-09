@@ -3,6 +3,7 @@
 use CodeIgniter\Config\Factories;
 use Config\Services;
 use Tatter\Files\Models\FileModel;
+use Tests\Support\Models\UserModel;
 
 class FeatureTestCase extends FilesTestCase
 {
@@ -37,6 +38,9 @@ class FeatureTestCase extends FilesTestCase
 		parent::setUp();
 
 		$this->resetAuthServices();
+
+		// Make sure we use the correct UserModel for permissions
+		Factories::injectMock('models', UserModel::class, new UserModel());
 	}
 
 	/**
