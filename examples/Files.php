@@ -20,6 +20,13 @@ class Files extends \Tatter\Files\Config\Files
 	public $storagePath = WRITEPATH . 'files/';
 
 	/**
+	 * Whether to include routes to the Files Controller.
+	 *
+	 * @var boolean
+	 */
+	public $routeFiles = true;
+
+	/**
 	 * Layouts to use for general access and for administration
 	 *
 	 * @var array<string, string>

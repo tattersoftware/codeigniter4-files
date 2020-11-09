@@ -1,5 +1,10 @@
 <?php
 
+if (empty(config('Files')->routeFiles))
+{
+	return;
+}
+
 // Routes to Files controller
 $routes->group('files', ['namespace' => '\Tatter\Files\Controllers'], function ($routes)
 {
