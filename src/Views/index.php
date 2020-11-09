@@ -68,6 +68,9 @@
 		</div>
 	</div>
 
+<?= $this->endSection() ?>
+<?= $this->section('footerAssets') ?>
+
 	<?= view(config('Files')->views['dropzone']) ?>
 
 <?= $this->endSection() ?>
