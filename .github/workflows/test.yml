@@ -4,14 +4,17 @@ on:
   pull_request:
     branches:
       - develop
+  push:
+    branches:
+      - develop
 
 jobs:
   main:
-    name: Build and test
+    name: PHP ${{ matrix.php-versions }} Unit Tests
 
     strategy:
       matrix:
-        php-versions: ['7.2', '7.3', '7.4']
+        php-versions: ['7.2', '7.3', '7.4', '8.0']
 
     runs-on: ubuntu-latest
 
@@ -41,9 +44,29 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --no-progress --no-suggest --no-interaction --prefer-dist --optimize-autoloader
+        run: composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
         env:
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
 
       - name: Test with PHPUnit
         run: vendor/bin/phpunit --verbose --coverage-text
+
+      - if: matrix.php-versions == '7.4'
+        name: Run Coveralls
+        run: |
+          composer global require php-coveralls/php-coveralls:^2.4
+          php-coveralls --coverage_clover=build/logs/clover.xml -v
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_PARALLEL: true
+          COVERALLS_FLAG_NAME: PHP ${{ matrix.php-versions }} - ${{ matrix.db-platforms }}
+
+  coveralls:
+    needs: [main]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          parallel-finished: true
