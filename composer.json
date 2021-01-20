@@ -20,7 +20,7 @@
 		}
 	],
 	"require": {
-		"php": "^7.3|^8.0",
+		"php": "^7.3",
 		"components/jquery": "^3.3",
 		"enyo/dropzone": "^5.7",
 		"fortawesome/font-awesome": "^5.8",
