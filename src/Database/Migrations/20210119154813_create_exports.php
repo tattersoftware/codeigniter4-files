@@ -43,5 +43,8 @@ class CreateExports extends Migration
 		$this->forge->addKey(['user_id', 'file_id']);
 
 		$this->forge->createTable('downloads');
+
+		// Drop exports
+		$this->forge->dropTable('exports');
 	}
 }
