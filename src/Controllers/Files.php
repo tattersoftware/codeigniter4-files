@@ -9,6 +9,7 @@ use Tatter\Exports\Exceptions\ExportsException;
 use Tatter\Files\Config\Files as FilesConfig;
 use Tatter\Files\Exceptions\FilesException;
 use Tatter\Files\Entities\File;
+use Tatter\Files\Models\ExportModel;
 use Tatter\Files\Models\FileModel;
 
 class Files extends Controller
@@ -521,6 +522,13 @@ class Files extends Controller
 			alert('warning', lang('Files.noFile'));
 			return redirect()->back();
 		}
+
+		// Create the record
+		model(ExportModel::class)->insert([
+			'handler' => $slug,
+			'file_id' => $file->id,
+			'user_id' => user_id() ?: null
+		]);
 
 		// Pass to the handler
 		$export   = new $handler($file->object);
