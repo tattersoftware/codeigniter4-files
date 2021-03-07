@@ -196,6 +196,11 @@ class FileModel extends Model
 		{
 			log_message('error', $e->getMessage());
 			log_message('error', 'Unable to create thumbnail for ' . $row['filename']);
+
+			if (ENVIRONMENT === 'testing')
+			{
+				throw $e;
+			}
 		}
 
 		// Return the File entity
