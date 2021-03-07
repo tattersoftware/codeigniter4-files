@@ -80,14 +80,19 @@ if (! function_exists('return_bytes'))
 	{
 		$value = strtolower(trim($value));
 		$unit  = $value[strlen($value) - 1];
-		$num   = (int)rtrim($value, $unit);
+		$num   = (int) rtrim($value, $unit);
 
 		switch ($unit)
 		{
 			case 'g': $num *= 1024;
 			case 'm': $num *= 1024;
 			case 'k': $num *= 1024;
+
+			// If it is not one of those modifiers then it was numerical bytes, add the final digit back
+			default:
+				$num = (int) ((string) $num . $unit);
 		}
+
 		return $num;
 	}
 }
