@@ -523,6 +523,14 @@ class Files extends Controller
 			return redirect()->back();
 		}
 
+		// Verify the file exists
+		if (! $fileObject = $file->getObject())
+		{
+			log_message('error', lang('Files.fileNotFound', [$file->getPath()]));
+			alert('warning', lang('Files.fileNotFound', [$file->filename]));
+			return redirect()->back();
+		}
+
 		// Create the record
 		model(ExportModel::class)->insert([
 			'handler' => $slug,

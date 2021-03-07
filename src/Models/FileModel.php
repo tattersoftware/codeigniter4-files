@@ -178,24 +178,34 @@ class FileModel extends Model
 		{
 			$this->addToUser($fileId, $userId);
 		}
-
-		// Try to create a Thumbnail
-		$thumbnail = pathinfo($row['localname'], PATHINFO_FILENAME);
-		$output    = $storage . 'thumbnails' . DIRECTORY_SEPARATOR . $thumbnail;
-
-		try
+		
+		// Check for a thumbnail handler
+		$extension = pathinfo((string) $file, PATHINFO_EXTENSION);
+		if (service('thumbnails')->matchHandlers($extension) !== [])
 		{
-			service('thumbnails')->create((string) $file, $output);
+			// Try to create a Thumbnail
+			$thumbnail = pathinfo($row['localname'], PATHINFO_FILENAME);
+			$output    = $storage . 'thumbnails' . DIRECTORY_SEPARATOR . $thumbnail;
 
-			// If it succeeds then update the database
-			$this->update($fileId, [
-				'thumbnail' => $thumbnail,
-			]);
-		}
-		catch (\Throwable $e)
-		{
-			log_message('error', $e->getMessage());
-			log_message('error', 'Unable to create thumbnail for ' . $row['filename']);
+			try
+			{
+				service('thumbnails')->create((string) $file, $output);
+
+				// If it succeeds then update the database
+				$this->update($fileId, [
+					'thumbnail' => $thumbnail,
+				]);
+			}
+			catch (\Throwable $e)
+			{
+				log_message('error', $e->getMessage());
+				log_message('error', 'Unable to create thumbnail for ' . $row['filename']);
+
+				if (ENVIRONMENT === 'testing')
+				{
+					throw $e;
+				}
+			}
 		}
 
 		// Return the File entity
