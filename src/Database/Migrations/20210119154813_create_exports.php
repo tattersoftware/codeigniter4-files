@@ -29,6 +29,9 @@ class CreateExports extends Migration
 
 	public function down()
 	{
+		// Drop exports
+		$this->forge->dropTable('exports');
+
 		// Restore downloads table
 		$fields = [
 			'file_id'    => ['type' => 'int', 'unsigned' => true],
@@ -43,8 +46,5 @@ class CreateExports extends Migration
 		$this->forge->addKey(['user_id', 'file_id']);
 
 		$this->forge->createTable('downloads');
-
-		// Drop exports
-		$this->forge->dropTable('exports');
 	}
 }
