@@ -452,6 +452,9 @@ class Files extends Controller
 		// Accept the file
 		$file = $this->model->createFromPath($path ?? $upload->getRealPath(), $data);
 
+		// Trigger the Event with the new File
+		Events::trigger('upload', $file);
+
 		if ($this->request->isAJAX())
 		{
 			session_write_close();
