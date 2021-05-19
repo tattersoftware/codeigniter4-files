@@ -17,6 +17,9 @@ parameters:
 		- '#Unsafe usage of new static\(\)*#'
 		- '#Call to an undefined static method Config\\Services::authentication\(\)#'
 		- '#Function Patchwork\\redefine not found#'
+	universalObjectCratesClasses:
+		- CodeIgniter\Entity
+		- Faker\Generator
 	scanDirectories:
 		- vendor/codeigniter4/codeigniter4/system/Helpers
 		- vendor/myth/auth/src/Helpers
