@@ -1,6 +1,8 @@
 <?php namespace Tatter\Files\Controllers;
 
 use CodeIgniter\Controller;
+use CodeIgniter\Events\Events;
+use CodeIgniter\HTTP\Exceptions\HTTPException;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -409,11 +411,19 @@ class Files extends Controller
 			$chunkDir = WRITEPATH . 'uploads/' . $uuid;
 			if (! is_dir($chunkDir) && ! mkdir($chunkDir, 0775, true))
 			{
-				throw FilesException::forChunkDirFail($chunkDir);
+				return $this->failure(400, lang('Files.chunkDirFail', [$chunkDir]));
 			}
 
 			// Move the file
-			$upload->move($chunkDir, $chunkIndex . '.' . $upload->getExtension());
+			try
+			{
+				$upload->move($chunkDir, $chunkIndex . '.' . $upload->getExtension());
+			}
+			catch (HTTPException $e)
+			{
+				log_message('error', $e->getMessage());
+				return $this->failure(400, $e->getMessage());
+			}
 
 			// Check for more chunks
 			if ($chunkIndex < $totalChunks - 1)
@@ -423,7 +433,15 @@ class Files extends Controller
 			}
 
 			// Merge the chunks
-			$path = $this->mergeChunks($chunkDir);
+			try
+			{
+				$path = $this->mergeChunks($chunkDir);
+			}
+			catch (FilesException $e)
+			{
+				log_message('error', $e->getMessage());
+				return $this->failure(400, $e->getMessage());
+			}
 		}
 
 		// Get additional post data to pass to model
