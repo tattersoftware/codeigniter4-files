@@ -2,6 +2,7 @@
 
 use CodeIgniter\Config\Config;
 use CodeIgniter\Files\Exceptions\FileNotFoundException;
+use CodeIgniter\Test\ControllerTestTrait;
 use Tatter\Files\Controllers\Files;
 use Tatter\Files\Entities\File;
 use Tatter\Files\Exceptions\FilesException;
@@ -11,7 +12,7 @@ use Tests\Support\Models\FileModel;
 
 class ControllerTest extends FilesTestCase
 {
-	use \CodeIgniter\Test\ControllerTester;
+	use ControllerTestTrait;
 
 	/**
 	 * Our Controller set by the trait

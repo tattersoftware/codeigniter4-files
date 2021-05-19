@@ -1,14 +1,15 @@
 <?php namespace Tests\Support;
 
 use CodeIgniter\Config\Factories;
+use CodeIgniter\Test\FeatureTestTrait;
 use Config\Services;
+use Myth\Auth\Test\AuthTestTrait;
 use Tatter\Files\Models\FileModel;
 use Tests\Support\Models\UserModel;
 
 class FeatureTestCase extends FilesTestCase
 {
-	use \CodeIgniter\Test\FeatureTestTrait;
-	use \Myth\Auth\Test\AuthTestTrait;
+	use AuthTestTrait, FeatureTestTrait;
 
 	/**
 	 * If present, will override application
