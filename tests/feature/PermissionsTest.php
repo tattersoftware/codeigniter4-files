@@ -179,7 +179,7 @@ class PermissionsTest extends FeatureTestCase
                  	   ->withHeaders(['X-Requested-With' => 'XMLHttpRequest'])
 					   ->post('files/upload');
 
-		$this->assertEquals('',	$result->response->getBody());
+		$this->assertEquals('',	$result->response()->getBody());
 	}
 
 	public function testProctorListsAllFiles()

@@ -124,7 +124,7 @@ class DisplayTest extends FeatureTestCase
 		$result = $this->get('files');
 
 		$result->assertStatus(200);
-		$content = $result->response->getBody();
+		$content = $result->response()->getBody();
 
 		if (strpos($content, $keyword) !== false)
 		{

@@ -1,6 +1,6 @@
 <?php namespace Tatter\Files\Entities;
 
-use CodeIgniter\Entity;
+use CodeIgniter\Entity\Entity;
 use CodeIgniter\Files\Exceptions\FileNotFoundException;
 use Config\Mimes;
 use Tatter\Files\Structures\FileObject;
