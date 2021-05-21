@@ -2,6 +2,7 @@
 
 use CodeIgniter\Config\Config;
 use CodeIgniter\Files\Exceptions\FileNotFoundException;
+use CodeIgniter\HTTP\DownloadResponse;
 use CodeIgniter\Test\ControllerTestTrait;
 use Tatter\Files\Controllers\Files;
 use Tatter\Files\Entities\File;
@@ -228,5 +229,20 @@ class ControllerTest extends FilesTestCase
 
 		$result = $controller->display();
 		$this->assertStringContainsString($file->filename, $result);
+	}
+
+	//--------------------------------------------------------------------
+
+	public function testExportCreatesRecord()
+	{
+		$file = fake(FileFaker::class, [
+			'localname' => 'image.jpg',
+		]);
+
+		$this->controller(Files::class);
+		$result = $this->execute('export', 'download', $file->id);
+
+		$this->assertInstanceOf(DownloadResponse::class, $result->response());
+		$this->seeInDatabase('exports', ['file_id' => $file->id]);
 	}
 }
