@@ -8,11 +8,6 @@ on:
       - develop
     paths:
       - 'src/**'
-  push:
-    branches:
-      - develop
-    paths:
-      - 'src/**'
 
 jobs:
   compare:

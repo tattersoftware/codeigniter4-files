@@ -3,6 +3,7 @@ File uploads and management, for CodeIgniter 4
 
 [![](https://github.com/tattersoftware/codeigniter4-files/workflows/PHPUnit/badge.svg)](https://github.com/tattersoftware/codeigniter4-files/actions?query=workflow%3A%22PHPUnit%22)
 [![](https://github.com/tattersoftware/codeigniter4-files/workflows/PHPStan/badge.svg)](https://github.com/tattersoftware/codeigniter4-files/actions?query=workflow%3A%PHPStan%22)
+[![Coverage Status](https://coveralls.io/repos/github/tattersoftware/codeigniter4-files/badge.svg?branch=develop)](https://coveralls.io/github/tattersoftware/codeigniter4-files?branch=develop)
 
 ## Quick Start
 
