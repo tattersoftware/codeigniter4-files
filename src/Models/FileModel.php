@@ -68,7 +68,7 @@ class FileModel extends Model
 		$thumbnails = $storage . 'thumbnails';
 		if (! is_dir($thumbnails) && ! @mkdir($thumbnails, 0775, true))
 		{
-			throw FilesException::forDirFail($thumbnails);
+			throw FilesException::forDirFail($thumbnails); // @codeCoverageIgnore
 		}
 
 		return $storage;

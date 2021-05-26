@@ -80,7 +80,8 @@ class ControllerTest extends FilesTestCase
 
 	public function testGetSortIgnoresInvalid()
 	{
-		$_REQUEST['sort'] = 'foobar';
+		$_REQUEST['sort']              = 'foobar';
+		service('settings')->filesSort = 'bambaz';
 
 		$this->controller(Files::class);
 
