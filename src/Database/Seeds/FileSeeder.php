@@ -6,34 +6,39 @@ class FileSeeder extends \CodeIgniter\Database\Seeder
 {
 	public function run()
 	{
+		// Compatible with Settings v1 and v2
 		$templates = [
 			[
 				'name'      => 'perPage',
-				'scope'     => 'user',
-				'content'   => '10',
+				'datatype'  => 'int',
 				'summary'   => 'Number of items to show per page',
+				'content'   => '10',
+				'scope'     => 'user',
 				'protected' => 1,
 			],
 			[
 				'name'      => 'filesFormat',
-				'scope'     => 'user',
-				'content'   => 'cards',
-				'protected' => 0,
+				'datatype'  => 'string',
 				'summary'   => 'Display format for listing files',
+				'content'   => 'cards',
+				'scope'     => 'user',
+				'protected' => 0,
 			],
 			[
 				'name'      => 'filesSort',
-				'scope'     => 'user',
-				'content'   => 'filename',
-				'protected' => 0,
+				'datatype'  => 'string',
 				'summary'   => 'Sort field for listing files',
+				'content'   => 'filename',
+				'scope'     => 'user',
+				'protected' => 0,
 			],
 			[
 				'name'      => 'filesOrder',
-				'scope'     => 'user',
-				'content'   => 'asc',
-				'protected' => 0,
+				'datatype'  => 'string',
 				'summary'   => 'Sort order for listing files',
+				'content'   => 'asc',
+				'scope'     => 'user',
+				'protected' => 0,
 			],
 		];
 
