@@ -67,21 +67,24 @@ class File extends Entity
 	 */
 	public function getExtension($method = ''): string
 	{
-		if (! $method || $method === 'type')
+		if ($this->attributes['type'] !== 'application/octet-stream')
 		{
-			if ($extension = Mimes::guessExtensionFromType($this->attributes['type']))
+			if (! $method || $method === 'type')
 			{
-				return $extension;
-			}
-		}
-
-		if (! $method || $method === 'mime')
-		{
-			if ($file = $this->getObject())
-			{
-				if ($extension = $file->guessExtension())
+				if ($extension = Mimes::guessExtensionFromType($this->attributes['type']))
 				{
 					return $extension;
+				}
+			}
+
+			if (! $method || $method === 'mime')
+			{
+				if ($file = $this->getObject())
+				{
+					if ($extension = $file->guessExtension())
+					{
+						return $extension;
+					}
 				}
 			}
 		}
