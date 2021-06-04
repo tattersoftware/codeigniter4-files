@@ -2,6 +2,7 @@
 
 use CodeIgniter\Files\File as CIFile;
 use CodeIgniter\Model;
+use Config\Mimes;
 use Tatter\Files\Entities\File;
 use Tatter\Files\Exceptions\FilesException;
 use Tatter\Thumbnails\Exceptions\ThumbnailsException;
@@ -151,7 +152,7 @@ class FileModel extends Model
 			'filename'   => $file->getFilename(),
 			'localname'  => $file->getRandomName(),
 			'clientname' => $file->getFilename(),
-			'type'       => $file->getMimeType(),
+			'type'       => Mimes::guessTypeFromExtension($file->getExtension()) ?? $file->getMimeType(),
 			'size'       => $file->getSize(),
 		];
 
