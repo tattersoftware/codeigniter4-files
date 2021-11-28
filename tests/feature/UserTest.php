@@ -1,5 +1,6 @@
 <?php
 
+use Tatter\Files\Models\FileModel;
 use Tests\Support\FeatureTestCase;
 use Tests\Support\Fakers\FileFaker;
 
@@ -7,10 +8,12 @@ class UserTest extends FeatureTestCase
 {
 	public function testShowsOwnFiles()
 	{
-		$file = fake(FileFaker::class);
-		$user = $this->login();
+		/** @var FileModel $model */
+		$model = model(FileModel::class);
+		$file  = fake(FileFaker::class);
+		$user  = $this->login();
 
-		model('FileModel')->addToUser($file->id, $user->id);
+		$model->addToUser($file->id, $user->id);
 
 		$result = $this->get('files/user/' . $user->id);
 		$result->assertSee('Manage My Files', 'h1');
@@ -19,10 +22,12 @@ class UserTest extends FeatureTestCase
 
 	public function testShowsOtherFiles()
 	{
-		$file = fake(FileFaker::class);
-		$user = $this->login();
+		/** @var FileModel $model */
+		$model = model(FileModel::class);
+		$file  = fake(FileFaker::class);
+		$user  = $this->login();
 
-		model('FileModel')->addToUser($file->id, $user->id);
+		$model->addToUser($file->id, $user->id);
 
 		$result = $this->get('files/user/1000');
 		$result->assertSee('Browse User Files', 'h1');

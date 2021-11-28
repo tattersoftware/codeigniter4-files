@@ -1,9 +1,11 @@
 <?php namespace Tests\Support;
 
 use CodeIgniter\Config\Factories;
-use CodeIgniter\Test\CIDatabaseTestCase;
+use CodeIgniter\Test\CIUnitTestCase;
+use CodeIgniter\Test\DatabaseTestTrait;
 use Config\Services;
 use Myth\Auth\Entities\User;
+use Myth\Auth\Test\AuthTestTrait;
 use Myth\Auth\Test\Fakers\UserFaker;
 use Tatter\Files\Config\Files;
 use Tests\Support\Fakers\FileFaker;
@@ -11,9 +13,10 @@ use Tests\Support\Models;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
 
-class FilesTestCase extends CIDatabaseTestCase
+class FilesTestCase extends CIUnitTestCase
 {
-	use \Myth\Auth\Test\AuthTestTrait;
+	use AuthTestTrait;
+	use DatabaseTestTrait;
 
 	/**
 	 * Should the database be refreshed before each test?

@@ -45,7 +45,7 @@ class FileSeeder extends \CodeIgniter\Database\Seeder
 		// Check for each template and create it if it is missing
 		foreach ($templates as $template)
 		{
-			if (! model(SettingModel::class)->where('name', $template['name'])->first())
+			if (! model(SettingModel::class)->where('name', $template['name'])->first()) // @phpstan-ignore-line
 			{
 				model(SettingModel::class)->insert($template);
 			}
