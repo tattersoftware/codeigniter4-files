@@ -1,6 +1,7 @@
-<?php namespace Tatter\Files\Structures;
+<?php
 
-use CodeIgniter\Files\Exceptions\FileNotFoundException;
+namespace Tatter\Files\Structures;
+
 use CodeIgniter\Files\File;
 
 /**
@@ -12,41 +13,36 @@ use CodeIgniter\Files\File;
  */
 class FileObject extends File
 {
-	/**
-	 * Base file name to override disk version
-	 *
-	 * @var string|null
-	 */
-	protected $basename;
+    /**
+     * Base file name to override disk version
+     *
+     * @var string|null
+     */
+    protected $basename;
 
-	/**
-	 * Returns the full path to this file
-	 *
-	 * @param string|null $basename
-	 *
-	 * @return $this
-	 */
-	public function setBasename(string $basename = null): self
-	{
-		$this->basename = $basename;
+    /**
+     * Returns the full path to this file
+     *
+     * @return $this
+     */
+    public function setBasename(?string $basename = null): self
+    {
+        $this->basename = $basename;
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
-	 * Returns the full path to this file
-	 *
-	 * @param string $suffix Optional suffix to omit from the base name returned
-	 *
-	 * @return string
-	 */
-	public function getBasename($suffix = null): string
-	{
-		if ($this->basename)
-		{
-			return basename($this->basename, $suffix);
-		}
+    /**
+     * Returns the full path to this file
+     *
+     * @param string $suffix Optional suffix to omit from the base name returned
+     */
+    public function getBasename($suffix = null): string
+    {
+        if ($this->basename) {
+            return basename($this->basename, $suffix);
+        }
 
-		return parent::getBasename($suffix);
-	}
+        return parent::getBasename($suffix);
+    }
 }

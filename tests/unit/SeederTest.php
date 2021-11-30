@@ -2,26 +2,32 @@
 
 use Tests\Support\FilesTestCase;
 
-class SeederTest extends FilesTestCase
+/**
+ * @internal
+ */
+final class SeederTest extends FilesTestCase
 {
- 	/**
- 	 * Note that the seeder has already been run during setUp()
- 	 *
- 	 * @dataProvider seederProvider
- 	 */
-	public function testSeederCreatesSettings($key, $default)
-	{
-		$result = service('settings')->$key;
+    /**
+     * Note that the seeder has already been run during setUp()
+     *
+     * @dataProvider seederProvider
+     *
+     * @param mixed $key
+     * @param mixed $default
+     */
+    public function testSeederCreatesSettings($key, $default)
+    {
+        $result = service('settings')->{$key};
 
-		$this->assertEquals($default, $result);
-	}
+        $this->assertSame($default, $result);
+    }
 
-	public function seederProvider()
-	{
-		return [
-			['filesFormat', 'cards'],
-			['filesSort', 'filename'],
-			['filesOrder', 'asc'],
-		];			
-	}
+    public function seederProvider()
+    {
+        return [
+            ['filesFormat', 'cards'],
+            ['filesSort', 'filename'],
+            ['filesOrder', 'asc'],
+        ];
+    }
 }

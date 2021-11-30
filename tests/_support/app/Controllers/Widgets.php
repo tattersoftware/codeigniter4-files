@@ -1,4 +1,6 @@
-<?php namespace App\Controllers;
+<?php
+
+namespace App\Controllers;
 
 use CodeIgniter\HTTP\RedirectResponse;
 use Tatter\Files\Controllers\Files;
@@ -8,13 +10,13 @@ use Tatter\Files\Controllers\Files;
  */
 class Widgets extends Files
 {
-	/**
-	 * Displays a list of odd files.
-	 *
-	 * @return RedirectResponse|string
-	 */
-	public function files()
-	{
-		return '';
-	}
+    /**
+     * Displays a list of odd files.
+     *
+     * @return RedirectResponse|string
+     */
+    public function files()
+    {
+        return '';
+    }
 }

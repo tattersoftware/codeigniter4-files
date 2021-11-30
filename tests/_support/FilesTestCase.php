@@ -1,4 +1,6 @@
-<?php namespace Tests\Support;
+<?php
+
+namespace Tests\Support;
 
 use CodeIgniter\Config\Factories;
 use CodeIgniter\Test\CIUnitTestCase;
@@ -7,139 +9,138 @@ use Config\Services;
 use Myth\Auth\Entities\User;
 use Myth\Auth\Test\AuthTestTrait;
 use Myth\Auth\Test\Fakers\UserFaker;
-use Tatter\Files\Config\Files;
-use Tests\Support\Fakers\FileFaker;
-use Tests\Support\Models;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
+use Tatter\Files\Config\Files;
+use Tests\Support\Fakers\FileFaker;
 
-class FilesTestCase extends CIUnitTestCase
+/**
+ * @internal
+ */
+abstract class FilesTestCase extends CIUnitTestCase
 {
-	use AuthTestTrait;
-	use DatabaseTestTrait;
+    use AuthTestTrait;
+    use DatabaseTestTrait;
 
-	/**
-	 * Should the database be refreshed before each test?
-	 *
-	 * @var boolean
-	 */
-	protected $refresh = true;
+    /**
+     * Should the database be refreshed before each test?
+     *
+     * @var bool
+     */
+    protected $refresh = true;
 
-	/**
-	 * The namespace(s) to help us find the migration classes.
-	 * Empty is equivalent to running `spark migrate -all`.
-	 * Note that running "all" runs migrations in date order,
-	 * but specifying namespaces runs them in namespace order (then date)
-	 *
-	 * @var string|array|null
-	 */
-    protected $namespace = null;
+    /**
+     * The namespace(s) to help us find the migration classes.
+     * Empty is equivalent to running `spark migrate -all`.
+     * Note that running "all" runs migrations in date order,
+     * but specifying namespaces runs them in namespace order (then date)
+     *
+     * @var array|string|null
+     */
+    protected $namespace;
 
-	/**
-	 * The seed file(s) used for all tests within this test case.
-	 * Should be fully-namespaced or relative to $basePath
-	 *
-	 * @var string|array
-	 */
-	protected $seed = 'Tatter\Files\Database\Seeds\FileSeeder';
+    /**
+     * The seed file(s) used for all tests within this test case.
+     * Should be fully-namespaced or relative to $basePath
+     *
+     * @var array|string
+     */
+    protected $seed = 'Tatter\Files\Database\Seeds\FileSeeder';
 
-	/**
-	 * Configuration
-	 *
-	 * @var Files
-	 */
-	protected $config;
+    /**
+     * Configuration
+     *
+     * @var Files
+     */
+    protected $config;
 
-	/**
-	 * @var FileFaker
-	 */
-	protected $model;
+    /**
+     * @var FileFaker
+     */
+    protected $model;
 
-	/**
-	 * @var vfsStreamDirectory|null
-	 */
-	protected $root;
+    /**
+     * @var vfsStreamDirectory|null
+     */
+    protected $root;
 
-	/**
-	 * Path to a test file to work with
-	 *
-	 * @var string
-	 */
-	protected $testPath;
+    /**
+     * Path to a test file to work with
+     *
+     * @var string
+     */
+    protected $testPath;
 
-	protected function setUp(): void
-	{
-		parent::setUp();
-		helper('auth');
-		$this->resetAuthServices();
+    protected function setUp(): void
+    {
+        parent::setUp();
+        helper('auth');
+        $this->resetAuthServices();
 
-		$_REQUEST = [];
-		$_POST    = [];
-		$_GET     = [];
+        $_REQUEST = [];
+        $_POST    = [];
+        $_GET     = [];
 
-		$this->model = new FileFaker();
+        $this->model = new FileFaker();
 
-		// Start the virtual filesystem
-		$this->root = vfsStream::setup();
+        // Start the virtual filesystem
+        $this->root = vfsStream::setup();
         vfsStream::copyFromFileSystem(SUPPORTPATH . 'vfs/', $this->root);
 
-		// Force our config to the virtual path
-		$this->config              = new Files();
-		$this->config->storagePath = $this->root->url() . '/storage/';
-		Factories::injectMock('config', 'Files', $this->config);
+        // Force our config to the virtual path
+        $this->config              = new Files();
+        $this->config->storagePath = $this->root->url() . '/storage/';
+        Factories::injectMock('config', 'Files', $this->config);
 
-		$this->testPath = $this->config->storagePath . 'image.jpg';
-	}
+        $this->testPath = $this->config->storagePath . 'image.jpg';
+    }
 
-	protected function tearDown(): void
-	{
-		parent::tearDown();
+    protected function tearDown(): void
+    {
+        parent::tearDown();
 
-		$this->root = null;
-	}
+        $this->root = null;
+    }
 
-	/**
-	 * Login a user, optionally created at random.
-	 *
-	 * @param int $userId
-	 *
-	 * $return User
-	 */
-	protected function login(int $userId = null): User
-	{
-		// Get or create the user
-		$user = $userId ? model(Models\UserModel::class)->find($userId) : fake(UserFaker::class);
+    /**
+     * Login a user, optionally created at random.
+     *
+     * @param int $userId
+     *
+     * $return User
+     */
+    protected function login(?int $userId = null): User
+    {
+        // Get or create the user
+        $user = $userId ? model(Models\UserModel::class)->find($userId) : fake(UserFaker::class);
 
-		$_SESSION['logged_in'] = $user->id;
+        $_SESSION['logged_in'] = $user->id;
 
-		$auth = Services::authentication();
-		$auth->login($user);
-		Services::injectMock('authentication', $auth);
+        $auth = Services::authentication();
+        $auth->login($user);
+        Services::injectMock('authentication', $auth);
 
-		return $user;
-	}
+        return $user;
+    }
 
-	/**
-	 * Create a random user and give it some random files.
-	 *
-	 * @param array $data    Overriding array of user data for the faker
-	 * @param int $fileCount Number of files to create
-	 *
-	 * @return User
-	 */
-	protected function createUserWithFiles(array $data = [], int $fileCount = 2): User
-	{
-		// Create the user
-		$user = fake(UserFaker::class, $data);
+    /**
+     * Create a random user and give it some random files.
+     *
+     * @param array $data      Overriding array of user data for the faker
+     * @param int   $fileCount Number of files to create
+     */
+    protected function createUserWithFiles(array $data = [], int $fileCount = 2): User
+    {
+        // Create the user
+        $user = fake(UserFaker::class, $data);
 
-		// Create files and assign them to the user
-		for ($i = 0; $i < abs($fileCount); $i++)
-		{
-			$file = fake(FileFaker::class);
+        // Create files and assign them to the user
+        for ($i = 0; $i < abs($fileCount); $i++) {
+            $file = fake(FileFaker::class);
 
-			$this->model->addToUser($file->id, $user->id);
-		}
+            $this->model->addToUser($file->id, $user->id);
+        }
 
-		return $user;
-	}
+        return $user;
+    }
 }

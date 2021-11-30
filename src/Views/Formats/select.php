@@ -23,7 +23,7 @@
 							id="file<?= $file->id ?>"
 							type="checkbox"
 							value="<?= $file->id ?>"
-							<?= in_array($file->id, $selected) ? 'checked' : '' ?>
+							<?= in_array($file->id, $selected, true) ? 'checked' : '' ?>
 						>
 						<label class="form-check-label" for="file<?= $file->id ?>"><?= $file->filename ?></label>
 					</div>

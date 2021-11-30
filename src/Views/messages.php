@@ -5,7 +5,7 @@
 
 <?php
 if (! empty($message)):
-	?>
+    ?>
 	<div class="alert alert-success">
 		<?= $message ?>
 	</div>
@@ -13,7 +13,7 @@ if (! empty($message)):
 endif;
 
 if (! empty($error)):
-	?>
+    ?>
 	<div class="alert alert-danger">
 		<?= $error ?>
 	</div>
@@ -21,15 +21,15 @@ if (! empty($error)):
 endif;
 
 if (! empty($errors)):
-	?>
+    ?>
 	<ul class="alert alert-danger">
 	<?php
-	foreach ($errors as $error):
-		?>
+    foreach ($errors as $error):
+        ?>
 		<li><?= $error ?></li>
 		<?php
-	endforeach;
-	?>
+    endforeach;
+    ?>
 	</ul>
 	<?php
 endif;

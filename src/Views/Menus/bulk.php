@@ -1,8 +1,7 @@
 <?php
 // Make sure there is something to display
-if (empty($bulks) && $access === 'display')
-{
-	return;
+if (empty($bulks) && $access === 'display') {
+    return;
 }
 ?>
 	<button class="btn btn-primary btn-sm mb-3 dropdown-toggle float-right" type="button" id="export-bulk" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
