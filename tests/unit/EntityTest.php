@@ -3,25 +3,27 @@
 use Tatter\Files\Entities\File;
 use Tests\Support\FilesTestCase;
 
-class EntityTest extends FilesTestCase
+/**
+ * @internal
+ */
+final class EntityTest extends FilesTestCase
 {
-	public function testGetPathReturnsAbsolutePath()
-	{
-		$file = $this->model->createFromPath($this->testPath);
+    public function testGetPathReturnsAbsolutePath()
+    {
+        $file = $this->model->createFromPath($this->testPath);
 
-		$expected = $this->config->storagePath . $file->localname;
+        $expected = $this->config->storagePath . $file->localname;
 
-		$this->assertEquals($expected, $file->getPath());
-	}
+        $this->assertSame($expected, $file->getPath());
+    }
 
-	public function testGetThumbnailUsesDefault()
-	{
-		$expected = HOMEPATH . 'src/Assets/Unavailable.jpg';
-		$expected = realpath($expected) ?: $expected;
+    public function testGetThumbnailUsesDefault()
+    {
+        $expected = HOMEPATH . 'src/Assets/Unavailable.jpg';
+        $expected = realpath($expected) ?: $expected;
 
-		$file = new File();
+        $file = new File();
 
-		$this->assertEquals($expected, $file->getThumbnail());
-	}
-		
+        $this->assertSame($expected, $file->getThumbnail());
+    }
 }

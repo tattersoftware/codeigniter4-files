@@ -1,7 +1,6 @@
 <?php
 
 use CodeIgniter\Config\Factories;
-use CodeIgniter\Files\Exceptions\FileNotFoundException;
 use CodeIgniter\HTTP\DownloadResponse;
 use CodeIgniter\Test\ControllerTestTrait;
 use Tatter\Files\Controllers\Files;
@@ -9,241 +8,243 @@ use Tatter\Files\Entities\File;
 use Tatter\Files\Exceptions\FilesException;
 use Tests\Support\Fakers\FileFaker;
 use Tests\Support\FilesTestCase;
-use Tests\Support\Models\FileModel;
 
-class ControllerTest extends FilesTestCase
+/**
+ * @internal
+ */
+final class ControllerTest extends FilesTestCase
 {
-	use ControllerTestTrait;
+    use ControllerTestTrait;
 
-	/**
-	 * Our Controller set by the trait
-	 *
-	 * @var Files|null
-	 */
-	protected $controller;
+    /**
+     * Our Controller set by the trait
+     *
+     * @var Files|null
+     */
+    protected $controller;
 
-	protected function setUp(): void
-	{
-		parent::setUp();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-		$this->controller = null;
-	}
+        $this->controller = null;
+    }
 
-	public function testThrowsWithInvalidStoragePath()
-	{
-		$this->config->storagePath = realpath(HOMEPATH . 'README.md') ?: HOMEPATH . 'README.md';
+    public function testThrowsWithInvalidStoragePath()
+    {
+        $this->config->storagePath = realpath(HOMEPATH . 'README.md') ?: HOMEPATH . 'README.md';
 
-		$this->expectException(FilesException::class);
-		$this->expectExceptionMessage(lang('Files.dirFail', [$this->config->storagePath]));
+        $this->expectException(FilesException::class);
+        $this->expectExceptionMessage(lang('Files.dirFail', [$this->config->storagePath]));
 
-		$controller = new Files($this->config);
-	}
+        $controller = new Files($this->config);
+    }
 
-	//--------------------------------------------------------------------
+    //--------------------------------------------------------------------
 
-	public function testCreatesMissingStoragePath()
-	{
-		$this->config->storagePath .= 'subdirectory/';
+    public function testCreatesMissingStoragePath()
+    {
+        $this->config->storagePath .= 'subdirectory/';
 
-		$controller = new Files($this->config);
+        $controller = new Files($this->config);
 
-		$this->assertDirectoryExists($this->config->storagePath);
-		$this->assertDirectoryIsWritable($this->config->storagePath);
-	}
+        $this->assertDirectoryExists($this->config->storagePath);
+        $this->assertDirectoryIsWritable($this->config->storagePath);
+    }
 
-	//--------------------------------------------------------------------
+    //--------------------------------------------------------------------
 
-	public function testGetSortUsesInput()
-	{
-		$_REQUEST['sort']              = 'size';
-		service('settings')->filesSort = 'type';
+    public function testGetSortUsesInput()
+    {
+        $_REQUEST['sort']              = 'size';
+        service('settings')->filesSort = 'type';
 
-		$this->controller(Files::class);
+        $this->controller(Files::class);
 
-		$method = $this->getPrivateMethodInvoker($this->controller, 'getSort');
-		$result = $method();
+        $method = $this->getPrivateMethodInvoker($this->controller, 'getSort');
+        $result = $method();
 
-		$this->assertEquals('size', $result);
-	}
+        $this->assertSame('size', $result);
+    }
 
-	public function testGetSortUsesSettings()
-	{
-		service('settings')->filesSort = 'type';
+    public function testGetSortUsesSettings()
+    {
+        service('settings')->filesSort = 'type';
 
-		$this->controller(Files::class);
+        $this->controller(Files::class);
 
-		$method = $this->getPrivateMethodInvoker($this->controller, 'getSort');
-		$result = $method();
+        $method = $this->getPrivateMethodInvoker($this->controller, 'getSort');
+        $result = $method();
 
-		$this->assertEquals('type', $result);
-	}
+        $this->assertSame('type', $result);
+    }
 
-	public function testGetSortIgnoresInvalid()
-	{
-		$_REQUEST['sort']              = 'foobar';
-		service('settings')->filesSort = 'bambaz';
+    public function testGetSortIgnoresInvalid()
+    {
+        $_REQUEST['sort']              = 'foobar';
+        service('settings')->filesSort = 'bambaz';
 
-		$this->controller(Files::class);
+        $this->controller(Files::class);
 
-		$method = $this->getPrivateMethodInvoker($this->controller, 'getSort');
-		$result = $method();
+        $method = $this->getPrivateMethodInvoker($this->controller, 'getSort');
+        $result = $method();
 
-		$this->assertEquals('filename', $result);
-	}
+        $this->assertSame('filename', $result);
+    }
 
-	//--------------------------------------------------------------------
+    //--------------------------------------------------------------------
 
-	public function testGetOrderUsesInput()
-	{
-		$_REQUEST['order']              = 'desc';
-		service('settings')->filesOrder = 'asc';
+    public function testGetOrderUsesInput()
+    {
+        $_REQUEST['order']              = 'desc';
+        service('settings')->filesOrder = 'asc';
 
-		$this->controller(Files::class);
+        $this->controller(Files::class);
 
-		$method = $this->getPrivateMethodInvoker($this->controller, 'getOrder');
-		$result = $method();
+        $method = $this->getPrivateMethodInvoker($this->controller, 'getOrder');
+        $result = $method();
 
-		$this->assertEquals('desc', $result);
-	}
+        $this->assertSame('desc', $result);
+    }
 
-	public function testGetOrderUsesSettings()
-	{
-		service('settings')->filesOrder = 'desc';
+    public function testGetOrderUsesSettings()
+    {
+        service('settings')->filesOrder = 'desc';
 
-		$this->controller(Files::class);
+        $this->controller(Files::class);
 
-		$method = $this->getPrivateMethodInvoker($this->controller, 'getOrder');
-		$result = $method();
+        $method = $this->getPrivateMethodInvoker($this->controller, 'getOrder');
+        $result = $method();
 
-		$this->assertEquals('desc', $result);
-	}
+        $this->assertSame('desc', $result);
+    }
 
-	public function testGetOrderIgnoresInvalid()
-	{
-		$_REQUEST['order'] = 'foobar';
+    public function testGetOrderIgnoresInvalid()
+    {
+        $_REQUEST['order'] = 'foobar';
 
-		$this->controller(Files::class);
+        $this->controller(Files::class);
 
-		$method = $this->getPrivateMethodInvoker($this->controller, 'getOrder');
-		$result = $method();
+        $method = $this->getPrivateMethodInvoker($this->controller, 'getOrder');
+        $result = $method();
 
-		$this->assertEquals('asc', $result);
-	}
+        $this->assertSame('asc', $result);
+    }
 
-	//--------------------------------------------------------------------
+    //--------------------------------------------------------------------
 
-	public function testGetFormatUsesInput()
-	{
-		$_REQUEST['format']              = 'select';
-		service('settings')->filesFormat = 'list';
+    public function testGetFormatUsesInput()
+    {
+        $_REQUEST['format']              = 'select';
+        service('settings')->filesFormat = 'list';
 
-		$this->controller(Files::class);
+        $this->controller(Files::class);
 
-		$method = $this->getPrivateMethodInvoker($this->controller, 'getFormat');
-		$result = $method();
+        $method = $this->getPrivateMethodInvoker($this->controller, 'getFormat');
+        $result = $method();
 
-		$this->assertEquals('select', $result);
-	}
+        $this->assertSame('select', $result);
+    }
 
-	public function testGetFormatUsesSettings()
-	{
-		service('settings')->filesFormat = 'list';
+    public function testGetFormatUsesSettings()
+    {
+        service('settings')->filesFormat = 'list';
 
-		$this->controller(Files::class);
+        $this->controller(Files::class);
 
-		$method = $this->getPrivateMethodInvoker($this->controller, 'getFormat');
-		$result = $method();
+        $method = $this->getPrivateMethodInvoker($this->controller, 'getFormat');
+        $result = $method();
 
-		$this->assertEquals('list', $result);
-	}
+        $this->assertSame('list', $result);
+    }
 
-	public function testGetFormatUsesConfig()
-	{
-		service('settings')->filesFormat = 'foobar';
+    public function testGetFormatUsesConfig()
+    {
+        service('settings')->filesFormat = 'foobar';
 
-		$this->config->defaultFormat = 'select';
-		Factories::injectMock('config', 'Files', $this->config);
+        $this->config->defaultFormat = 'select';
+        Factories::injectMock('config', 'Files', $this->config);
 
-		$this->controller(Files::class);
+        $this->controller(Files::class);
 
-		$method = $this->getPrivateMethodInvoker($this->controller, 'getFormat');
-		$result = $method();
+        $method = $this->getPrivateMethodInvoker($this->controller, 'getFormat');
+        $result = $method();
 
-		$this->assertEquals('select', $result);
-	}
+        $this->assertSame('select', $result);
+    }
 
-	public function testGetFormatIgnoresInvalid()
-	{
-		$_REQUEST['format'] = 'foobar';
+    public function testGetFormatIgnoresInvalid()
+    {
+        $_REQUEST['format'] = 'foobar';
 
-		$this->controller(Files::class);
+        $this->controller(Files::class);
 
-		$method = $this->getPrivateMethodInvoker($this->controller, 'getFormat');
-		$result = $method();
+        $method = $this->getPrivateMethodInvoker($this->controller, 'getFormat');
+        $result = $method();
 
-		$this->assertEquals('cards', $result);
-	}
+        $this->assertSame('cards', $result);
+    }
 
-	public function testDataUsesVarWithFaker()
-	{
-		$file = fake(FileFaker::class);
+    public function testDataUsesVarWithFaker()
+    {
+        $file = fake(FileFaker::class);
 
-		$controller = new Files();
-		$controller->initController(service('request'), service('response'), service('logger'));
+        $controller = new Files();
+        $controller->initController(service('request'), service('response'), service('logger'));
 
-		$method = $this->getPrivateMethodInvoker($controller, 'setData');
-		$method([
-			'files' => [
-				0 => $file
-			],
-		]);
+        $method = $this->getPrivateMethodInvoker($controller, 'setData');
+        $method([
+            'files' => [
+                0 => $file,
+            ],
+        ]);
 
-		$result = $controller->display();
-		$this->assertStringContainsString($file->filename, $result);
-	}
+        $result = $controller->display();
+        $this->assertStringContainsString($file->filename, $result);
+    }
 
-	public function testDataUsesVarViaPassEntity()
-	{
-		$controller = new Files();
-		$controller->initController(service('request'), service('response'), service('logger'));
+    public function testDataUsesVarViaPassEntity()
+    {
+        $controller = new Files();
+        $controller->initController(service('request'), service('response'), service('logger'));
 
-		$file = new File;
-		$file->filename ='foo.txt';
-		$file->thumbnail = '';
-		$file->type = '';
-		$file->localname = '';
-		$file->clientname = '';
-		$file->size = 1;
-		$file->created_at = new class {
-			public function humanize()
-			{
-				return '';
-			}
-		};
+        $file             = new File();
+        $file->filename   = 'foo.txt';
+        $file->thumbnail  = '';
+        $file->type       = '';
+        $file->localname  = '';
+        $file->clientname = '';
+        $file->size       = 1;
+        $file->created_at = new class() {
+            public function humanize()
+            {
+                return '';
+            }
+        };
 
-		$method = $this->getPrivateMethodInvoker($controller, 'setData');
-		$method([
-			'files' => [
-				0 => $file
-			],
-		]);
+        $method = $this->getPrivateMethodInvoker($controller, 'setData');
+        $method([
+            'files' => [
+                0 => $file,
+            ],
+        ]);
 
-		$result = $controller->display();
-		$this->assertStringContainsString($file->filename, $result);
-	}
+        $result = $controller->display();
+        $this->assertStringContainsString($file->filename, $result);
+    }
 
-	//--------------------------------------------------------------------
+    //--------------------------------------------------------------------
 
-	public function testExportCreatesRecord()
-	{
-		$file = fake(FileFaker::class, [
-			'localname' => 'image.jpg',
-		]);
+    public function testExportCreatesRecord()
+    {
+        $file = fake(FileFaker::class, [
+            'localname' => 'image.jpg',
+        ]);
 
-		$this->controller(Files::class);
-		$result = $this->execute('export', 'download', $file->id);
+        $this->controller(Files::class);
+        $result = $this->execute('export', 'download', $file->id);
 
-		$this->assertInstanceOf(DownloadResponse::class, $result->response());
-		$this->seeInDatabase('exports', ['file_id' => $file->id]);
-	}
+        $this->assertInstanceOf(DownloadResponse::class, $result->response());
+        $this->seeInDatabase('exports', ['file_id' => $file->id]);
+    }
 }

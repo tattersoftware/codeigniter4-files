@@ -1,4 +1,6 @@
-<?php namespace Tests\Support\Models;
+<?php
+
+namespace Tests\Support\Models;
 
 use Myth\Auth\Models\UserModel as MythModel;
 use Tatter\Permits\Interfaces\PermitsUserModelInterface;
@@ -9,16 +11,14 @@ use Tatter\Permits\Interfaces\PermitsUserModelInterface;
  */
 class UserModel extends MythModel implements PermitsUserModelInterface
 {
-	/**
-	 * Returns an empty array since groups are
-	 * not currently implemented.
-	 *
-	 * @param mixed $userId = null
-	 *
-	 * @return array
-	 */
-	public function groups($userId = null): array
-	{
-		return [];
-	}
+    /**
+     * Returns an empty array since groups are
+     * not currently implemented.
+     *
+     * @param mixed $userId = null
+     */
+    public function groups($userId = null): array
+    {
+        return [];
+    }
 }

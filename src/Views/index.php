@@ -3,7 +3,7 @@
 
 	<div class="row">
 		<div class="col">
-			<div class="btn-toolbar float-right" role="toolbar" aria-label="Toolbar with button groups">				
+			<div class="btn-toolbar float-right" role="toolbar" aria-label="Toolbar with button groups">
 				<div class="btn-group mr-2" role="group" aria-label="Action group">
 					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#dropzoneModal">
 						<i class="fas fa-file-upload"></i> Add Files
