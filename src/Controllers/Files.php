@@ -56,7 +56,7 @@ class Files extends Controller
 		$this->config = $config ?? config('Files');
 
 		// Use the short model name so a child may be loaded first
-		$this->model = $model ?? model('FileModel');
+		$this->model = $model ?? model('FileModel'); // @phpstan-ignore-line
 
 		// Verify the storage directory
 		FileModel::storage();

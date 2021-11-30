@@ -7,6 +7,7 @@ use CodeIgniter\HTTP\Files\UploadedFile;
 use Myth\Auth\Entities\User;
 use Patchwork as p;
 use Tatter\Permits\Models\PermitModel;
+use Tatter\Files\Models\FileModel;
 use Tests\Support\FeatureTestCase;
 use Tests\Support\Fakers\FileFaker;
 
@@ -196,17 +197,20 @@ class PermissionsTest extends FeatureTestCase
 
 	public function testAuthenticatedListOwnOnly()
 	{
+		/** @var FileModel $model */
+		$model = model(FileModel::class);
+
 		$this->setMode(00660);
 		$this->login($this->proctor->id);
 
 		$fileOwnByProctor = fake(FileFaker::class);
-		model('FileModel')->addToUser($fileOwnByProctor->id, $this->proctor->id);
+		$model->addToUser($fileOwnByProctor->id, $this->proctor->id);
 
 		$fileOwnByProctor2 = fake(FileFaker::class);
-		model('FileModel')->addToUser($fileOwnByProctor2->id, $this->proctor->id);
+		$model->addToUser($fileOwnByProctor2->id, $this->proctor->id);
 
 		$fileOwnByAdmin = fake(FileFaker::class);
-		model('FileModel')->addToUser($fileOwnByAdmin->id, $this->admin->id);
+		$model->addToUser($fileOwnByAdmin->id, $this->admin->id);
 
 		$result = $this->withSession()->get('files/user/' . $this->proctor->id);
 		$result->assertStatus(200);

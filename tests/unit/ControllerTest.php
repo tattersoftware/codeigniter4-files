@@ -1,6 +1,6 @@
 <?php
 
-use CodeIgniter\Config\Config;
+use CodeIgniter\Config\Factories;
 use CodeIgniter\Files\Exceptions\FileNotFoundException;
 use CodeIgniter\HTTP\DownloadResponse;
 use CodeIgniter\Test\ControllerTestTrait;
@@ -162,7 +162,7 @@ class ControllerTest extends FilesTestCase
 		service('settings')->filesFormat = 'foobar';
 
 		$this->config->defaultFormat = 'select';
-		Config::injectMock('Files', $this->config);
+		Factories::injectMock('config', 'Files', $this->config);
 
 		$this->controller(Files::class);
 
