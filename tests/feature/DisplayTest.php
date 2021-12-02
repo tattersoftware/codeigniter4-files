@@ -26,11 +26,11 @@ final class DisplayTest extends FeatureTestCase
         $result->assertSee($file->filename);
     }
 
-    public function testDataUsesSettings()
+    public function testDataUsesPreferences()
     {
-        service('settings')->filesSort   = 'type';
-        service('settings')->filesOrder  = 'asc';
-        service('settings')->filesFormat = 'cards';
+        preference('Files.sort', 'type');
+        preference('Files.order', 'asc');
+        preference('Files.format', 'cards');
 
         $file   = fake(FileFaker::class);
         $result = $this->get('files');
@@ -46,7 +46,7 @@ final class DisplayTest extends FeatureTestCase
 
         yield ['select', 'select'];
 
-        yield ['invalid', config('Files')->defaultFormat];
+        yield ['invalid', config('Files')->format];
     }
 
     /**
@@ -60,7 +60,7 @@ final class DisplayTest extends FeatureTestCase
         $result = $this->get('files');
 
         $result->assertStatus(200);
-        $this->assertSame($configFormat, service('settings')->filesFormat);
+        $this->assertSame($configFormat, preference('Files.format'));
     }
 
     public function provideSort()
@@ -91,7 +91,7 @@ final class DisplayTest extends FeatureTestCase
         $result = $this->get('files');
 
         $result->assertStatus(200);
-        $this->assertSame($configSort, service('settings')->filesSort);
+        $this->assertSame($configSort, preference('Files.sort'));
     }
 
     public function provideOrder()
@@ -114,7 +114,7 @@ final class DisplayTest extends FeatureTestCase
         $result = $this->get('files');
 
         $result->assertStatus(200);
-        $this->assertSame($configOrder, service('settings')->filesOrder);
+        $this->assertSame($configOrder, preference('Files.order'));
     }
 
     public function provideSearch()

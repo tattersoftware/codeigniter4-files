@@ -35,7 +35,7 @@ class Files extends Controller
     /**
      * Helpers to load.
      */
-    protected $helpers = ['alerts', 'files', 'handlers', 'html', 'text'];
+    protected $helpers = ['alerts', 'files', 'handlers', 'html', 'preferences', 'text'];
 
     /**
      * Overriding data for views.
@@ -64,9 +64,9 @@ class Files extends Controller
     /**
      * Verify authentication is configured correctly *after* parent calls loadHelpers().
      *
-     * @throws \CodeIgniter\HTTP\Exceptions\HTTPException
+     * @throws FilesException
      *
-     * @see https://codeigniter4.github.io/CodeIgniter4/extending/authentication.html
+     * @see https://codeigniter.com/user_guide/extending/authentication.html
      */
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
@@ -605,23 +605,34 @@ class Files extends Controller
      */
     protected function getSort(): string
     {
-        // Check for a request, then load from Settings
-        $sorts = [
-            $this->request->getVar('sort'),
-            service('settings')->filesSort,
-        ];
+        // Check for a sort request
+        if (null !== $sort = $this->validateSort($this->request->getVar('sort'))) {
+            // Store the new preference
+            preference('Files.sort', $sort);
 
-        foreach ($sorts as $sort) {
-            // Validate
-            if (in_array($sort, $this->model->allowedFields, true)) { // @phpstan-ignore-line
-                // Update user setting with the new preference
-                service('settings')->filesSort = $sort;
-
-                return $sort;
-            }
+            return $sort;
         }
 
-        return 'filename';
+        return $this->validateSort(preference('Files.sort')) ?? 'filename';
+    }
+
+    /**
+     * Determines whether the given field is valid for sorting.
+     */
+    private function validateSort(?string $sort): ?string
+    {
+        if ($sort === null) {
+            return null;
+        }
+
+        $allowed = $this->model->allowedFields; // @phpstan-ignore-line
+        $allowed = array_merge($allowed, [
+            'created_at',
+            'updated_at',
+            'deleted_at',
+        ]);
+
+        return in_array($sort, $allowed, true) ? $sort : null;
     }
 
     /**
@@ -629,25 +640,27 @@ class Files extends Controller
      */
     protected function getOrder(): string
     {
-        // Check for a request, then load from Settings
-        $orders = [
-            $this->request->getVar('order'),
-            service('settings')->filesOrder,
-        ];
+        // Check for a sort request
+        if (null !== $order = $this->validateOrder($this->request->getVar('order'))) {
+            // Store the new preference
+            preference('Files.order', $order);
 
-        foreach ($orders as $order) {
-            $order = strtolower($order);
-
-            // Validate
-            if (in_array($order, ['asc', 'desc'], true)) {
-                // Update user setting with the new preference
-                service('settings')->filesOrder = $order;
-
-                return $order;
-            }
+            return $order;
         }
 
-        return 'asc';
+        return $this->validateOrder(preference('Files.order')) ?? 'asc';
+    }
+
+    /**
+     * Determines whether the given order is valid.
+     */
+    private function validateOrder(?string $order): ?string
+    {
+        if ($order === null) {
+            return null;
+        }
+
+        return in_array($order, ['asc', 'desc'], true) ? $order : null;
     }
 
     /**
@@ -655,23 +668,32 @@ class Files extends Controller
      */
     protected function getPerPage(): int
     {
-        // Check for a request, then load from Settings
-        $nums = [
-            $this->request->getVar('perPage'),
-            service('settings')->perPage,
-        ];
+        // Check for a sort request
+        if (null !== $perPage = $this->validatePerPage($this->request->getVar('perPage'))) {
+            // Store the new preference
+            preference('App.perPage', $perPage);
 
-        foreach ($nums as $num) {
-            // Validate
-            if (is_numeric($num) && (int) $num > 0) {
-                // Update user setting with the new preference
-                service('settings')->perPage = $num;
-
-                return $num;
-            }
+            return $perPage;
         }
 
-        return 10;
+        return $this->validatePerPage(preference('Files.perPage')) ?? 10;
+    }
+
+    /**
+     * Determines whether the "per page" is valid.
+     *
+     * int|string|null
+     *
+     * @param mixed $perPage
+     */
+    private function validatePerPage($perPage): ?int
+    {
+        if ($perPage === null || ! is_numeric($perPage)) {
+            return null;
+        }
+        $perPage = (int) $perPage;
+
+        return $perPage > 0 ? $perPage : null;
     }
 
     /**
@@ -679,24 +701,27 @@ class Files extends Controller
      */
     protected function getFormat(): string
     {
-        // Check for a request, then load from Settings, fallback to the config default
-        $formats = [
-            $this->request->getVar('format'),
-            service('settings')->filesFormat,
-            $this->config->defaultFormat,
-        ];
+        // Check for a sort request
+        if (null !== $format = $this->validateFormat($this->request->getVar('format'))) {
+            // Store the new preference
+            preference('Files.format', $format);
 
-        foreach ($formats as $format) {
-            // Validate
-            if (in_array($format, ['cards', 'list', 'select'], true)) {
-                // Update user setting with the new preference
-                service('settings')->filesFormat = $format;
-
-                return $format;
-            }
+            return $format;
         }
 
-        return 'cards';
+        return $this->validateFormat(preference('Files.format')) ?? 'cards';
+    }
+
+    /**
+     * Determines whether the display format is valid.
+     */
+    private function validateFormat(?string $format): ?string
+    {
+        if ($format === null) {
+            return null;
+        }
+
+        return in_array($format, ['cards', 'list', 'select'], true) ? $format : null;
     }
 
     /**

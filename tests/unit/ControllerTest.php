@@ -1,6 +1,5 @@
 <?php
 
-use CodeIgniter\Config\Factories;
 use CodeIgniter\HTTP\DownloadResponse;
 use CodeIgniter\Test\ControllerTestTrait;
 use Tatter\Files\Controllers\Files;
@@ -56,8 +55,8 @@ final class ControllerTest extends FilesTestCase
 
     public function testGetSortUsesInput()
     {
-        $_REQUEST['sort']              = 'size';
-        service('settings')->filesSort = 'type';
+        $_REQUEST['sort'] = 'size';
+        preference('Files.sort', 'type');
 
         $this->controller(Files::class);
 
@@ -67,9 +66,9 @@ final class ControllerTest extends FilesTestCase
         $this->assertSame('size', $result);
     }
 
-    public function testGetSortUsesSettings()
+    public function testGetSortUsesPreference()
     {
-        service('settings')->filesSort = 'type';
+        preference('Files.sort', 'type');
 
         $this->controller(Files::class);
 
@@ -81,8 +80,8 @@ final class ControllerTest extends FilesTestCase
 
     public function testGetSortIgnoresInvalid()
     {
-        $_REQUEST['sort']              = 'foobar';
-        service('settings')->filesSort = 'bambaz';
+        $_REQUEST['sort'] = 'foobar';
+        preference('Files.sort', 'bambaz');
 
         $this->controller(Files::class);
 
@@ -96,8 +95,8 @@ final class ControllerTest extends FilesTestCase
 
     public function testGetOrderUsesInput()
     {
-        $_REQUEST['order']              = 'desc';
-        service('settings')->filesOrder = 'asc';
+        $_REQUEST['order'] = 'desc';
+        preference('Files.order', 'asc');
 
         $this->controller(Files::class);
 
@@ -107,9 +106,9 @@ final class ControllerTest extends FilesTestCase
         $this->assertSame('desc', $result);
     }
 
-    public function testGetOrderUsesSettings()
+    public function testGetOrderUsesPreference()
     {
-        service('settings')->filesOrder = 'desc';
+        preference('Files.order', 'desc');
 
         $this->controller(Files::class);
 
@@ -135,8 +134,8 @@ final class ControllerTest extends FilesTestCase
 
     public function testGetFormatUsesInput()
     {
-        $_REQUEST['format']              = 'select';
-        service('settings')->filesFormat = 'list';
+        $_REQUEST['format'] = 'select';
+        preference('Files.format', 'list');
 
         $this->controller(Files::class);
 
@@ -146,9 +145,9 @@ final class ControllerTest extends FilesTestCase
         $this->assertSame('select', $result);
     }
 
-    public function testGetFormatUsesSettings()
+    public function testGetFormatUsesPreference()
     {
-        service('settings')->filesFormat = 'list';
+        preference('Files.format', 'list');
 
         $this->controller(Files::class);
 
@@ -156,21 +155,6 @@ final class ControllerTest extends FilesTestCase
         $result = $method();
 
         $this->assertSame('list', $result);
-    }
-
-    public function testGetFormatUsesConfig()
-    {
-        service('settings')->filesFormat = 'foobar';
-
-        $this->config->defaultFormat = 'select';
-        Factories::injectMock('config', 'Files', $this->config);
-
-        $this->controller(Files::class);
-
-        $method = $this->getPrivateMethodInvoker($this->controller, 'getFormat');
-        $result = $method();
-
-        $this->assertSame('select', $result);
     }
 
     public function testGetFormatIgnoresInvalid()
@@ -215,7 +199,7 @@ final class ControllerTest extends FilesTestCase
         $file->localname  = '';
         $file->clientname = '';
         $file->size       = 1;
-        $file->created_at = new class() {
+        $file->created_at = new class () {
             public function humanize()
             {
                 return '';

@@ -40,14 +40,6 @@ abstract class FilesTestCase extends CIUnitTestCase
     protected $namespace;
 
     /**
-     * The seed file(s) used for all tests within this test case.
-     * Should be fully-namespaced or relative to $basePath
-     *
-     * @var array|string
-     */
-    protected $seed = 'Tatter\Files\Database\Seeds\FileSeeder';
-
-    /**
      * Configuration
      *
      * @var Files

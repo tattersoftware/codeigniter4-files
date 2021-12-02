@@ -40,16 +40,36 @@ class Files extends BaseConfig
     ];
 
     /**
-     * Default display format; built in are 'cards', 'list', 'select'
-     *
-     * @var string
-     */
-    public $defaultFormat = 'cards';
-
-    /**
      * Path to the default thumbnail file
      *
      * @var string
      */
     public $defaultThumbnail = 'Tatter\Files\Assets\Unavailable.jpg';
+
+    //--------------------------------------------------------------------
+    // Display Preferences
+    //--------------------------------------------------------------------
+
+    /**
+     * Display format for listing files.
+     * Included options are 'cards', 'list', 'select'
+     *
+     * @var string
+     */
+    public $format = 'cards';
+
+    /**
+     * Default sort column.
+     * See FileModel::$allowedFields for options.
+     *
+     * @var string
+     */
+    public $sort = 'filename';
+
+    /**
+     * Default sort ordering. "asc" or "desc"
+     *
+     * @var string
+     */
+    public $order = 'asc';
 }
