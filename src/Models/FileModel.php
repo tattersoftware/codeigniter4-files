@@ -7,11 +7,11 @@ use CodeIgniter\Model;
 use Config\Mimes;
 use Tatter\Files\Entities\File;
 use Tatter\Files\Exceptions\FilesException;
+use Tatter\Permits\Traits\PermitsTrait;
 
 class FileModel extends Model
 {
-    use \Tatter\Audits\Traits\AuditsTrait;
-    use \Tatter\Permits\Traits\PermitsTrait;
+    use PermitsTrait;
 
     protected $table          = 'files';
     protected $primaryKey     = 'id';
@@ -32,11 +32,6 @@ class FileModel extends Model
         // file size in bytes
         'size' => 'permit_empty|is_natural',
     ];
-
-    // Audits
-    protected $afterInsert = ['auditInsert'];
-    protected $afterUpdate = ['auditUpdate'];
-    protected $afterDelete = ['auditDelete'];
 
     // Permits
     protected $mode       = 04660;

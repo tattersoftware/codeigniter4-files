@@ -26,7 +26,6 @@
         "fortawesome/font-awesome": "^5.8",
         "tatter/alerts": "^2.0",
         "tatter/assets": "^2.2",
-        "tatter/audits": "^1.0",
         "tatter/exports": "^2.0",
         "tatter/permits": "^2.0",
         "tatter/preferences": "^1.0",
@@ -68,6 +67,9 @@
             "url": "https://asset-packagist.org"
         }
     ],
+    "suggest": {
+        "tatter/audits": "Adds logging for user changes to Files database rows."
+    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
