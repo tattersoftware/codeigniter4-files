@@ -21,16 +21,13 @@
     ],
     "require": {
         "php": "^7.3 || ^8.0",
-        "components/jquery": "^3.3",
-        "enyo/dropzone": "^5.7",
-        "fortawesome/font-awesome": "^5.8",
+        "enyo/dropzone": "^6.0",
         "tatter/alerts": "^2.0",
-        "tatter/assets": "^2.2",
         "tatter/exports": "^2.0",
+        "tatter/frontend": "^1.0",
         "tatter/permits": "^2.0",
         "tatter/preferences": "^1.0",
-        "tatter/thumbnails": "^1.2",
-        "twbs/bootstrap": "^4.5"
+        "tatter/thumbnails": "^1.2"
     },
     "require-dev": {
         "antecedent/patchwork": "^2.1",
