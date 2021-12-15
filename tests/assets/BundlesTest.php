@@ -2,7 +2,7 @@
 
 namespace Tatter\Files\Bundles;
 
-use Tatter\Frontend\Test\BundlesTestCase;
+use Tatter\Assets\Test\BundlesTestCase;
 
 /**
  * @internal
@@ -18,6 +18,19 @@ final class BundlesTest extends BundlesTestCase
                     'dropzone.css',
                 ],
                 [
+                    'dropzone-min.js',
+                ],
+            ],
+            [
+                FilesBundle::class,
+                [
+                    'all.min.css',
+                    'bootstrap.min.css',
+                    'dropzone.css',
+                    'jquery.min.js', // Note that unlike most JS files this goes in <head>
+                ],
+                [
+                    'bootstrap.bundle.min.js',
                     'dropzone-min.js',
                 ],
             ],
