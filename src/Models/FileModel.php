@@ -5,6 +5,7 @@ namespace Tatter\Files\Models;
 use CodeIgniter\Files\File as CIFile;
 use CodeIgniter\Model;
 use Config\Mimes;
+use Faker\Generator;
 use Tatter\Files\Entities\File;
 use Tatter\Files\Exceptions\FilesException;
 use Tatter\Permits\Traits\PermitsTrait;
@@ -178,5 +179,22 @@ class FileModel extends Model
 
         // Return the File entity
         return $this->find($fileId);
+    }
+
+    /**
+     * Faked data for Fabricator.
+     */
+    public function fake(Generator &$faker): File
+    {
+        $name = $faker->company . '.' . $faker->fileExtension;
+
+        return new File([
+            'filename'   => $name,
+            'localname'  => $faker->md5,
+            'clientname' => $name,
+            'type'       => $faker->mimeType,
+            'size'       => mt_rand(1000, 4000000),
+            'thumbnail'  => $faker->text(5000),
+        ]);
     }
 }
