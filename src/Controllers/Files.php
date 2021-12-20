@@ -581,7 +581,7 @@ class Files extends Controller
     {
         return $this->setData([
             'source'   => 'index',
-            'layout'   => 'public',
+            'layout'   => 'files',
             'files'    => null,
             'selected' => explode(',', $this->request->getVar('selected') ?? ''),
             'userId'   => null,

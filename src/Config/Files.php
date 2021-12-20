@@ -21,16 +21,6 @@ class Files extends BaseConfig
     public $routeFiles = true;
 
     /**
-     * Layouts to use for general access and for administration
-     *
-     * @var array<string, string>
-     */
-    public $layouts = [
-        'public' => 'Tatter\Files\Views\layout',
-        'manage' => 'Tatter\Files\Views\layout',
-    ];
-
-    /**
      * View file aliases
      *
      * @var string[]

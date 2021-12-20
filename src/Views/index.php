@@ -1,5 +1,10 @@
-<?= $this->extend(config('Files')->layouts[$layout ?? 'public']) ?>
-<?= $this->section('main') ?>
+<?php $this->extend(config('Layouts')->{$layout}) ?>
+<?php $this->section('navbar') ?>
+
+	<?= view('Tatter\Files\Views\navbar') ?>
+
+<?php $this->endSection() ?>
+<?php $this->section('main') ?>
 
 	<div class="row">
 		<div class="col">
