@@ -21,6 +21,7 @@
     ],
     "require": {
         "php": "^7.3 || ^8.0",
+        "codeigniter4/authentication-implementation": "^1.0",
         "enyo/dropzone": "^6.0",
         "tatter/alerts": "^2.0",
         "tatter/exports": "^2.0",

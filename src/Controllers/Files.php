@@ -6,9 +6,7 @@ use CodeIgniter\Controller;
 use CodeIgniter\Events\Events;
 use CodeIgniter\HTTP\Exceptions\HTTPException;
 use CodeIgniter\HTTP\RedirectResponse;
-use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Psr\Log\LoggerInterface;
 use Tatter\Exports\Exceptions\ExportsException;
 use Tatter\Files\Config\Files as FilesConfig;
 use Tatter\Files\Entities\File;
@@ -52,22 +50,6 @@ class Files extends Controller
     {
         $this->config = $config ?? config('Files');
         $this->model  = $model ?? model(FileModel::class); // @phpstan-ignore-line
-    }
-
-    /**
-     * Verify authentication is configured correctly *after* parent calls loadHelpers().
-     *
-     * @throws FilesException
-     *
-     * @see https://codeigniter.com/user_guide/extending/authentication.html
-     */
-    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
-    {
-        parent::initController($request, $response, $logger);
-
-        if (! function_exists('user_id') || ! empty($this->config->failNoAuth)) {
-            throw new FilesException(lang('Files.noAuth'));
-        }
     }
 
     //--------------------------------------------------------------------
@@ -144,10 +126,10 @@ class Files extends Controller
     public function user($userId = null)
     {
         // Figure out user & access
-        $userId = $userId ?? user_id() ?? 0;
+        $userId = $userId ?? user_id();
 
         // Not logged in
-        if (! $userId) {
+        if ($userId === null) {
             // Check for list permission
             if (! $this->model->mayList()) {
                 return $this->failure(403, lang('Permits.notPermitted'));
@@ -496,7 +478,7 @@ class Files extends Controller
         model(ExportModel::class)->insert([
             'handler' => $slug,
             'file_id' => $file->id,
-            'user_id' => user_id() ?: null,
+            'user_id' => user_id(),
         ]);
 
         // Pass to the handler
