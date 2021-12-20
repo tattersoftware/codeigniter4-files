@@ -7,7 +7,6 @@ use CodeIgniter\Model;
 use Config\Mimes;
 use Faker\Generator;
 use Tatter\Files\Entities\File;
-use Tatter\Files\Exceptions\FilesException;
 use Tatter\Permits\Traits\PermitsTrait;
 
 class FileModel extends Model
@@ -39,33 +38,6 @@ class FileModel extends Model
     protected $userKey    = 'user_id';
     protected $pivotKey   = 'file_id';
     protected $usersPivot = 'files_users';
-
-    //--------------------------------------------------------------------
-
-    /**
-     * Normalizes and creates (if necessary) the storage and thumbnail paths.
-     *
-     * @throws FilesException
-     *
-     * @return string The normalized storage path
-     */
-    public static function storage(): string
-    {
-        // Normalize the path
-        $storage = realpath(config('Files')->storagePath) ?: config('Files')->storagePath;
-        $storage = rtrim($storage, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        if (! is_dir($storage) && ! @mkdir($storage, 0775, true)) {
-            throw FilesException::forDirFail($storage);
-        }
-
-        // Normalize the path
-        $thumbnails = $storage . 'thumbnails';
-        if (! is_dir($thumbnails) && ! @mkdir($thumbnails, 0775, true)) {
-            throw FilesException::forDirFail($thumbnails); // @codeCoverageIgnore
-        }
-
-        return $storage;
-    }
 
     //--------------------------------------------------------------------
 
@@ -135,7 +107,7 @@ class FileModel extends Model
         $row = array_merge($row, $data);
 
         // Normalize paths
-        $storage  = self::storage();
+        $storage  = config('Files')->getPath();
         $filePath = $file->getRealPath() ?: (string) $file;
 
         // Determine if we need to move the file

@@ -45,20 +45,13 @@ class Files extends Controller
     protected $data = [];
 
     /**
-     * Preloads the configuration and verifies the storage directory.
+     * Preloads the configuration and model.
      * Parameters are mostly for testing purposes.
-     *
-     * @throws FilesException
      */
     public function __construct(?FilesConfig $config = null, ?FileModel $model = null)
     {
         $this->config = $config ?? config('Files');
-
-        // Use the short model name so a child may be loaded first
-        $this->model = $model ?? model('FileModel'); // @phpstan-ignore-line
-
-        // Verify the storage directory
-        FileModel::storage();
+        $this->model  = $model ?? model(FileModel::class); // @phpstan-ignore-line
     }
 
     /**
