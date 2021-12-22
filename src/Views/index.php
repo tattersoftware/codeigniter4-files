@@ -22,7 +22,7 @@
 				</div>
 			</div>
 
-			<h1><?= $access === 'manage' ? 'Manage' : 'Browse' ?> <?= $username ?? '' ?> Files</h1>
+			<h1><?= $access === 'manage' ? 'Manage' : 'Browse' ?> <?= $userName ?? '' ?> Files</h1>
 
 			<form class="form-inline mb-3" name="files-search" method="get" action="<?= current_url() ?>">
 				<div class="input-group">

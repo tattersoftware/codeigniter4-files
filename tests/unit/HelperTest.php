@@ -66,19 +66,19 @@ final class HelperTest extends CIUnitTestCase
 
     public function testMergeFileChunks()
     {
-    	$path = merge_file_chunks(
-    		SUPPORTPATH . 'chunks/0',
-    		SUPPORTPATH . 'chunks/1',
-    		SUPPORTPATH . 'chunks/2',
-    		SUPPORTPATH . 'chunks/3'
-    	);
+        $path = merge_file_chunks(
+            SUPPORTPATH . 'chunks/0',
+            SUPPORTPATH . 'chunks/1',
+            SUPPORTPATH . 'chunks/2',
+            SUPPORTPATH . 'chunks/3'
+        );
 
         $this->assertIsString($path);
         $this->assertFileExists($path);
 
-		$expected = 'All your base are belong to us.';
-		$result   = file_get_contents($path);
+        $expected = 'All your base are belong to us.';
+        $result   = file_get_contents($path);
 
-		$this->assertSame($expected, $result);
+        $this->assertSame($expected, $result);
     }
 }

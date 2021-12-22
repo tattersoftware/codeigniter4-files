@@ -67,7 +67,7 @@ abstract class TestCase extends CIUnitTestCase
         vfsStream::copyFromFileSystem(SUPPORTPATH . 'vfs/', $this->root);
 
         // Force our config to the virtual path
-        $path = $this->root->url() . '/storage/';
+        $path         = $this->root->url() . '/storage/';
         $this->config = config('Files');
         $this->config->setPath($path);
         Factories::injectMock('config', 'Files', $this->config);

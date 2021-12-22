@@ -44,6 +44,18 @@ class Files extends Controller
     protected $data = [];
 
     /**
+     * Validation for Preferences.
+     *
+     * @var array<string,string>
+     */
+    protected $preferenceRules = [
+        'sort'    => 'in_list[filename,localname,clientname,type,size,created_at,updated_at,deleted_at]',
+        'order'   => 'in_list[asc,desc]',
+        'format'  => 'in_list[cards,list,select]',
+        'perPage' => 'is_natural_no_zero',
+    ];
+
+    /**
      * Preloads the configuration and model.
      * Parameters are mostly for testing purposes.
      */
@@ -139,7 +151,7 @@ class Files extends Controller
             $this->setData([
                 'access'   => 'display',
                 'title'    => 'All Files',
-                'username' => '',
+                'userName' => '',
             ]);
         }
         // Logged in, looking at another user
@@ -152,7 +164,7 @@ class Files extends Controller
             $this->setData([
                 'access'   => $this->model->mayAdmin() ? 'manage' : 'display',
                 'title'    => 'User Files',
-                'username' => 'User',
+                'userName' => 'User',
             ]);
         }
         // Looking at own files
@@ -160,7 +172,7 @@ class Files extends Controller
             $this->setData([
                 'access'   => 'manage',
                 'title'    => 'My Files',
-                'username' => 'My',
+                'userName' => 'My',
             ]);
         }
 
@@ -364,12 +376,12 @@ class Files extends Controller
                 return '';
             }
 
-      		// Get chunks from target directory
-			helper('filesystem');
-			$chunks = get_filenames($chunkDir, true);
-			if (empty($chunks)) {
-				throw FilesException::forNoChunks($chunkDir);
-			}
+            // Get chunks from target directory
+            helper('filesystem');
+            $chunks = get_filenames($chunkDir, true);
+            if (empty($chunks)) {
+                throw FilesException::forNoChunks($chunkDir);
+            }
 
             // Merge the chunks
             try {
@@ -380,7 +392,7 @@ class Files extends Controller
                 return $this->failure(400, $e->getMessage());
             }
 
-	        log_message('debug', 'Merged ' . count($chunks) . ' chunks to ' . $path);
+            log_message('debug', 'Merged ' . count($chunks) . ' chunks to ' . $path);
         }
 
         // Get additional post data to pass to model
@@ -470,8 +482,6 @@ class Files extends Controller
         return $this->response->setHeader('Content-type', 'image/jpeg')->setBody(file_get_contents($path));
     }
 
-    //--------------------------------------------------------------------
-
     /**
      * Handles failures.
      *
@@ -489,6 +499,8 @@ class Files extends Controller
 
         return redirect()->back()->with('error', $message);
     }
+
+    //--------------------------------------------------------------------
 
     /**
      * Sets a value in $this->data, overwrites optional.
@@ -515,149 +527,57 @@ class Files extends Controller
      */
     protected function setDefaults(): self
     {
-        return $this->setData([
+        $this->setData([
             'source'   => 'index',
             'layout'   => 'files',
             'files'    => null,
             'selected' => explode(',', $this->request->getVar('selected') ?? ''),
             'userId'   => null,
-            'username' => '',
+            'userName' => '',
             'ajax'     => $this->request->isAJAX(),
             'search'   => $this->request->getVar('search'),
-            'sort'     => $this->getSort(),
-            'order'    => $this->getOrder(),
-            'format'   => $this->getFormat(),
-            'perPage'  => $this->getPerPage(),
             'page'     => $this->request->getVar('page'),
             'pager'    => null,
             'access'   => $this->model->mayAdmin() ? 'manage' : 'display',
             'exports'  => $this->getExports(),
             'bulks'    => handlers()->where(['bulk' => 1])->findAll(),
         ]);
-    }
 
-    /**
-     * Determines the sort field.
-     */
-    protected function getSort(): string
-    {
-        // Check for a sort request
-        if (null !== $sort = $this->validateSort($this->request->getVar('sort'))) {
-            // Store the new preference
-            preference('Files.sort', $sort);
+        // Add preferences
+        $this->setPreferences();
 
-            return $sort;
+        foreach (['Files.sort', 'Files.order', 'Files.format', 'Pager.perPage'] as $preference) {
+            [,$field] = explode('.', $preference);
+            $this->setData([$field => preference($preference)]);
         }
 
-        return $this->validateSort(preference('Files.sort')) ?? 'filename';
+        return $this;
     }
 
     /**
-     * Determines whether the given field is valid for sorting.
-     */
-    private function validateSort(?string $sort): ?string
-    {
-        if ($sort === null) {
-            return null;
-        }
-
-        $allowed = $this->model->allowedFields; // @phpstan-ignore-line
-        $allowed = array_merge($allowed, [
-            'created_at',
-            'updated_at',
-            'deleted_at',
-        ]);
-
-        return in_array($sort, $allowed, true) ? $sort : null;
-    }
-
-    /**
-     * Determines the sort order.
-     */
-    protected function getOrder(): string
-    {
-        // Check for a sort request
-        if (null !== $order = $this->validateOrder($this->request->getVar('order'))) {
-            // Store the new preference
-            preference('Files.order', $order);
-
-            return $order;
-        }
-
-        return $this->validateOrder(preference('Files.order')) ?? 'asc';
-    }
-
-    /**
-     * Determines whether the given order is valid.
-     */
-    private function validateOrder(?string $order): ?string
-    {
-        if ($order === null) {
-            return null;
-        }
-
-        return in_array($order, ['asc', 'desc'], true) ? $order : null;
-    }
-
-    /**
-     * Determines items per page.
-     */
-    protected function getPerPage(): int
-    {
-        // Check for a sort request
-        if (null !== $perPage = $this->validatePerPage($this->request->getVar('perPage'))) {
-            // Store the new preference
-            preference('App.perPage', $perPage);
-
-            return $perPage;
-        }
-
-        return $this->validatePerPage(preference('Files.perPage')) ?? 10;
-    }
-
-    /**
-     * Determines whether the "per page" is valid.
+     * Filters, validates, and sets preferences based on input values.
      *
-     * int|string|null
-     *
-     * @param mixed $perPage
+     * @return $this
      */
-    private function validatePerPage($perPage): ?int
+    protected function setPreferences(): self
     {
-        if ($perPage === null || ! is_numeric($perPage)) {
-            return null;
-        }
-        $perPage = (int) $perPage;
+        // Filter input on allowed fields
+        $validation = service('validation');
 
-        return $perPage > 0 ? $perPage : null;
-    }
+        foreach ($this->preferenceRules as $field => $rule) {
+            if (null !== $value = $this->request->getVar($field)) {
+                if ($validation->check($value, $rule)) {
+                    // Special case for perPage
+                    $preference = $field === 'perPage'
+                        ? 'Pager.' . $field
+                        : 'Files.' . $field;
 
-    /**
-     * Determines the display format.
-     */
-    protected function getFormat(): string
-    {
-        // Check for a sort request
-        if (null !== $format = $this->validateFormat($this->request->getVar('format'))) {
-            // Store the new preference
-            preference('Files.format', $format);
-
-            return $format;
+                    preference($preference, $value);
+                }
+            }
         }
 
-        return $this->validateFormat(preference('Files.format')) ?? 'cards';
-    }
-
-    /**
-     * Determines whether the display format is valid.
-     */
-    private function validateFormat(?string $format): ?string
-    {
-        if ($format === null) {
-            return null;
-        }
-
-        return in_array($format, ['cards', 'list', 'select'], true) ? $format : null;
+        return $this;
     }
 
     /**

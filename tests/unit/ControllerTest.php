@@ -30,122 +30,45 @@ final class ControllerTest extends TestCase
         $this->controller = null;
     }
 
-    //--------------------------------------------------------------------
-
-    public function testGetSortUsesInput()
+    public function testSetPreferencesUsesValidInput()
     {
-        $_REQUEST['sort'] = 'size';
-        preference('Files.sort', 'type');
+        $_REQUEST = [
+            'sort'    => 'size',
+            'order'   => 'desc',
+            'format'  => 'list',
+            'perPage' => '42',
+        ];
 
         $this->controller(Files::class);
 
-        $method = $this->getPrivateMethodInvoker($this->controller, 'getSort');
+        $method = $this->getPrivateMethodInvoker($this->controller, 'setPreferences');
         $result = $method();
 
-        $this->assertSame('size', $result);
+        $this->assertSame('size', preference('Files.sort'));
+        $this->assertSame('desc', preference('Files.order'));
+        $this->assertSame('list', preference('Files.format'));
+        $this->assertSame('42', preference('Pager.perPage'));
     }
 
-    public function testGetSortUsesPreference()
+    public function testSetPreferencesIgnoreInvalidInput()
     {
-        preference('Files.sort', 'type');
+        $config   = config('Files');
+        $_REQUEST = [
+            'sort'    => 'potato',
+            'order'   => 'up',
+            'format'  => 'banana',
+            'perPage' => '-10',
+        ];
 
         $this->controller(Files::class);
 
-        $method = $this->getPrivateMethodInvoker($this->controller, 'getSort');
+        $method = $this->getPrivateMethodInvoker($this->controller, 'setPreferences');
         $result = $method();
 
-        $this->assertSame('type', $result);
-    }
-
-    public function testGetSortIgnoresInvalid()
-    {
-        $_REQUEST['sort'] = 'foobar';
-        preference('Files.sort', 'bambaz');
-
-        $this->controller(Files::class);
-
-        $method = $this->getPrivateMethodInvoker($this->controller, 'getSort');
-        $result = $method();
-
-        $this->assertSame('filename', $result);
-    }
-
-    //--------------------------------------------------------------------
-
-    public function testGetOrderUsesInput()
-    {
-        $_REQUEST['order'] = 'desc';
-        preference('Files.order', 'asc');
-
-        $this->controller(Files::class);
-
-        $method = $this->getPrivateMethodInvoker($this->controller, 'getOrder');
-        $result = $method();
-
-        $this->assertSame('desc', $result);
-    }
-
-    public function testGetOrderUsesPreference()
-    {
-        preference('Files.order', 'desc');
-
-        $this->controller(Files::class);
-
-        $method = $this->getPrivateMethodInvoker($this->controller, 'getOrder');
-        $result = $method();
-
-        $this->assertSame('desc', $result);
-    }
-
-    public function testGetOrderIgnoresInvalid()
-    {
-        $_REQUEST['order'] = 'foobar';
-
-        $this->controller(Files::class);
-
-        $method = $this->getPrivateMethodInvoker($this->controller, 'getOrder');
-        $result = $method();
-
-        $this->assertSame('asc', $result);
-    }
-
-    //--------------------------------------------------------------------
-
-    public function testGetFormatUsesInput()
-    {
-        $_REQUEST['format'] = 'select';
-        preference('Files.format', 'list');
-
-        $this->controller(Files::class);
-
-        $method = $this->getPrivateMethodInvoker($this->controller, 'getFormat');
-        $result = $method();
-
-        $this->assertSame('select', $result);
-    }
-
-    public function testGetFormatUsesPreference()
-    {
-        preference('Files.format', 'list');
-
-        $this->controller(Files::class);
-
-        $method = $this->getPrivateMethodInvoker($this->controller, 'getFormat');
-        $result = $method();
-
-        $this->assertSame('list', $result);
-    }
-
-    public function testGetFormatIgnoresInvalid()
-    {
-        $_REQUEST['format'] = 'foobar';
-
-        $this->controller(Files::class);
-
-        $method = $this->getPrivateMethodInvoker($this->controller, 'getFormat');
-        $result = $method();
-
-        $this->assertSame('cards', $result);
+        $this->assertSame($config->sort, preference('Files.sort'));
+        $this->assertSame($config->order, preference('Files.order'));
+        $this->assertSame($config->format, preference('Files.format'));
+        $this->assertSame(config('Pager')->perPage, preference('Pager.perPage'));
     }
 
     public function testDataUsesVarWithFaker()
@@ -195,8 +118,6 @@ final class ControllerTest extends TestCase
         $result = $controller->display();
         $this->assertStringContainsString($file->filename, $result);
     }
-
-    //--------------------------------------------------------------------
 
     public function testExportCreatesRecord()
     {
