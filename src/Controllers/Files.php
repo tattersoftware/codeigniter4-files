@@ -13,6 +13,7 @@ use Tatter\Files\Entities\File;
 use Tatter\Files\Exceptions\FilesException;
 use Tatter\Files\Models\ExportModel;
 use Tatter\Files\Models\FileModel;
+use Throwable;
 
 class Files extends Controller
 {
@@ -363,14 +364,23 @@ class Files extends Controller
                 return '';
             }
 
+      		// Get chunks from target directory
+			helper('filesystem');
+			$chunks = get_filenames($chunkDir, true);
+			if (empty($chunks)) {
+				throw FilesException::forNoChunks($chunkDir);
+			}
+
             // Merge the chunks
             try {
-                $path = $this->mergeChunks($chunkDir);
-            } catch (FilesException $e) {
+                $path = merge_file_chunks(...$chunks);
+            } catch (Throwable $e) {
                 log_message('error', $e->getMessage());
 
                 return $this->failure(400, $e->getMessage());
             }
+
+	        log_message('debug', 'Merged ' . count($chunks) . ' chunks to ' . $path);
         }
 
         // Get additional post data to pass to model
@@ -391,55 +401,6 @@ class Files extends Controller
         }
 
         return redirect()->back()->with('message', lang('File.uploadSucces', [$file->clientname]));
-    }
-
-    /**
-     * Merges all chunks in a target directory into a single file, returns the file path.
-     *
-     * @param mixed $dir
-     *
-     * @throws FilesException
-     */
-    protected function mergeChunks($dir): string
-    {
-        helper('filesystem');
-        helper('text');
-
-        // Get chunks from target directory
-        $chunks = get_filenames($dir, true);
-        if (empty($chunks)) {
-            throw FilesException::forNoChunks($dir);
-        }
-
-        // Create the temp file
-        $tmpfile = tempnam(sys_get_temp_dir(), random_string());
-        log_message('debug', 'Merging ' . count($chunks) . ' chunks to ' . $tmpfile);
-
-        // Open temp file for writing
-        $output = @fopen($tmpfile, 'ab');
-        if (! $output) {
-            throw FilesException::forNewFileFail($tmpfile);
-        }
-
-        // Write each chunk to the temp file
-        foreach ($chunks as $file) {
-            $input = @fopen($file, 'rb');
-            if (! $input) {
-                throw FilesException::forWriteFileFail($tmpfile);
-            }
-
-            // Buffered merge of chunk
-            while ($buffer = fread($input, 4096)) {
-                fwrite($output, $buffer);
-            }
-
-            fclose($input);
-        }
-
-        // close output handle
-        fclose($output);
-
-        return $tmpfile;
     }
 
     /**
