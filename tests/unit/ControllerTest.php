@@ -2,18 +2,19 @@
 
 use CodeIgniter\HTTP\DownloadResponse;
 use CodeIgniter\Test\ControllerTestTrait;
+use CodeIgniter\Test\DatabaseTestTrait;
 use Tatter\Files\Controllers\Files;
 use Tatter\Files\Entities\File;
-use Tatter\Files\Exceptions\FilesException;
-use Tests\Support\Fakers\FileFaker;
-use Tests\Support\FilesTestCase;
+use Tatter\Files\Models\FileModel;
+use Tests\Support\TestCase;
 
 /**
  * @internal
  */
-final class ControllerTest extends FilesTestCase
+final class ControllerTest extends TestCase
 {
     use ControllerTestTrait;
+    use DatabaseTestTrait;
 
     /**
      * Our Controller set by the trait
@@ -27,28 +28,6 @@ final class ControllerTest extends FilesTestCase
         parent::setUp();
 
         $this->controller = null;
-    }
-
-    public function testThrowsWithInvalidStoragePath()
-    {
-        $this->config->storagePath = realpath(HOMEPATH . 'README.md') ?: HOMEPATH . 'README.md';
-
-        $this->expectException(FilesException::class);
-        $this->expectExceptionMessage(lang('Files.dirFail', [$this->config->storagePath]));
-
-        $controller = new Files($this->config);
-    }
-
-    //--------------------------------------------------------------------
-
-    public function testCreatesMissingStoragePath()
-    {
-        $this->config->storagePath .= 'subdirectory/';
-
-        $controller = new Files($this->config);
-
-        $this->assertDirectoryExists($this->config->storagePath);
-        $this->assertDirectoryIsWritable($this->config->storagePath);
     }
 
     //--------------------------------------------------------------------
@@ -171,7 +150,7 @@ final class ControllerTest extends FilesTestCase
 
     public function testDataUsesVarWithFaker()
     {
-        $file = fake(FileFaker::class);
+        $file = fake(FileModel::class);
 
         $controller = new Files();
         $controller->initController(service('request'), service('response'), service('logger'));
@@ -221,7 +200,7 @@ final class ControllerTest extends FilesTestCase
 
     public function testExportCreatesRecord()
     {
-        $file = fake(FileFaker::class, [
+        $file = fake(FileModel::class, [
             'localname' => 'image.jpg',
         ]);
 

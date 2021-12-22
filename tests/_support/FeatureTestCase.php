@@ -3,6 +3,7 @@
 namespace Tests\Support;
 
 use CodeIgniter\Config\Factories;
+use CodeIgniter\Publisher\Publisher;
 use CodeIgniter\Test\FeatureTestTrait;
 use Myth\Auth\Test\AuthTestTrait;
 use Tatter\Files\Models\FileModel;
@@ -47,6 +48,11 @@ abstract class FeatureTestCase extends FilesTestCase
 
         // Make sure we use the correct UserModel for permissions
         Factories::injectMock('models', UserModel::class, new UserModel());
+
+        // Make sure everything is published
+        foreach (Publisher::discover() as $publisher) {
+            $publisher->publish(); // @codeCoverageIgnore
+        }
     }
 
     /**

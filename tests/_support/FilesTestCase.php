@@ -11,6 +11,7 @@ use Myth\Auth\Test\AuthTestTrait;
 use Myth\Auth\Test\Fakers\UserFaker;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
+use Tatter\Assets\Asset;
 use Tatter\Files\Config\Files;
 use Tests\Support\Fakers\FileFaker;
 
@@ -66,7 +67,7 @@ abstract class FilesTestCase extends CIUnitTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        helper('auth');
+        helper(['auth', 'preferences']);
         $this->resetAuthServices();
 
         $_REQUEST = [];
@@ -85,6 +86,16 @@ abstract class FilesTestCase extends CIUnitTestCase
         Factories::injectMock('config', 'Files', $this->config);
 
         $this->testPath = $this->config->storagePath . 'image.jpg';
+
+        // Configure Assets for the VFS
+        $config                = config('Assets');
+        $config->directory     = $this->config->storagePath;
+        $config->useTimestamps = false; // These make testing much harder
+
+        Asset::useConfig($config);
+
+        // Add VFS as an allowed Publisher directory
+        config('Publisher')->restrictions[$config->directory] = '*';
     }
 
     protected function tearDown(): void
