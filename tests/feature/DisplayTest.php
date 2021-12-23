@@ -1,6 +1,6 @@
 <?php
 
-use Tests\Support\Fakers\FileFaker;
+use Tatter\Files\Models\FileModel;
 use Tests\Support\FeatureTestCase;
 
 /**
@@ -8,6 +8,8 @@ use Tests\Support\FeatureTestCase;
  */
 final class DisplayTest extends FeatureTestCase
 {
+    protected $refresh = true;
+
     public function testNoFiles()
     {
         $result = $this->get('files');
@@ -18,7 +20,7 @@ final class DisplayTest extends FeatureTestCase
 
     public function testDefaultDisplaysCards()
     {
-        $file = fake(FileFaker::class);
+        $file = fake(FileModel::class);
 
         $result = $this->get('files');
 
@@ -32,7 +34,7 @@ final class DisplayTest extends FeatureTestCase
         preference('Files.order', 'asc');
         preference('Files.format', 'cards');
 
-        $file   = fake(FileFaker::class);
+        $file   = fake(FileModel::class);
         $result = $this->get('files');
         $result->assertStatus(200);
         $result->assertSee($file->filename);
@@ -40,13 +42,12 @@ final class DisplayTest extends FeatureTestCase
 
     public function provideFormat()
     {
-        yield ['cards', 'cards'];
-
-        yield ['list', 'list'];
-
-        yield ['select', 'select'];
-
-        yield ['invalid', config('Files')->format];
+        return [
+            ['cards', 'cards'],
+            ['list', 'list'],
+            ['select', 'select'],
+            ['invalid', config('Files')->format],
+        ];
     }
 
     /**
@@ -56,7 +57,7 @@ final class DisplayTest extends FeatureTestCase
     {
         $_REQUEST['format'] = $format;
 
-        $file   = fake(FileFaker::class);
+        $file   = fake(FileModel::class);
         $result = $this->get('files');
 
         $result->assertStatus(200);
@@ -65,19 +66,15 @@ final class DisplayTest extends FeatureTestCase
 
     public function provideSort()
     {
-        yield ['filename', 'filename'];
-
-        yield ['localname', 'localname'];
-
-        yield ['clientname', 'clientname'];
-
-        yield ['type', 'type'];
-
-        yield ['size', 'size'];
-
-        yield ['thumbnail', 'thumbnail'];
-
-        yield ['invalidsort', 'filename'];
+        return [
+            ['filename', 'filename'],
+            ['localname', 'localname'],
+            ['clientname', 'clientname'],
+            ['type', 'type'],
+            ['size', 'size'],
+            ['thumbnail', 'filename'],
+            ['invalidsort', 'filename'],
+        ];
     }
 
     /**
@@ -87,7 +84,7 @@ final class DisplayTest extends FeatureTestCase
     {
         $_REQUEST['sort'] = $sort;
 
-        $file   = fake(FileFaker::class);
+        $file   = fake(FileModel::class);
         $result = $this->get('files');
 
         $result->assertStatus(200);
@@ -96,11 +93,11 @@ final class DisplayTest extends FeatureTestCase
 
     public function provideOrder()
     {
-        yield ['asc', 'asc'];
-
-        yield ['desc', 'desc'];
-
-        yield ['invalid', 'asc'];
+        return [
+            ['asc', 'asc'],
+            ['desc', 'desc'],
+            ['invalid', 'asc'],
+        ];
     }
 
     /**
@@ -110,7 +107,7 @@ final class DisplayTest extends FeatureTestCase
     {
         $_REQUEST['order'] = $order;
 
-        $file   = fake(FileFaker::class);
+        $file   = fake(FileModel::class);
         $result = $this->get('files');
 
         $result->assertStatus(200);
@@ -119,9 +116,10 @@ final class DisplayTest extends FeatureTestCase
 
     public function provideSearch()
     {
-        yield ['Heathcote'];
-
-        yield ['will never be found'];
+        return [
+            ['Heathcote'],
+            ['will never be found'],
+        ];
     }
 
     /**
@@ -131,7 +129,7 @@ final class DisplayTest extends FeatureTestCase
     {
         $_REQUEST['search'] = $keyword;
 
-        $file   = fake(FileFaker::class);
+        $file   = fake(FileModel::class);
         $result = $this->get('files');
 
         $result->assertStatus(200);
@@ -146,17 +144,20 @@ final class DisplayTest extends FeatureTestCase
 
     public function testPages()
     {
-        for ($i = 0; $i < 12; $i++) {
-            $file = fake(FileFaker::class);
+        $_REQUEST['perPage'] = 2;
+
+        for ($i = 0; $i < 2; $i++) {
+            $file = fake(FileModel::class);
         }
 
         // Make a file to be sorted last
-        $file = fake(FileFaker::class, [
+        $file = fake(FileModel::class, [
             'filename' => 'ZZZZZZZZZ',
         ]);
 
         // Last file should be on the next page
         $result = $this->get('files');
+
         $result->assertStatus(200);
         $result->assertDontSee($file->filename);
 

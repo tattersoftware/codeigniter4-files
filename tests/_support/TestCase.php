@@ -34,18 +34,18 @@ abstract class TestCase extends CIUnitTestCase
     protected $root;
 
     /**
-     * Whether the publishers have been run.
-     *
-     * @var bool
-     */
-    private $published = false;
-
-    /**
      * Path to a test file to work with
      *
      * @var string
      */
     protected $testPath;
+
+    /**
+     * Whether the publishers have been run.
+     *
+     * @var bool
+     */
+    private $published = false;
 
     public static function setUpBeforeClass(): void
     {

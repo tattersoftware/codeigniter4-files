@@ -4,7 +4,6 @@ use CodeIgniter\HTTP\DownloadResponse;
 use CodeIgniter\Test\ControllerTestTrait;
 use CodeIgniter\Test\DatabaseTestTrait;
 use Tatter\Files\Controllers\Files;
-use Tatter\Files\Entities\File;
 use Tatter\Files\Models\FileModel;
 use Tests\Support\TestCase;
 
@@ -27,6 +26,13 @@ final class ControllerTest extends TestCase
     {
         parent::setUp();
 
+        $this->controller(Files::class);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
         $this->controller = null;
     }
 
@@ -38,8 +44,6 @@ final class ControllerTest extends TestCase
             'format'  => 'list',
             'perPage' => '42',
         ];
-
-        $this->controller(Files::class);
 
         $method = $this->getPrivateMethodInvoker($this->controller, 'setPreferences');
         $result = $method();
@@ -60,8 +64,6 @@ final class ControllerTest extends TestCase
             'perPage' => '-10',
         ];
 
-        $this->controller(Files::class);
-
         $method = $this->getPrivateMethodInvoker($this->controller, 'setPreferences');
         $result = $method();
 
@@ -75,47 +77,14 @@ final class ControllerTest extends TestCase
     {
         $file = fake(FileModel::class);
 
-        $controller = new Files();
-        $controller->initController(service('request'), service('response'), service('logger'));
-
-        $method = $this->getPrivateMethodInvoker($controller, 'setData');
+        $method = $this->getPrivateMethodInvoker($this->controller, 'setData');
         $method([
             'files' => [
                 0 => $file,
             ],
         ]);
 
-        $result = $controller->display();
-        $this->assertStringContainsString($file->filename, $result);
-    }
-
-    public function testDataUsesVarViaPassEntity()
-    {
-        $controller = new Files();
-        $controller->initController(service('request'), service('response'), service('logger'));
-
-        $file             = new File();
-        $file->filename   = 'foo.txt';
-        $file->thumbnail  = '';
-        $file->type       = '';
-        $file->localname  = '';
-        $file->clientname = '';
-        $file->size       = 1;
-        $file->created_at = new class () {
-            public function humanize()
-            {
-                return '';
-            }
-        };
-
-        $method = $this->getPrivateMethodInvoker($controller, 'setData');
-        $method([
-            'files' => [
-                0 => $file,
-            ],
-        ]);
-
-        $result = $controller->display();
+        $result = $this->controller->display();
         $this->assertStringContainsString($file->filename, $result);
     }
 
