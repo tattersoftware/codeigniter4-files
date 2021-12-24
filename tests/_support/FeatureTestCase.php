@@ -4,8 +4,6 @@ namespace Tests\Support;
 
 use CodeIgniter\Config\Factories;
 use CodeIgniter\Test\FeatureTestTrait;
-use Myth\Auth\Test\AuthTestTrait;
-use Tatter\Files\Models\FileModel;
 use Tests\Support\Models\UserModel;
 
 /**
@@ -13,7 +11,6 @@ use Tests\Support\Models\UserModel;
  */
 abstract class FeatureTestCase extends TestCase
 {
-    use AuthTestTrait;
     use FeatureTestTrait;
 
     /**
@@ -43,25 +40,10 @@ abstract class FeatureTestCase extends TestCase
     {
         parent::setUp();
 
-        $this->resetAuthServices();
-
         // Make sure we use the correct UserModel for permissions
         Factories::injectMock('models', UserModel::class, new UserModel());
 
         // Make sure everything is published once
         $this->publishAll();
-    }
-
-    /**
-     * Injects a permission mode into the shared FileModel.
-     *
-     * @param int $mode Octal mode
-     */
-    protected function setMode(int $mode)
-    {
-        $model = new FileModel();
-        $model->setMode($mode);
-
-        Factories::injectMock('models', FileModel::class, $model);
     }
 }

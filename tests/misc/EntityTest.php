@@ -11,9 +11,11 @@ final class EntityTest extends TestCase
 {
     public function testGetPathReturnsAbsolutePath()
     {
-        $file = model(FileModel::class)->createFromPath($this->testPath);
+        /** @var FileModel $model */
+        $model = model(FileModel::class);
+        $file  = $model->createFromPath($this->testPath);
 
-        $expected = $this->config->getPath() . $file->localname;
+        $expected = config('Files')->getPath() . $file->localname;
 
         $this->assertSame($expected, $file->getPath());
     }

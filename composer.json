@@ -33,7 +33,7 @@
     "require-dev": {
         "antecedent/patchwork": "^2.1",
         "codeigniter4/codeigniter4": "dev-develop",
-        "myth/auth": "dev-develop",
+        "tatter/imposter": "^1.0",
         "tatter/tools": "^1.15"
     },
     "autoload": {
@@ -52,13 +52,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/codeigniter4/CodeIgniter4",
-            "no-api": true
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/lonnieezell/myth-auth",
-            "no-api": true
+            "url": "https://github.com/codeigniter4/CodeIgniter4.git"
         },
         {
             "type": "composer",

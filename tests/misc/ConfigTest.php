@@ -23,10 +23,12 @@ final class ConfigTest extends TestCase
 
     public function testCreatesMissingStoragePath()
     {
-        $path = $this->config->getPath() . 'subdirectory/';
-        $this->config->setPath($path);
+        $config = config('Files');
 
-        $this->config->getPath();
+        $path = $config->getPath() . 'subdirectory/';
+        $config->setPath($path);
+
+        $config->getPath();
 
         $this->assertDirectoryExists($path);
         $this->assertDirectoryIsWritable($path);

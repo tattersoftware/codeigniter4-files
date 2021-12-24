@@ -18,7 +18,7 @@ final class ModelTest extends TestCase
     {
         parent::setUp();
 
-        $this->model = model(FileModel::class);
+        $this->model = model(FileModel::class); // @phpstan-ignore-line
     }
 
     public function testAddToUser()
@@ -76,18 +76,18 @@ final class ModelTest extends TestCase
         $this->seeInDatabase('files', ['filename' => $result->filename]);
     }
 
-    /*
-        public function testCreateFromPathAssignsToUser()
-        {
-            $user = $this->login();
+    public function testCreateFromPathAssignsToUser()
+    {
+        $userId = 3;
+        service('auth')->login($userId);
 
-            $this->model->createFromPath($this->testPath);
+        $this->model->createFromPath($this->testPath);
 
-            $result = $this->model->getForUser($user->id);
+        $result = $this->model->getForUser($userId);
 
-            $this->assertCount(1, $result);
-        }
-    */
+        $this->assertCount(1, $result);
+    }
+
     public function testCreateAddsThumbnail()
     {
         helper('filesystem');
@@ -97,7 +97,7 @@ final class ModelTest extends TestCase
         $array     = $file->toRawArray();
         $this->assertSame($thumbnail, $array['thumbnail']);
 
-        $path = $this->config->getPath() . 'thumbnails' . DIRECTORY_SEPARATOR . $thumbnail;
+        $path = config('Files')->getPath() . 'thumbnails' . DIRECTORY_SEPARATOR . $thumbnail;
         $this->assertFileExists($path);
     }
 

@@ -155,7 +155,7 @@ class Files extends Controller
             ]);
         }
         // Logged in, looking at another user
-        elseif ($userId !== user_id()) {
+        elseif ((int) $userId !== user_id()) {
             // Check for list permission
             if (! $this->model->mayList()) {
                 return $this->failure(403, lang('Permits.notPermitted'));

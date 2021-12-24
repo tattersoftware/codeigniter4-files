@@ -2,15 +2,17 @@
 
 namespace Tests\Support\Models;
 
-use Myth\Auth\Models\UserModel as MythModel;
+use CodeIgniter\Model;
 use Tatter\Permits\Interfaces\PermitsUserModelInterface;
 
 /**
- * An extension of Myth's UserModel that is
- * compatible with Tatter\Permits.
+ * A barebones UserModel that is compatible with Tatter\Permits.
  */
-class UserModel extends MythModel implements PermitsUserModelInterface
+class UserModel extends Model implements PermitsUserModelInterface
 {
+    protected $table      = 'users';
+    protected $primaryKey = 'id';
+
     /**
      * Returns an empty array since groups are
      * not currently implemented.
