@@ -1,10 +1,15 @@
-<?= $this->extend(config('Files')->layouts[$layout ?? 'public']) ?>
-<?= $this->section('main') ?>
+<?php $this->extend(config('Layouts')->{$layout}) ?>
+<?php $this->section('navbar') ?>
+
+	<?= view('Tatter\Files\Views\navbar') ?>
+
+<?php $this->endSection() ?>
+<?php $this->section('main') ?>
 
 	<?= view('Tatter\Files\Views\Dropzone\modal') ?>
 
-<?= $this->endSection() ?>
-<?= $this->section('footerAssets') ?>
+<?php $this->endSection() ?>
+<?php $this->section('footerAssets') ?>
 
 	<?= view(config('Files')->views['dropzone']) ?>
 
@@ -14,4 +19,4 @@ $(function() {
 });
 </script>
 
-<?= $this->endSection() ?>
+<?php $this->endSection() ?>

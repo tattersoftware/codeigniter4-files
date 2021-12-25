@@ -1,17 +1,17 @@
 <?php
 
-use Tests\Support\FilesTestCase;
+use CodeIgniter\Test\CIUnitTestCase;
 
 /**
  * @internal
  */
-final class HelperTest extends FilesTestCase
+final class HelperTest extends CIUnitTestCase
 {
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
 
-        helper('files');
+        helper(['files']);
     }
 
     /**
@@ -62,5 +62,23 @@ final class HelperTest extends FilesTestCase
             ['1m', 1024 * 1024],
             ['1g', 1024 * 1024 * 1024],
         ];
+    }
+
+    public function testMergeFileChunks()
+    {
+        $path = merge_file_chunks(
+            SUPPORTPATH . 'chunks/0',
+            SUPPORTPATH . 'chunks/1',
+            SUPPORTPATH . 'chunks/2',
+            SUPPORTPATH . 'chunks/3'
+        );
+
+        $this->assertIsString($path);
+        $this->assertFileExists($path);
+
+        $expected = 'All your base are belong to us.';
+        $result   = file_get_contents($path);
+
+        $this->assertSame($expected, $result);
     }
 }

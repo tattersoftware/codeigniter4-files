@@ -1,5 +1,7 @@
 <?php
 
+use Tatter\Files\Exceptions\FilesException;
+
 if (! function_exists('bytes2human')) {
     /**
      * Converts bytes to a human-friendly format.
@@ -52,6 +54,47 @@ if (! function_exists('max_file_upload_in_bytes')) {
 
         // Return the smallest of them, this defines the real limit
         return min($max_upload, $max_post, $memory_limit);
+    }
+}
+
+if (! function_exists('merge_file_chunks')) {
+    /**
+     * Merges the given file chunks into a single file
+     * and returns the new path.
+     *
+     * @throws FilesException
+     */
+    function merge_file_chunks(string ...$files): string
+    {
+        // Create the temp file
+        $prefix  = bin2hex(random_bytes(16));
+        $tmpfile = tempnam(sys_get_temp_dir(), $prefix);
+
+        // Open temp file for writing
+        $output = @fopen($tmpfile, 'ab');
+        if (! $output) {
+            throw FilesException::forNewFileFail($tmpfile); // @codeCoverageIgnore
+        }
+
+        // Write each chunk to the temp file
+        foreach ($files as $file) {
+            $input = @fopen($file, 'rb');
+            if (! $input) {
+                throw FilesException::forWriteFileFail($tmpfile);
+            }
+
+            // Buffered merge of chunk
+            while ($buffer = fread($input, 4096)) {
+                fwrite($output, $buffer);
+            }
+
+            fclose($input);
+        }
+
+        // close output handle
+        fclose($output);
+
+        return $tmpfile;
     }
 }
 

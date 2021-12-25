@@ -1,14 +1,26 @@
 <?php
 
 use Tatter\Files\Entities\File;
-use Tests\Support\Fakers\FileFaker;
-use Tests\Support\FilesTestCase;
+use Tatter\Files\Models\FileModel;
+use Tests\Support\TestCase;
 
 /**
  * @internal
  */
-final class ModelTest extends FilesTestCase
+final class ModelTest extends TestCase
 {
+    /**
+     * @var FileModel
+     */
+    protected $model;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->model = model(FileModel::class); // @phpstan-ignore-line
+    }
+
     public function testAddToUser()
     {
         $this->model->addToUser(7, 42);
@@ -21,8 +33,8 @@ final class ModelTest extends FilesTestCase
 
     public function testGetForUser()
     {
-        $file1 = fake(FileFaker::class);
-        $file2 = fake(FileFaker::class);
+        $file1 = fake(FileModel::class);
+        $file2 = fake(FileModel::class);
 
         $this->model->addToUser($file1->id, 10);
         $this->model->addToUser($file2->id, 10);
@@ -37,14 +49,14 @@ final class ModelTest extends FilesTestCase
 
     public function testGetForUserBuildsOnModelMethods()
     {
-        $file1 = fake(FileFaker::class);
-        $file2 = fake(FileFaker::class);
+        $file1 = fake(FileModel::class);
+        $file2 = fake(FileModel::class);
 
-        $this->model->addToUser($file1->id, 10);
-        $this->model->addToUser($file2->id, 10);
+        $this->model->addToUser($file1->id, 11);
+        $this->model->addToUser($file2->id, 11);
 
         $this->model->where(['filename' => $file2->filename]);
-        $result = $this->model->getForUser(10);
+        $result = $this->model->getForUser(11);
 
         $this->assertCount(1, $result);
         $this->assertSame($file2->id, $result[0]->id);
@@ -66,11 +78,12 @@ final class ModelTest extends FilesTestCase
 
     public function testCreateFromPathAssignsToUser()
     {
-        $user = $this->login();
+        $userId = 3;
+        service('auth')->login($userId);
 
         $this->model->createFromPath($this->testPath);
 
-        $result = $this->model->getForUser($user->id);
+        $result = $this->model->getForUser($userId);
 
         $this->assertCount(1, $result);
     }
@@ -84,7 +97,7 @@ final class ModelTest extends FilesTestCase
         $array     = $file->toRawArray();
         $this->assertSame($thumbnail, $array['thumbnail']);
 
-        $path = FileFaker::storage() . 'thumbnails' . DIRECTORY_SEPARATOR . $thumbnail;
+        $path = config('Files')->getPath() . 'thumbnails' . DIRECTORY_SEPARATOR . $thumbnail;
         $this->assertFileExists($path);
     }
 

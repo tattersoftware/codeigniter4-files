@@ -15,16 +15,15 @@ parameters:
 		- '#Cannot access property \$[a-z]+ on array\|object#'
 		- '#Cannot call method [A-Za-z]+\(\) on array\|object#'
 		- '#Unsafe usage of new static\(\)*#'
-		- '#Call to an undefined static method Config\\Services::authentication\(\)#'
-		- '#Function Patchwork\\redefine not found#'
 	universalObjectCratesClasses:
 		- CodeIgniter\Entity
 		- Faker\Generator
 	scanDirectories:
 		- vendor/codeigniter4/codeigniter4/system/Helpers
-		- vendor/myth/auth/src/Helpers
 		- vendor/tatter/alerts/src/Helpers
 		- vendor/tatter/handlers/src/Helpers
+		- vendor/tatter/imposter/src/Helpers
+		- vendor/tatter/preferences/src/Helpers
 	dynamicConstantNames:
 		- APP_NAMESPACE
 		- CI_DEBUG

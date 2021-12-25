@@ -49,7 +49,7 @@ class File extends Entity
      */
     public function getPath(): string
     {
-        $path = config('Files')->storagePath . $this->attributes['localname'];
+        $path = config('Files')->getPath() . $this->attributes['localname'];
 
         return realpath($path) ?: $path;
     }
@@ -133,7 +133,7 @@ class File extends Entity
      */
     public function getThumbnail(): string
     {
-        $path = config('Files')->storagePath . 'thumbnails' . DIRECTORY_SEPARATOR . ($this->attributes['thumbnail'] ?? '');
+        $path = config('Files')->getPath() . 'thumbnails' . DIRECTORY_SEPARATOR . ($this->attributes['thumbnail'] ?? '');
 
         if (! is_file($path)) {
             $path = self::locateDefaultThumbnail();

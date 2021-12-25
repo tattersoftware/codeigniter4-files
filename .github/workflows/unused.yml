@@ -57,4 +57,4 @@ jobs:
           COMPOSER_AUTH: ${{ secrets.COMPOSER_AUTH }}
 
       - name: Detect unused packages
-        run: composer-unused -vvv --profile --ansi --no-interaction --no-progress --excludePackage=php --excludePackage=tatter/alerts --excludePackage=tatter/assets --excludePackage=tatter/audits
+        run: composer-unused -vvv --profile --ansi --no-interaction --no-progress --excludePackage=php --excludePackage=tatter/alerts --excludePackage=tatter/assets --excludePackage=tatter/audits --excludePackage=tatter/preferences --excludePackage=tatter/thumbnails

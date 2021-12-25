@@ -6,15 +6,14 @@ use CodeIgniter\Controller;
 use CodeIgniter\Events\Events;
 use CodeIgniter\HTTP\Exceptions\HTTPException;
 use CodeIgniter\HTTP\RedirectResponse;
-use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Psr\Log\LoggerInterface;
 use Tatter\Exports\Exceptions\ExportsException;
 use Tatter\Files\Config\Files as FilesConfig;
 use Tatter\Files\Entities\File;
 use Tatter\Files\Exceptions\FilesException;
 use Tatter\Files\Models\ExportModel;
 use Tatter\Files\Models\FileModel;
+use Throwable;
 
 class Files extends Controller
 {
@@ -35,7 +34,7 @@ class Files extends Controller
     /**
      * Helpers to load.
      */
-    protected $helpers = ['alerts', 'files', 'handlers', 'html', 'text'];
+    protected $helpers = ['alerts', 'files', 'handlers', 'html', 'preferences', 'text'];
 
     /**
      * Overriding data for views.
@@ -45,36 +44,25 @@ class Files extends Controller
     protected $data = [];
 
     /**
-     * Preloads the configuration and verifies the storage directory.
-     * Parameters are mostly for testing purposes.
+     * Validation for Preferences.
      *
-     * @throws FilesException
+     * @var array<string,string>
+     */
+    protected $preferenceRules = [
+        'sort'    => 'in_list[filename,localname,clientname,type,size,created_at,updated_at,deleted_at]',
+        'order'   => 'in_list[asc,desc]',
+        'format'  => 'in_list[cards,list,select]',
+        'perPage' => 'is_natural_no_zero',
+    ];
+
+    /**
+     * Preloads the configuration and model.
+     * Parameters are mostly for testing purposes.
      */
     public function __construct(?FilesConfig $config = null, ?FileModel $model = null)
     {
         $this->config = $config ?? config('Files');
-
-        // Use the short model name so a child may be loaded first
-        $this->model = $model ?? model('FileModel'); // @phpstan-ignore-line
-
-        // Verify the storage directory
-        FileModel::storage();
-    }
-
-    /**
-     * Verify authentication is configured correctly *after* parent calls loadHelpers().
-     *
-     * @throws \CodeIgniter\HTTP\Exceptions\HTTPException
-     *
-     * @see https://codeigniter4.github.io/CodeIgniter4/extending/authentication.html
-     */
-    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
-    {
-        parent::initController($request, $response, $logger);
-
-        if (! function_exists('user_id') || ! empty($this->config->failNoAuth)) {
-            throw new FilesException(lang('Files.noAuth'));
-        }
+        $this->model  = $model ?? model(FileModel::class); // @phpstan-ignore-line
     }
 
     //--------------------------------------------------------------------
@@ -151,10 +139,10 @@ class Files extends Controller
     public function user($userId = null)
     {
         // Figure out user & access
-        $userId = $userId ?? user_id() ?? 0;
+        $userId = $userId ?? user_id();
 
         // Not logged in
-        if (! $userId) {
+        if ($userId === null) {
             // Check for list permission
             if (! $this->model->mayList()) {
                 return $this->failure(403, lang('Permits.notPermitted'));
@@ -163,11 +151,11 @@ class Files extends Controller
             $this->setData([
                 'access'   => 'display',
                 'title'    => 'All Files',
-                'username' => '',
+                'userName' => '',
             ]);
         }
         // Logged in, looking at another user
-        elseif ($userId !== user_id()) {
+        elseif ((int) $userId !== user_id()) {
             // Check for list permission
             if (! $this->model->mayList()) {
                 return $this->failure(403, lang('Permits.notPermitted'));
@@ -176,7 +164,7 @@ class Files extends Controller
             $this->setData([
                 'access'   => $this->model->mayAdmin() ? 'manage' : 'display',
                 'title'    => 'User Files',
-                'username' => 'User',
+                'userName' => 'User',
             ]);
         }
         // Looking at own files
@@ -184,7 +172,7 @@ class Files extends Controller
             $this->setData([
                 'access'   => 'manage',
                 'title'    => 'My Files',
-                'username' => 'My',
+                'userName' => 'My',
             ]);
         }
 
@@ -388,14 +376,23 @@ class Files extends Controller
                 return '';
             }
 
+            // Get chunks from target directory
+            helper('filesystem');
+            $chunks = get_filenames($chunkDir, true);
+            if (empty($chunks)) {
+                throw FilesException::forNoChunks($chunkDir);
+            }
+
             // Merge the chunks
             try {
-                $path = $this->mergeChunks($chunkDir);
-            } catch (FilesException $e) {
+                $path = merge_file_chunks(...$chunks);
+            } catch (Throwable $e) {
                 log_message('error', $e->getMessage());
 
                 return $this->failure(400, $e->getMessage());
             }
+
+            log_message('debug', 'Merged ' . count($chunks) . ' chunks to ' . $path);
         }
 
         // Get additional post data to pass to model
@@ -416,55 +413,6 @@ class Files extends Controller
         }
 
         return redirect()->back()->with('message', lang('File.uploadSucces', [$file->clientname]));
-    }
-
-    /**
-     * Merges all chunks in a target directory into a single file, returns the file path.
-     *
-     * @param mixed $dir
-     *
-     * @throws FilesException
-     */
-    protected function mergeChunks($dir): string
-    {
-        helper('filesystem');
-        helper('text');
-
-        // Get chunks from target directory
-        $chunks = get_filenames($dir, true);
-        if (empty($chunks)) {
-            throw FilesException::forNoChunks($dir);
-        }
-
-        // Create the temp file
-        $tmpfile = tempnam(sys_get_temp_dir(), random_string());
-        log_message('debug', 'Merging ' . count($chunks) . ' chunks to ' . $tmpfile);
-
-        // Open temp file for writing
-        $output = @fopen($tmpfile, 'ab');
-        if (! $output) {
-            throw FilesException::forNewFileFail($tmpfile);
-        }
-
-        // Write each chunk to the temp file
-        foreach ($chunks as $file) {
-            $input = @fopen($file, 'rb');
-            if (! $input) {
-                throw FilesException::forWriteFileFail($tmpfile);
-            }
-
-            // Buffered merge of chunk
-            while ($buffer = fread($input, 4096)) {
-                fwrite($output, $buffer);
-            }
-
-            fclose($input);
-        }
-
-        // close output handle
-        fclose($output);
-
-        return $tmpfile;
     }
 
     /**
@@ -503,7 +451,7 @@ class Files extends Controller
         model(ExportModel::class)->insert([
             'handler' => $slug,
             'file_id' => $file->id,
-            'user_id' => user_id() ?: null,
+            'user_id' => user_id(),
         ]);
 
         // Pass to the handler
@@ -534,8 +482,6 @@ class Files extends Controller
         return $this->response->setHeader('Content-type', 'image/jpeg')->setBody(file_get_contents($path));
     }
 
-    //--------------------------------------------------------------------
-
     /**
      * Handles failures.
      *
@@ -553,6 +499,8 @@ class Files extends Controller
 
         return redirect()->back()->with('error', $message);
     }
+
+    //--------------------------------------------------------------------
 
     /**
      * Sets a value in $this->data, overwrites optional.
@@ -579,124 +527,57 @@ class Files extends Controller
      */
     protected function setDefaults(): self
     {
-        return $this->setData([
+        $this->setData([
             'source'   => 'index',
-            'layout'   => 'public',
+            'layout'   => 'files',
             'files'    => null,
             'selected' => explode(',', $this->request->getVar('selected') ?? ''),
             'userId'   => null,
-            'username' => '',
+            'userName' => '',
             'ajax'     => $this->request->isAJAX(),
             'search'   => $this->request->getVar('search'),
-            'sort'     => $this->getSort(),
-            'order'    => $this->getOrder(),
-            'format'   => $this->getFormat(),
-            'perPage'  => $this->getPerPage(),
             'page'     => $this->request->getVar('page'),
             'pager'    => null,
             'access'   => $this->model->mayAdmin() ? 'manage' : 'display',
             'exports'  => $this->getExports(),
             'bulks'    => handlers()->where(['bulk' => 1])->findAll(),
         ]);
+
+        // Add preferences
+        $this->setPreferences();
+
+        foreach (['Files.sort', 'Files.order', 'Files.format', 'Pager.perPage'] as $preference) {
+            [,$field] = explode('.', $preference);
+            $this->setData([$field => preference($preference)]);
+        }
+
+        return $this;
     }
 
     /**
-     * Determines the sort field.
+     * Filters, validates, and sets preferences based on input values.
+     *
+     * @return $this
      */
-    protected function getSort(): string
+    protected function setPreferences(): self
     {
-        // Check for a request, then load from Settings
-        $sorts = [
-            $this->request->getVar('sort'),
-            service('settings')->filesSort,
-        ];
+        // Filter input on allowed fields
+        $validation = service('validation');
 
-        foreach ($sorts as $sort) {
-            // Validate
-            if (in_array($sort, $this->model->allowedFields, true)) { // @phpstan-ignore-line
-                // Update user setting with the new preference
-                service('settings')->filesSort = $sort;
+        foreach ($this->preferenceRules as $field => $rule) {
+            if (null !== $value = $this->request->getVar($field)) {
+                if ($validation->check($value, $rule)) {
+                    // Special case for perPage
+                    $preference = $field === 'perPage'
+                        ? 'Pager.' . $field
+                        : 'Files.' . $field;
 
-                return $sort;
+                    preference($preference, $value);
+                }
             }
         }
 
-        return 'filename';
-    }
-
-    /**
-     * Determines the sort order.
-     */
-    protected function getOrder(): string
-    {
-        // Check for a request, then load from Settings
-        $orders = [
-            $this->request->getVar('order'),
-            service('settings')->filesOrder,
-        ];
-
-        foreach ($orders as $order) {
-            $order = strtolower($order);
-
-            // Validate
-            if (in_array($order, ['asc', 'desc'], true)) {
-                // Update user setting with the new preference
-                service('settings')->filesOrder = $order;
-
-                return $order;
-            }
-        }
-
-        return 'asc';
-    }
-
-    /**
-     * Determines items per page.
-     */
-    protected function getPerPage(): int
-    {
-        // Check for a request, then load from Settings
-        $nums = [
-            $this->request->getVar('perPage'),
-            service('settings')->perPage,
-        ];
-
-        foreach ($nums as $num) {
-            // Validate
-            if (is_numeric($num) && (int) $num > 0) {
-                // Update user setting with the new preference
-                service('settings')->perPage = $num;
-
-                return $num;
-            }
-        }
-
-        return 10;
-    }
-
-    /**
-     * Determines the display format.
-     */
-    protected function getFormat(): string
-    {
-        // Check for a request, then load from Settings, fallback to the config default
-        $formats = [
-            $this->request->getVar('format'),
-            service('settings')->filesFormat,
-            $this->config->defaultFormat,
-        ];
-
-        foreach ($formats as $format) {
-            // Validate
-            if (in_array($format, ['cards', 'list', 'select'], true)) {
-                // Update user setting with the new preference
-                service('settings')->filesFormat = $format;
-
-                return $format;
-            }
-        }
-
-        return 'cards';
+        return $this;
     }
 
     /**

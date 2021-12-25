@@ -2,17 +2,12 @@
 
 namespace Tatter\Files\Config;
 
-/**
- * Class Registrar
- *
- * Provides a basic registrar class for testing BaseConfig registration functions.
- */
 class Registrar
 {
     /**
-     * Override database config
+     * Adds the Files option to available Pager templates.
      *
-     * @return array
+     * @return array<string,mixed>
      */
     public static function Pager()
     {

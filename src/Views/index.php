@@ -1,5 +1,10 @@
-<?= $this->extend(config('Files')->layouts[$layout ?? 'public']) ?>
-<?= $this->section('main') ?>
+<?php $this->extend(config('Layouts')->{$layout}) ?>
+<?php $this->section('navbar') ?>
+
+	<?= view('Tatter\Files\Views\navbar') ?>
+
+<?php $this->endSection() ?>
+<?php $this->section('main') ?>
 
 	<div class="row">
 		<div class="col">
@@ -17,7 +22,7 @@
 				</div>
 			</div>
 
-			<h1><?= $access === 'manage' ? 'Manage' : 'Browse' ?> <?= $username ?? '' ?> Files</h1>
+			<h1><?= $access === 'manage' ? 'Manage' : 'Browse' ?> <?= $userName ?? '' ?> Files</h1>
 
 			<form class="form-inline mb-3" name="files-search" method="get" action="<?= current_url() ?>">
 				<div class="input-group">

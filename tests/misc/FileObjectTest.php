@@ -1,12 +1,12 @@
 <?php
 
 use Tatter\Files\Structures\FileObject;
-use Tests\Support\FilesTestCase;
+use Tests\Support\TestCase;
 
 /**
  * @internal
  */
-final class FileObjectTest extends FilesTestCase
+final class FileObjectTest extends TestCase
 {
     public function testSetBasename()
     {

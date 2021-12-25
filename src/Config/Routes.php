@@ -4,8 +4,13 @@ if (empty(config('Files')->routeFiles)) {
     return;
 }
 
+$options = [
+    'filter'    => 'assets:\Tatter\Files\Bundles\FilesBundle',
+    'namespace' => '\Tatter\Files\Controllers',
+];
+
 // Routes to Files controller
-$routes->group('files', ['namespace' => '\Tatter\Files\Controllers'], static function ($routes) {
+$routes->group('files', $options, static function ($routes) {
     $routes->get('/', 'Files::index');
     $routes->get('user', 'Files::user');
     $routes->get('user/(:any)', 'Files::user/$1');

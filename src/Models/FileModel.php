@@ -5,13 +5,13 @@ namespace Tatter\Files\Models;
 use CodeIgniter\Files\File as CIFile;
 use CodeIgniter\Model;
 use Config\Mimes;
+use Faker\Generator;
 use Tatter\Files\Entities\File;
-use Tatter\Files\Exceptions\FilesException;
+use Tatter\Permits\Traits\PermitsTrait;
 
 class FileModel extends Model
 {
-    use \Tatter\Audits\Traits\AuditsTrait;
-    use \Tatter\Permits\Traits\PermitsTrait;
+    use PermitsTrait;
 
     protected $table          = 'files';
     protected $primaryKey     = 'id';
@@ -33,43 +33,11 @@ class FileModel extends Model
         'size' => 'permit_empty|is_natural',
     ];
 
-    // Audits
-    protected $afterInsert = ['auditInsert'];
-    protected $afterUpdate = ['auditUpdate'];
-    protected $afterDelete = ['auditDelete'];
-
     // Permits
     protected $mode       = 04660;
     protected $userKey    = 'user_id';
     protected $pivotKey   = 'file_id';
     protected $usersPivot = 'files_users';
-
-    //--------------------------------------------------------------------
-
-    /**
-     * Normalizes and creates (if necessary) the storage and thumbnail paths.
-     *
-     * @throws FilesException
-     *
-     * @return string The normalized storage path
-     */
-    public static function storage(): string
-    {
-        // Normalize the path
-        $storage = realpath(config('Files')->storagePath) ?: config('Files')->storagePath;
-        $storage = rtrim($storage, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-        if (! is_dir($storage) && ! @mkdir($storage, 0775, true)) {
-            throw FilesException::forDirFail($storage);
-        }
-
-        // Normalize the path
-        $thumbnails = $storage . 'thumbnails';
-        if (! is_dir($thumbnails) && ! @mkdir($thumbnails, 0775, true)) {
-            throw FilesException::forDirFail($thumbnails); // @codeCoverageIgnore
-        }
-
-        return $storage;
-    }
 
     //--------------------------------------------------------------------
 
@@ -139,7 +107,7 @@ class FileModel extends Model
         $row = array_merge($row, $data);
 
         // Normalize paths
-        $storage  = self::storage();
+        $storage  = config('Files')->getPath();
         $filePath = $file->getRealPath() ?: (string) $file;
 
         // Determine if we need to move the file
@@ -183,5 +151,22 @@ class FileModel extends Model
 
         // Return the File entity
         return $this->find($fileId);
+    }
+
+    /**
+     * Faked data for Fabricator.
+     */
+    public function fake(Generator &$faker): File
+    {
+        $name = $faker->company . '.' . $faker->fileExtension;
+
+        return new File([
+            'filename'   => $name,
+            'localname'  => $faker->md5,
+            'clientname' => $name,
+            'type'       => $faker->mimeType,
+            'size'       => mt_rand(1000, 4000000),
+            'thumbnail'  => $faker->text(5000),
+        ]);
     }
 }
