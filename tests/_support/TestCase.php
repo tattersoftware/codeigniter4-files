@@ -8,6 +8,10 @@ use CodeIgniter\Test\DatabaseTestTrait;
 use org\bovigo\vfs\vfsStream;
 use Tatter\Assets\Test\AssetsTestTrait;
 use Tatter\Files\Config\Files;
+use Tatter\Files\Models\FileModel;
+use Tatter\Imposter\Entities\User;
+use Tatter\Imposter\Factories\ImposterFactory;
+use Tatter\Users\UserProvider;
 
 /**
  * @internal
@@ -17,7 +21,8 @@ abstract class TestCase extends CIUnitTestCase
     use AssetsTestTrait;
     use DatabaseTestTrait;
 
-    protected $refresh = false;
+    protected $refreshVfs = false;
+    protected $refresh    = false;
     protected $namespace;
 
     /**
@@ -25,11 +30,17 @@ abstract class TestCase extends CIUnitTestCase
      */
     protected string $testPath;
 
+    /**
+     * @var FileModel
+     */
+    protected $model;
+
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
 
         helper(['auth', 'files', 'preferences']);
+        UserProvider::addFactory(ImposterFactory::class, ImposterFactory::class);
     }
 
     protected function setUp(): void
@@ -38,22 +49,50 @@ abstract class TestCase extends CIUnitTestCase
 
         parent::setUp();
 
-        $_REQUEST = [];
         $_POST    = [];
         $_GET     = [];
         $_FILES   = [];
+        $_REQUEST = [];
 
-        // Copy the files to VFS
-        vfsStream::copyFromFileSystem(SUPPORTPATH . 'VFS', $this->root);
-
-        // "vendor" gets ignored by .gitignore so rename it after copying to VFS
-        $path = $this->root->url() . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR;
-        rename($this->root->url() . '/storage', $path);
-        $this->testPath = $path . 'image.jpg';
+        // Make sure all files are on a single page
+        $_REQUEST['perPage'] = 200;
 
         // Force Files config to the virtual path
+        $path   = self::$root->url() . DIRECTORY_SEPARATOR;
         $config = config('Files');
         $config->setPath($path);
         Factories::injectMock('config', 'Files', $config);
+
+        // Copy the files to VFS (if necessary)
+        $this->testPath = $config->getPath() . 'image.jpg';
+        if (! is_file($this->testPath)) {
+            vfsStream::copyFromFileSystem(SUPPORTPATH . 'VFS', self::$root);
+        }
+
+        // Set up the model
+        $this->model = model(FileModel::class); // @phpstan-ignore-line
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        ImposterFactory::reset();
+    }
+
+    /**
+     * Creates a test User with some files.
+     *
+     * @return array Tuple of [User, File]
+     */
+    protected function createUserWithFile(): array
+    {
+        $user     = ImposterFactory::fake();
+        $user->id = ImposterFactory::add($user);
+
+        $file = fake(FileModel::class);
+        $this->model->addToUser($file->id, $user->id);
+
+        return [$user, $file];
     }
 }

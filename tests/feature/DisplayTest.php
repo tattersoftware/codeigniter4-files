@@ -8,7 +8,8 @@ use Tests\Support\FeatureTestCase;
  */
 final class DisplayTest extends FeatureTestCase
 {
-    protected $refresh = true;
+    protected $refresh    = true;
+    protected $refreshVfs = true;
 
     public function testNoFiles()
     {
@@ -144,8 +145,6 @@ final class DisplayTest extends FeatureTestCase
 
     public function testPages()
     {
-        $_REQUEST['perPage'] = 2;
-
         for ($i = 0; $i < 2; $i++) {
             $file = fake(FileModel::class);
         }
@@ -156,7 +155,8 @@ final class DisplayTest extends FeatureTestCase
         ]);
 
         // Last file should be on the next page
-        $result = $this->get('files');
+        $_REQUEST['perPage'] = 2;
+        $result              = $this->get('files');
 
         $result->assertStatus(200);
         $result->assertDontSee($file->filename);

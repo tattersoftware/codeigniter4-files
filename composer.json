@@ -26,12 +26,11 @@
         "tatter/alerts": "^2.0",
         "tatter/exports": "^2.0",
         "tatter/frontend": "^1.0",
-        "tatter/permits": "^2.0",
+        "tatter/permits": "^3.0",
         "tatter/preferences": "^1.0",
         "tatter/thumbnails": "^1.2"
     },
     "require-dev": {
-        "antecedent/patchwork": "^2.1",
         "codeigniter4/devkit": "^1.0",
         "codeigniter4/framework": "^4.1",
         "tatter/imposter": "^1.0"
