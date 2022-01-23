@@ -24,8 +24,6 @@ class Files extends Controller
 
     /**
      * The model to use.
-     *
-     * @var FileModel
      */
     protected FileModel $model;
 
