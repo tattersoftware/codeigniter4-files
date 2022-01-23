@@ -17,10 +17,8 @@ final class ControllerTest extends TestCase
 
     /**
      * Our Controller set by the trait
-     *
-     * @var Files|null
      */
-    protected $controller;
+    protected ?Files $controller = null;
 
     protected function setUp(): void
     {
@@ -46,7 +44,7 @@ final class ControllerTest extends TestCase
         ];
 
         $method = $this->getPrivateMethodInvoker($this->controller, 'setPreferences');
-        $result = $method();
+        $method();
 
         $this->assertSame('size', preference('Files.sort'));
         $this->assertSame('desc', preference('Files.order'));
@@ -65,7 +63,7 @@ final class ControllerTest extends TestCase
         ];
 
         $method = $this->getPrivateMethodInvoker($this->controller, 'setPreferences');
-        $result = $method();
+        $method();
 
         $this->assertSame($config->sort, preference('Files.sort'));
         $this->assertSame($config->order, preference('Files.order'));

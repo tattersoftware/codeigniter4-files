@@ -1,7 +1,8 @@
 <?php
 
-use Tatter\Files\Exceptions\FilesException;
+namespace Tatter\Files\Helpers;
 
+use Tatter\Files\Exceptions\FilesException;
 if (! function_exists('bytes2human')) {
     /**
      * Converts bytes to a human-friendly format.
@@ -33,7 +34,6 @@ if (! function_exists('bytes2human')) {
         return round($bytes, 1) . ' ' . $unit;
     }
 }
-
 if (! function_exists('max_file_upload_in_bytes')) {
     /**
      * Determines the maximum allowed file size for uploads.
@@ -56,7 +56,6 @@ if (! function_exists('max_file_upload_in_bytes')) {
         return min($max_upload, $max_post, $memory_limit);
     }
 }
-
 if (! function_exists('merge_file_chunks')) {
     /**
      * Merges the given file chunks into a single file
@@ -97,7 +96,6 @@ if (! function_exists('merge_file_chunks')) {
         return $tmpfile;
     }
 }
-
 if (! function_exists('return_bytes')) {
     /**
      * Converts ini-style sizes to bytes.
@@ -118,7 +116,7 @@ if (! function_exists('return_bytes')) {
             // If it is not one of those modifiers then it was numerical bytes, add the final digit back
             // no break
             default:
-                $num = (int) ((string) $num . $unit);
+                $num = (int) ($num . $unit);
         }
 
         return $num;

@@ -139,7 +139,7 @@ class Files extends Controller
     public function user($userId = null)
     {
         // Figure out user & access
-        $userId = $userId ?? user_id();
+        $userId ??= user_id();
 
         // Not logged in
         if ($userId === null) {
@@ -379,7 +379,7 @@ class Files extends Controller
             // Get chunks from target directory
             helper('filesystem');
             $chunks = get_filenames($chunkDir, true);
-            if (empty($chunks)) {
+            if ($chunks === []) {
                 throw FilesException::forNoChunks($chunkDir);
             }
 
@@ -392,13 +392,13 @@ class Files extends Controller
                 return $this->failure(400, $e->getMessage());
             }
 
-            log_message('debug', 'Merged ' . count($chunks) . ' chunks to ' . $path);
+            log_message('debug', 'Merged ' . (is_countable($chunks) ? count($chunks) : 0) . ' chunks to ' . $path);
         }
 
         // Get additional post data to pass to model
         $data               = $this->request->getPost();
-        $data['filename']   = $data['filename'] ?? $upload->getClientName();
-        $data['clientname'] = $data['clientname'] ?? $upload->getClientName();
+        $data['filename'] ??= $upload->getClientName();
+        $data['clientname'] ??= $upload->getClientName();
 
         // Accept the file
         $file = $this->model->createFromPath($path ?? $upload->getRealPath(), $data);
@@ -473,19 +473,13 @@ class Files extends Controller
      */
     public function thumbnail($fileId): ResponseInterface
     {
-        if ($file = $this->model->find($fileId)) {
-            $path = $file->getThumbnail();
-        } else {
-            $path = File::locateDefaultThumbnail();
-        }
+        $path = ($file = $this->model->find($fileId)) ? $file->getThumbnail() : File::locateDefaultThumbnail();
 
         return $this->response->setHeader('Content-type', 'image/jpeg')->setBody(file_get_contents($path));
     }
 
     /**
      * Handles failures.
-     *
-     * @return RedirectResponse|ResponseInterface
      */
     protected function failure(int $code, string $message, ?bool $isAjax = null): ResponseInterface
     {
@@ -511,11 +505,7 @@ class Files extends Controller
      */
     protected function setData(array $data, bool $overwrite = false): self
     {
-        if ($overwrite) {
-            $this->data = array_merge($this->data, $data);
-        } else {
-            $this->data = array_merge($data, $this->data);
-        }
+        $this->data = $overwrite ? array_merge($this->data, $data) : array_merge($data, $this->data);
 
         return $this;
     }
@@ -565,16 +555,17 @@ class Files extends Controller
         $validation = service('validation');
 
         foreach ($this->preferenceRules as $field => $rule) {
-            if (null !== $value = $this->request->getVar($field)) {
-                if ($validation->check($value, $rule)) {
-                    // Special case for perPage
-                    $preference = $field === 'perPage'
-                        ? 'Pager.' . $field
-                        : 'Files.' . $field;
-
-                    preference($preference, $value);
-                }
+            if (null === ($value = $this->request->getVar($field))) {
+                continue;
             }
+            if (!$validation->check($value, $rule)) {
+                continue;
+            }
+            // Special case for perPage
+            $preference = $field === 'perPage'
+                ? 'Pager.' . $field
+                : 'Files.' . $field;
+            preference($preference, $value);
         }
 
         return $this;

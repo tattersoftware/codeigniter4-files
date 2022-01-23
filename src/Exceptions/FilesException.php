@@ -2,9 +2,10 @@
 
 namespace Tatter\Files\Exceptions;
 
+use RuntimeException;
 use CodeIgniter\Exceptions\ExceptionInterface;
 
-class FilesException extends \RuntimeException implements ExceptionInterface
+class FilesException extends RuntimeException implements ExceptionInterface
 {
     public static function forDirFail($dir)
     {

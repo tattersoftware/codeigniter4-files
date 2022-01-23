@@ -1,5 +1,7 @@
 <?php
 
+namespace Tatter\Files\Language\en;
+
 return [
     // Exceptions
     'noAuth'        => 'Missing dependency: authentication function user_id()',

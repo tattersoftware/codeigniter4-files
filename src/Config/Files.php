@@ -85,7 +85,7 @@ class Files extends BaseConfig
         }
 
         // Normalize the storage path
-        $this->path = realpath($storage) ?: $storage;
+        $storage    = realpath($storage) ?: $storage;
         $this->path = rtrim($storage, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         // Check or create the thumbnails subdirectory

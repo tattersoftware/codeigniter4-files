@@ -1,14 +1,14 @@
 <?php
 
+namespace Tatter\Files\Config;
+
 if (empty(config('Files')->routeFiles)) {
     return;
 }
-
 $options = [
     'filter'    => 'assets:\Tatter\Files\Bundles\FilesBundle',
     'namespace' => '\Tatter\Files\Controllers',
 ];
-
 // Routes to Files controller
 $routes->group('files', $options, static function ($routes) {
     $routes->get('/', 'Files::index');
