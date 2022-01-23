@@ -17,8 +17,10 @@ final class ControllerTest extends TestCase
 
     /**
      * Our Controller set by the trait
+     *
+     * @var Files|null
      */
-    protected ?Files $controller = null;
+    protected $controller;
 
     protected function setUp(): void
     {

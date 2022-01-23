@@ -386,7 +386,7 @@ class Files extends Controller
                 return $this->failure(400, $e->getMessage());
             }
 
-            log_message('debug', 'Merged ' . (is_countable($chunks) ? count($chunks) : 0) . ' chunks to ' . $path);
+            log_message('debug', 'Merged ' . count($chunks) . ' chunks to ' . $path);
         }
 
         // Get additional post data to pass to model

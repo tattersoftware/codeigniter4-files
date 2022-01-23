@@ -13,9 +13,7 @@ $finder = Finder::create()
     ->exclude('build')
     ->append([__FILE__]);
 
-$overrides = [
-    'phpdoc_to_property_type' => true,
-];
+$overrides = [];
 
 $options = [
     'finder'    => $finder,

@@ -3,7 +3,6 @@
 namespace Tests\Support;
 
 use CodeIgniter\Config\Factories;
-use CodeIgniter\Router\RouteCollection;
 use CodeIgniter\Test\FeatureTestTrait;
 use Tests\Support\Models\UserModel;
 
@@ -15,21 +14,9 @@ abstract class FeatureTestCase extends TestCase
     use FeatureTestTrait;
 
     /**
-     * If present, will override application
-     * routes when using call().
-     */
-    protected RouteCollection $routes;
-
-    /**
-     * Values to be set in the SESSION global
-     * before running the test.
-     */
-    protected array $session = [];
-
-    /**
      * Enabled auto clean op buffer after request call
      */
-    protected bool $clean = true;
+    protected $clean = true;
 
     protected function setUp(): void
     {

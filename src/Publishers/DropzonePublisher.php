@@ -6,14 +6,14 @@ use Tatter\Frontend\FrontendPublisher;
 
 class DropzonePublisher extends FrontendPublisher
 {
-    protected string $source = 'vendor/enyo/dropzone/dist';
+    protected $source = 'vendor/enyo/dropzone/dist';
 
     /**
      * Destination path relative to AssetsConfig::directory.
      *
      * @see FrontendPublisher::__construct()
      */
-    protected string $path = 'dropzone';
+    protected $path = 'dropzone';
 
     /**
      * Reads files from the sources and copies them out to their destinations.
