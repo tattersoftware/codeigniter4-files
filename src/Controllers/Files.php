@@ -19,17 +19,13 @@ class Files extends Controller
 {
     /**
      * Files config.
-     *
-     * @var FilesConfig
      */
-    protected $config;
+    protected FilesConfig $config;
 
     /**
      * The model to use, may be a child of this library's.
-     *
-     * @var FileModel
      */
-    protected $model;
+    protected FileModel $model;
 
     /**
      * Helpers to load.
@@ -38,17 +34,15 @@ class Files extends Controller
 
     /**
      * Overriding data for views.
-     *
-     * @var array
      */
-    protected $data = [];
+    protected array $data = [];
 
     /**
      * Validation for Preferences.
      *
      * @var array<string,string>
      */
-    protected $preferenceRules = [
+    protected array $preferenceRules = [
         'sort'    => 'in_list[filename,localname,clientname,type,size,created_at,updated_at,deleted_at]',
         'order'   => 'in_list[asc,desc]',
         'format'  => 'in_list[cards,list,select]',
@@ -139,7 +133,7 @@ class Files extends Controller
     public function user($userId = null)
     {
         // Figure out user & access
-        $userId = $userId ?? user_id();
+        $userId ??= user_id();
 
         // Not logged in
         if ($userId === null) {
@@ -379,7 +373,7 @@ class Files extends Controller
             // Get chunks from target directory
             helper('filesystem');
             $chunks = get_filenames($chunkDir, true);
-            if (empty($chunks)) {
+            if ($chunks === []) {
                 throw FilesException::forNoChunks($chunkDir);
             }
 
@@ -396,9 +390,9 @@ class Files extends Controller
         }
 
         // Get additional post data to pass to model
-        $data               = $this->request->getPost();
-        $data['filename']   = $data['filename'] ?? $upload->getClientName();
-        $data['clientname'] = $data['clientname'] ?? $upload->getClientName();
+        $data = $this->request->getPost();
+        $data['filename'] ??= $upload->getClientName();
+        $data['clientname'] ??= $upload->getClientName();
 
         // Accept the file
         $file = $this->model->createFromPath($path ?? $upload->getRealPath(), $data);
@@ -473,19 +467,13 @@ class Files extends Controller
      */
     public function thumbnail($fileId): ResponseInterface
     {
-        if ($file = $this->model->find($fileId)) {
-            $path = $file->getThumbnail();
-        } else {
-            $path = File::locateDefaultThumbnail();
-        }
+        $path = ($file = $this->model->find($fileId)) ? $file->getThumbnail() : File::locateDefaultThumbnail();
 
         return $this->response->setHeader('Content-type', 'image/jpeg')->setBody(file_get_contents($path));
     }
 
     /**
      * Handles failures.
-     *
-     * @return RedirectResponse|ResponseInterface
      */
     protected function failure(int $code, string $message, ?bool $isAjax = null): ResponseInterface
     {
@@ -511,11 +499,7 @@ class Files extends Controller
      */
     protected function setData(array $data, bool $overwrite = false): self
     {
-        if ($overwrite) {
-            $this->data = array_merge($this->data, $data);
-        } else {
-            $this->data = array_merge($data, $this->data);
-        }
+        $this->data = $overwrite ? array_merge($this->data, $data) : array_merge($data, $this->data);
 
         return $this;
     }
@@ -565,16 +549,17 @@ class Files extends Controller
         $validation = service('validation');
 
         foreach ($this->preferenceRules as $field => $rule) {
-            if (null !== $value = $this->request->getVar($field)) {
-                if ($validation->check($value, $rule)) {
-                    // Special case for perPage
-                    $preference = $field === 'perPage'
-                        ? 'Pager.' . $field
-                        : 'Files.' . $field;
-
-                    preference($preference, $value);
-                }
+            if (null === ($value = $this->request->getVar($field))) {
+                continue;
             }
+            if (! $validation->check($value, $rule)) {
+                continue;
+            }
+            // Special case for perPage
+            $preference = $field === 'perPage'
+                ? 'Pager.' . $field
+                : 'Files.' . $field;
+            preference($preference, $value);
         }
 
         return $this;

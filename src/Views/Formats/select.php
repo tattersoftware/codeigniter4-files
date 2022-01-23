@@ -2,7 +2,7 @@
 	<?php if (empty($files)): ?>
 	<p>No files to display.</p>
 	<?php else: ?>
-	<?php $selected = $selected ?? []; ?>
+	<?php $selected ??= []; ?>
 	<table class="table table-sm table-striped">
 		<thead>
 			<tr>

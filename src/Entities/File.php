@@ -17,10 +17,8 @@ class File extends Entity
 
     /**
      * Resolved path to the default thumbnail
-     *
-     * @var string|null
      */
-    protected static $defaultThumbnail;
+    protected static ?string $defaultThumbnail;
 
     /**
      * Returns the absolute path to the configured default thumbnail
@@ -62,26 +60,18 @@ class File extends Entity
     public function getExtension($method = ''): string
     {
         if ($this->attributes['type'] !== 'application/octet-stream') {
-            if (! $method || $method === 'type') {
-                if ($extension = Mimes::guessExtensionFromType($this->attributes['type'])) {
-                    return $extension;
-                }
+            if ((! $method || $method === 'type') && ($extension = Mimes::guessExtensionFromType($this->attributes['type']))) {
+                return $extension;
             }
 
-            if (! $method || $method === 'mime') {
-                if ($file = $this->getObject()) {
-                    if ($extension = $file->guessExtension()) {
-                        return $extension;
-                    }
-                }
+            if ((! $method || $method === 'mime') && ($file = $this->getObject()) && ($extension = $file->guessExtension())) {
+                return $extension;
             }
         }
 
         foreach (['clientname', 'localname', 'filename'] as $attribute) {
-            if (! $method || $method === $attribute) {
-                if ($extension = pathinfo($this->attributes[$attribute], PATHINFO_EXTENSION)) {
-                    return $extension;
-                }
+            if ((! $method || $method === $attribute) && ($extension = pathinfo($this->attributes[$attribute], PATHINFO_EXTENSION))) {
+                return $extension;
             }
         }
 

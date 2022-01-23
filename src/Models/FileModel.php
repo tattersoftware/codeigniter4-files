@@ -8,6 +8,7 @@ use Config\Mimes;
 use Faker\Generator;
 use Tatter\Files\Entities\File;
 use Tatter\Permits\Traits\PermitsTrait;
+use Throwable;
 
 class FileModel extends Model
 {
@@ -139,7 +140,7 @@ class FileModel extends Model
                 $this->update($fileId, [
                     'thumbnail' => $thumbnail,
                 ]);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 log_message('error', $e->getMessage());
                 log_message('error', 'Unable to create thumbnail for ' . $row['filename']);
 
@@ -165,7 +166,7 @@ class FileModel extends Model
             'localname'  => $faker->md5,
             'clientname' => $name,
             'type'       => $faker->mimeType,
-            'size'       => mt_rand(1000, 4000000),
+            'size'       => random_int(1000, 4_000_000),
             'thumbnail'  => $faker->text(5000),
         ]);
     }

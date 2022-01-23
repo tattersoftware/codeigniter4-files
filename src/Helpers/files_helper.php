@@ -118,7 +118,7 @@ if (! function_exists('return_bytes')) {
             // If it is not one of those modifiers then it was numerical bytes, add the final digit back
             // no break
             default:
-                $num = (int) ((string) $num . $unit);
+                $num = (int) ($num . $unit);
         }
 
         return $num;

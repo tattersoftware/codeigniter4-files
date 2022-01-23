@@ -57,7 +57,7 @@ final class DisplayTest extends FeatureTestCase
     {
         $_REQUEST['format'] = $format;
 
-        $file   = fake(FileModel::class);
+        fake(FileModel::class);
         $result = $this->get('files');
 
         $result->assertStatus(200);
@@ -84,7 +84,7 @@ final class DisplayTest extends FeatureTestCase
     {
         $_REQUEST['sort'] = $sort;
 
-        $file   = fake(FileModel::class);
+        fake(FileModel::class);
         $result = $this->get('files');
 
         $result->assertStatus(200);
@@ -107,7 +107,7 @@ final class DisplayTest extends FeatureTestCase
     {
         $_REQUEST['order'] = $order;
 
-        $file   = fake(FileModel::class);
+        fake(FileModel::class);
         $result = $this->get('files');
 
         $result->assertStatus(200);
@@ -129,7 +129,7 @@ final class DisplayTest extends FeatureTestCase
     {
         $_REQUEST['search'] = $keyword;
 
-        $file   = fake(FileModel::class);
+        fake(FileModel::class);
         $result = $this->get('files');
 
         $result->assertStatus(200);

@@ -9,10 +9,7 @@ use Tests\Support\TestCase;
  */
 final class ModelTest extends TestCase
 {
-    /**
-     * @var FileModel
-     */
-    protected $model;
+    protected FileModel $model;
 
     protected function setUp(): void
     {
