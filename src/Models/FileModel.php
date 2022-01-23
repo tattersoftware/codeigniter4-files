@@ -2,13 +2,13 @@
 
 namespace Tatter\Files\Models;
 
-use Throwable;
 use CodeIgniter\Files\File as CIFile;
 use CodeIgniter\Model;
 use Config\Mimes;
 use Faker\Generator;
 use Tatter\Files\Entities\File;
 use Tatter\Permits\Traits\PermitsTrait;
+use Throwable;
 
 class FileModel extends Model
 {

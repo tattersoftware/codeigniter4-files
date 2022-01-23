@@ -32,10 +32,7 @@ final class PermissionsTest extends FeatureTestCase
      */
     private const PROCTOR_ID = 104;
 
-    /**
-     * @var FileModel
-     */
-    protected $model;
+    protected FileModel $model;
 
     protected $seeded = false;
 

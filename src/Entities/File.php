@@ -17,10 +17,8 @@ class File extends Entity
 
     /**
      * Resolved path to the default thumbnail
-     *
-     * @var string|null
      */
-    protected static $defaultThumbnail;
+    protected static ?string $defaultThumbnail;
 
     /**
      * Returns the absolute path to the configured default thumbnail

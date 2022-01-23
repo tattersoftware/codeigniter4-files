@@ -9,26 +9,22 @@ class Files extends BaseConfig
 {
     /**
      * Whether to include routes to the Files Controller.
-     *
-     * @var bool
      */
-    public $routeFiles = true;
+    public bool $routeFiles = true;
 
     /**
      * View file aliases
      *
      * @var string[]
      */
-    public $views = [
+    public array $views = [
         'dropzone' => 'Tatter\Files\Views\Dropzone\config',
     ];
 
     /**
      * Path to the default thumbnail file
-     *
-     * @var string
      */
-    public $defaultThumbnail = 'Tatter\Files\Assets\Unavailable.jpg';
+    public string $defaultThumbnail = 'Tatter\Files\Assets\Unavailable.jpg';
 
     //--------------------------------------------------------------------
     // Display Preferences
@@ -37,25 +33,19 @@ class Files extends BaseConfig
     /**
      * Display format for listing files.
      * Included options are 'cards', 'list', 'select'
-     *
-     * @var string
      */
-    public $format = 'cards';
+    public string $format = 'cards';
 
     /**
      * Default sort column.
      * See FileModel::$allowedFields for options.
-     *
-     * @var string
      */
-    public $sort = 'filename';
+    public string $sort = 'filename';
 
     /**
      * Default sort ordering. "asc" or "desc"
-     *
-     * @var string
      */
-    public $order = 'asc';
+    public string $order = 'asc';
 
     //--------------------------------------------------------------------
     // Storage Options
@@ -64,10 +54,8 @@ class Files extends BaseConfig
     /**
      * Directory to store files (with trailing slash).
      * Usually best to use getPath()
-     *
-     * @var string
      */
-    protected $path = WRITEPATH . 'files' . DIRECTORY_SEPARATOR;
+    protected string $path = WRITEPATH . 'files' . DIRECTORY_SEPARATOR;
 
     /**
      * Normalizes and creates (if necessary) the storage and thumbnail paths,

@@ -19,17 +19,13 @@ class Files extends Controller
 {
     /**
      * Files config.
-     *
-     * @var FilesConfig
      */
-    protected $config;
+    protected FilesConfig $config;
 
     /**
      * The model to use, may be a child of this library's.
-     *
-     * @var FileModel
      */
-    protected $model;
+    protected FileModel $model;
 
     /**
      * Helpers to load.
@@ -38,17 +34,15 @@ class Files extends Controller
 
     /**
      * Overriding data for views.
-     *
-     * @var array
      */
-    protected $data = [];
+    protected array $data = [];
 
     /**
      * Validation for Preferences.
      *
      * @var array<string,string>
      */
-    protected $preferenceRules = [
+    protected array $preferenceRules = [
         'sort'    => 'in_list[filename,localname,clientname,type,size,created_at,updated_at,deleted_at]',
         'order'   => 'in_list[asc,desc]',
         'format'  => 'in_list[cards,list,select]',
@@ -396,7 +390,7 @@ class Files extends Controller
         }
 
         // Get additional post data to pass to model
-        $data               = $this->request->getPost();
+        $data = $this->request->getPost();
         $data['filename'] ??= $upload->getClientName();
         $data['clientname'] ??= $upload->getClientName();
 
@@ -558,7 +552,7 @@ class Files extends Controller
             if (null === ($value = $this->request->getVar($field))) {
                 continue;
             }
-            if (!$validation->check($value, $rule)) {
+            if (! $validation->check($value, $rule)) {
                 continue;
             }
             // Special case for perPage

@@ -2,8 +2,8 @@
 
 namespace Tatter\Files\Exceptions;
 
-use RuntimeException;
 use CodeIgniter\Exceptions\ExceptionInterface;
+use RuntimeException;
 
 class FilesException extends RuntimeException implements ExceptionInterface
 {

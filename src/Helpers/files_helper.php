@@ -3,6 +3,7 @@
 namespace Tatter\Files\Helpers;
 
 use Tatter\Files\Exceptions\FilesException;
+
 if (! function_exists('bytes2human')) {
     /**
      * Converts bytes to a human-friendly format.

@@ -15,10 +15,8 @@ class FileObject extends File
 {
     /**
      * Base file name to override disk version
-     *
-     * @var string|null
      */
-    protected $basename;
+    protected ?string $basename;
 
     /**
      * Returns the full path to this file

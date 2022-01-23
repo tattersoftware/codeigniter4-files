@@ -22,10 +22,8 @@ abstract class TestCase extends CIUnitTestCase
 
     /**
      * Path to a test file to work with
-     *
-     * @var string
      */
-    protected $testPath;
+    protected string $testPath;
 
     public static function setUpBeforeClass(): void
     {
