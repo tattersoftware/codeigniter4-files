@@ -22,18 +22,13 @@ final class ControllerTest extends TestCase
      */
     protected $controller;
 
+    protected $refreshVfs = true;
+
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->controller(Files::class);
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-
-        $this->controller = null;
     }
 
     public function testSetPreferencesUsesValidInput()

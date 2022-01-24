@@ -5,6 +5,7 @@
 
 * Switches to `Tatter\Preferences` for managing persistent settings; read more below
 * Drops `Tatter\Audits` as a dependency and adds it as a suggestion; read more below
+* Access rights are now handled via Config file; see [Tatter\Permits](https://github.com/tattersoftware/codeigniter4-permits) for more information
 
 ### `Settings` Migration
 
@@ -29,7 +30,7 @@ php spark migrate --all
 ```
 
 Example model file in **app/Models/FileModel.php**:
-```
+```php
 <?php
 
 namespace App\Models;

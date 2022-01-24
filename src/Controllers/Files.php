@@ -23,7 +23,7 @@ class Files extends Controller
     protected FilesConfig $config;
 
     /**
-     * The model to use, may be a child of this library's.
+     * The model to use.
      */
     protected FileModel $model;
 
@@ -156,7 +156,6 @@ class Files extends Controller
             }
 
             $this->setData([
-                'access'   => $this->model->mayAdmin() ? 'manage' : 'display',
                 'title'    => 'User Files',
                 'userName' => 'User',
             ]);

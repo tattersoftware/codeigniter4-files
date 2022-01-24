@@ -1,7 +1,6 @@
 <?php
 
 use Tatter\Files\Entities\File;
-use Tatter\Files\Models\FileModel;
 use Tests\Support\TestCase;
 
 /**
@@ -9,11 +8,11 @@ use Tests\Support\TestCase;
  */
 final class EntityTest extends TestCase
 {
+    protected $refreshVfs = true;
+
     public function testGetPathReturnsAbsolutePath()
     {
-        /** @var FileModel $model */
-        $model = model(FileModel::class);
-        $file  = $model->createFromPath($this->testPath);
+        $file = $this->model->createFromPath($this->testPath);
 
         $expected = config('Files')->getPath() . $file->localname;
 

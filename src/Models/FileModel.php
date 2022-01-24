@@ -34,12 +34,6 @@ class FileModel extends Model
         'size' => 'permit_empty|is_natural',
     ];
 
-    // Permits
-    protected $mode       = 04660;
-    protected $userKey    = 'user_id';
-    protected $pivotKey   = 'file_id';
-    protected $usersPivot = 'files_users';
-
     //--------------------------------------------------------------------
 
     /**
