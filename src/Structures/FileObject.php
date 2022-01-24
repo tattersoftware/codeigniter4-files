@@ -35,7 +35,7 @@ class FileObject extends File
      *
      * @param string $suffix Optional suffix to omit from the base name returned
      */
-    public function getBasename($suffix = null): string
+    public function getBasename($suffix = ''): string
     {
         if ($this->basename) {
             return basename($this->basename, $suffix);

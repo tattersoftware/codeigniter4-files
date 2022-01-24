@@ -77,6 +77,11 @@ return static function (ContainerConfigurator $containerConfigurator): void {
             __DIR__ . '/tests',
         ],
 
+        // Ignore files that should not be namespaced
+        NormalizeNamespaceByPSR4ComposerAutoloadRector::class => [
+            __DIR__ . '/src/Helpers',
+        ],
+
         // May load view files directly when detecting classes
         StringClassNameToClassConstantRector::class,
 
