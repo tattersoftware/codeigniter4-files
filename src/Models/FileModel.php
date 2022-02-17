@@ -8,6 +8,7 @@ use Config\Mimes;
 use Faker\Generator;
 use Tatter\Files\Entities\File;
 use Tatter\Permits\Traits\PermitsTrait;
+use Tatter\Thumbnails\Factories\ThumbnailerFactory;
 use Throwable;
 
 class FileModel extends Model
@@ -109,7 +110,7 @@ class FileModel extends Model
         if (strpos($filePath, $storage) === false) {
             // Move the file
             $file = $file->move($storage, $row['localname']);
-            chmod($storage . $row['localname'], 0664);
+            chmod((string) $file, 0664);
         }
 
         // Record it in the database
@@ -120,32 +121,40 @@ class FileModel extends Model
             $this->addToUser($fileId, $userId);
         }
 
-        // Check for a thumbnail handler
-        $extension = pathinfo((string) $file, PATHINFO_EXTENSION);
-        if (service('thumbnails')->matchHandlers($extension) !== []) {
-            // Try to create a Thumbnail
-            $thumbnail = pathinfo($row['localname'], PATHINFO_FILENAME);
-            $output    = $storage . 'thumbnails' . DIRECTORY_SEPARATOR . $thumbnail;
+        $entity = $this->find($fileId);
 
-            try {
-                service('thumbnails')->create((string) $file, $output);
+        // Get the extension
+        if ($extension = $entity->getExtension()) {
+            // Check for a thumbnail handler
+            if (ThumbnailerFactory::findForExtension($extension) !== []) {
+                // Try to create a Thumbnail
+                $thumbnail = pathinfo($row['localname'], PATHINFO_FILENAME);
+                $output    = $storage . 'thumbnails' . DIRECTORY_SEPARATOR . $thumbnail;
 
-                // If it succeeds then update the database
-                $this->update($fileId, [
-                    'thumbnail' => $thumbnail,
-                ]);
-            } catch (Throwable $e) {
-                log_message('error', $e->getMessage());
-                log_message('error', 'Unable to create thumbnail for ' . $row['filename']);
+                try {
+                    $result = service('thumbnails')->create($entity->getPath());
+                    rename($result, $output);
 
-                if (ENVIRONMENT === 'testing') {
-                    throw $e;
+                    // If it succeeds then update the database
+                    $entity->thumbnail = $thumbnail;
+                    $this->update($entity->id, [
+                        'thumbnail' => $thumbnail,
+                    ]);
+                } catch (Throwable $e) {
+                    log_message('error', $e->getMessage());
+                    log_message('error', 'Unable to create thumbnail for ' . $row['filename']);
+
+                    if (ENVIRONMENT === 'testing') {
+                        throw $e;
+                    }
                 }
+            } else {
+                log_message('debug', 'No thumbnail handler located for extension ' . $extension);
             }
         }
 
         // Return the File entity
-        return $this->find($fileId);
+        return $entity;
     }
 
     /**

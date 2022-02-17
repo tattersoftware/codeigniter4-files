@@ -7,7 +7,9 @@ use CodeIgniter\Events\Events;
 use CodeIgniter\HTTP\Exceptions\HTTPException;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\ResponseInterface;
+use RuntimeException;
 use Tatter\Exports\Exceptions\ExportsException;
+use Tatter\Exports\Factories\ExporterFactory;
 use Tatter\Files\Config\Files as FilesConfig;
 use Tatter\Files\Entities\File;
 use Tatter\Files\Exceptions\FilesException;
@@ -30,7 +32,7 @@ class Files extends Controller
     /**
      * Helpers to load.
      */
-    protected $helpers = ['alerts', 'files', 'handlers', 'html', 'preferences', 'text'];
+    protected $helpers = ['alerts', 'files', 'html', 'preferences', 'text'];
 
     /**
      * Overriding data for views.
@@ -139,7 +141,7 @@ class Files extends Controller
         if ($userId === null) {
             // Check for list permission
             if (! $this->model->mayList()) {
-                return $this->failure(403, lang('Permits.notPermitted'));
+                return $this->failure(403, lang('Files.notPermitted'));
             }
 
             $this->setData([
@@ -152,7 +154,7 @@ class Files extends Controller
         elseif ((int) $userId !== user_id()) {
             // Check for list permission
             if (! $this->model->mayList()) {
-                return $this->failure(403, lang('Permits.notPermitted'));
+                return $this->failure(403, lang('Files.notPermitted'));
             }
 
             $this->setData([
@@ -188,7 +190,7 @@ class Files extends Controller
     {
         // Check for create permission
         if (! $this->model->mayCreate()) {
-            return $this->failure(403, lang('Permits.notPermitted'));
+            return $this->failure(403, lang('Files.notPermitted'));
         }
 
         return view('Tatter\Files\Views\new');
@@ -248,7 +250,7 @@ class Files extends Controller
             return $this->failure(400, lang('Files.noFile'));
         }
         if (! $this->model->mayDelete($file)) {
-            return $this->failure(403, lang('Permits.notPermitted'));
+            return $this->failure(403, lang('Files.notPermitted'));
         }
 
         if ($this->model->delete($fileId)) {
@@ -296,20 +298,21 @@ class Files extends Controller
         }
 
         // Bulk export of some kind, match the handler
-        if (! $handler = handlers('Exports')->where(['slug' => $action])->first()) {
-            return $this->failure(400, 'No handler found for ' . $action);
+        try {
+            $handler = ExporterFactory::find($action);
+        } catch (RuntimeException $e) {
+            return $this->failure(400, 'No export handler found for ' . $action);
         }
-
-        $export = new $handler();
+        $exporter = new $handler();
 
         foreach ($fileIds as $fileId) {
             if ($file = $this->model->find($fileId)) {
-                $export->setFile($file->object->setBasename($file->filename));
+                $exporter->setFile($file->object->setBasename($file->filename));
             }
         }
 
         try {
-            $result = $export->process();
+            $result = $exporter->process();
         } catch (ExportsException $e) {
             return $this->failure(400, $e->getMessage());
         }
@@ -328,7 +331,7 @@ class Files extends Controller
     {
         // Check for create permission
         if (! $this->model->mayCreate()) {
-            return $this->failure(403, lang('Permits.notPermitted'));
+            return $this->failure(403, lang('Files.notPermitted'));
         }
 
         // Verify upload succeeded
@@ -394,7 +397,13 @@ class Files extends Controller
         $data['clientname'] ??= $upload->getClientName();
 
         // Accept the file
-        $file = $this->model->createFromPath($path ?? $upload->getRealPath(), $data);
+        try {
+            $file = $this->model->createFromPath($path ?? $upload->getRealPath(), $data);
+        } catch (Throwable $e) {
+            log_message('error', $e->getMessage());
+
+            return $this->failure(400, $e->getMessage());
+        }
 
         // Trigger the Event with the new File
         Events::trigger('upload', $file);
@@ -411,22 +420,21 @@ class Files extends Controller
     /**
      * Processes Export requests.
      *
-     * @param string     $slug   The slug to match to Exports attribute
      * @param int|string $fileId
      */
-    public function export(string $slug, $fileId): ResponseInterface
+    public function export(string $handlerId, $fileId): ResponseInterface
     {
         // Match the export handler
-        $handler = handlers('Exports')->where(['slug' => $slug])->first();
-        if (empty($handler)) {
-            alert('warning', 'No handler found for ' . $slug);
+        try {
+            $handler = ExporterFactory::find($handlerId);
+        } catch (RuntimeException $e) {
+            alert('warning', 'No export handler found for ' . $handlerId);
 
             return redirect()->back();
         }
 
         // Load the file
-        $file = $this->model->find($fileId);
-        if (empty($file)) {
+        if (empty($fileId) || null === $file = $this->model->find($fileId)) {
             alert('warning', lang('Files.noFile'));
 
             return redirect()->back();
@@ -442,21 +450,22 @@ class Files extends Controller
 
         // Create the record
         model(ExportModel::class)->insert([
-            'handler' => $slug,
+            'handler' => $handlerId,
             'file_id' => $file->id,
             'user_id' => user_id(),
         ]);
 
         // Pass to the handler
-        $export   = new $handler($file->object);
-        $response = $export->setFilename($file->filename)->process();
+        $exporter = new $handler($file->object);
+        $exporter->setFilename($file->filename);
 
-        // If the handler returned a response then we're done
-        if ($response instanceof ResponseInterface) {
-            return $response;
+        try {
+            $result = $exporter->process();
+        } catch (ExportsException $e) {
+            return $this->failure(400, $e->getMessage());
         }
 
-        return redirect()->back();
+        return $result;
     }
 
     /**
@@ -466,9 +475,13 @@ class Files extends Controller
      */
     public function thumbnail($fileId): ResponseInterface
     {
-        $path = ($file = $this->model->find($fileId)) ? $file->getThumbnail() : File::locateDefaultThumbnail();
+        $path = ($file = $this->model->find($fileId))
+            ? $file->getThumbnail()
+            : File::locateDefaultThumbnail();
 
-        return $this->response->setHeader('Content-type', 'image/jpeg')->setBody(file_get_contents($path));
+        return $this->response
+            ->setHeader('Content-type', 'image/jpeg')
+            ->setBody(file_get_contents($path));
     }
 
     /**
@@ -510,9 +523,26 @@ class Files extends Controller
      */
     protected function setDefaults(): self
     {
+        // Get bulk support and index Exporters by the extension(s) they support
+        $bulks     = [];
+        $exporters = [];
+
+        foreach (ExporterFactory::findAll() as $handler) {
+            $attributes = $handler::attributes();
+
+            if ($attributes['bulk']) {
+                $bulks[] = $handler;
+            }
+
+            foreach ($attributes['extensions'] as $extension) {
+                $exporters[$extension][] = $attributes;
+            }
+        }
+
         $this->setData([
             'source'   => 'index',
             'layout'   => 'files',
+            'model'    => $this->model,
             'files'    => null,
             'selected' => explode(',', $this->request->getVar('selected') ?? ''),
             'userId'   => null,
@@ -522,8 +552,8 @@ class Files extends Controller
             'page'     => $this->request->getVar('page'),
             'pager'    => null,
             'access'   => $this->model->mayAdmin() ? 'manage' : 'display',
-            'exports'  => $this->getExports(),
-            'bulks'    => handlers()->where(['bulk' => 1])->findAll(),
+            'exports'  => $exporters,
+            'bulks'    => $bulks,
         ]);
 
         // Add preferences
@@ -562,28 +592,5 @@ class Files extends Controller
         }
 
         return $this;
-    }
-
-    /**
-     * Gets Export handlers indexed by the extension they support.
-     *
-     * @return array<string, array>
-     */
-    protected function getExports(): array
-    {
-        $exports = [];
-
-        foreach (handlers('Exports')->findAll() as $class) {
-            $attributes = handlers()->getAttributes($class);
-
-            // Add the class name for easy access later
-            $attributes['class'] = $class;
-
-            foreach (explode(',', $attributes['extensions']) as $extension) {
-                $exports[$extension][] = $attributes;
-            }
-        }
-
-        return $exports;
     }
 }

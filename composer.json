@@ -24,11 +24,11 @@
         "codeigniter4/authentication-implementation": "^1.0",
         "enyo/dropzone": "^6.0",
         "tatter/alerts": "^2.0",
-        "tatter/exports": "^2.0",
+        "tatter/exports": "^3.0",
         "tatter/frontend": "^1.0",
         "tatter/permits": "^3.0",
         "tatter/preferences": "^1.0",
-        "tatter/thumbnails": "^1.2"
+        "tatter/thumbnails": "^2.0"
     },
     "require-dev": {
         "codeigniter4/devkit": "^1.0",

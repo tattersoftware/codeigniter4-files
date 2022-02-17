@@ -14,6 +14,9 @@ class File extends Entity
         'updated_at',
         'deleted_at',
     ];
+    protected $attributes = [
+        'thumbnail' => '',
+    ];
 
     /**
      * Resolved path to the default thumbnail
@@ -93,37 +96,12 @@ class File extends Entity
     }
 
     /**
-     * Returns class names of Exports applicable to this file's extension
-     *
-     * @param bool $asterisk Whether to include generic "*" extensions
-     *
-     * @return string[]
-     */
-    public function getExports($asterisk = true): array
-    {
-        $exports = [];
-
-        if ($extension = $this->getExtension()) {
-            $exports = handlers('Exports')->where(['extensions has' => $extension])->findAll();
-        }
-
-        if ($asterisk) {
-            $exports = array_merge(
-                $exports,
-                handlers('Exports')->where(['extensions' => '*'])->findAll()
-            );
-        }
-
-        return $exports;
-    }
-
-    /**
      * Returns the path to this file's thumbnail, or the default from config.
      * Should always return a path to a valid file to be safe for img_data()
      */
     public function getThumbnail(): string
     {
-        $path = config('Files')->getPath() . 'thumbnails' . DIRECTORY_SEPARATOR . ($this->attributes['thumbnail'] ?? '');
+        $path = config('Files')->getPath() . 'thumbnails' . DIRECTORY_SEPARATOR . $this->attributes['thumbnail'];
 
         if (! is_file($path)) {
             $path = self::locateDefaultThumbnail();

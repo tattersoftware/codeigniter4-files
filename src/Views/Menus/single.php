@@ -1,8 +1,12 @@
 <?php
-$exports = $file->getExports();
+
+use Tatter\Exports\Factories\ExporterFactory;
+
+// Gather applicable exporters
+$exporters = ExporterFactory::getAttributesForExtension($file->getExtension());
 
 // Make sure there is something to display
-if (empty($exports) && $access === 'display') {
+if ($exporters === [] && $access === 'display') {
     return;
 }
 ?>
@@ -11,16 +15,23 @@ if (empty($exports) && $access === 'display') {
 	</button>
 	<div class="dropdown-menu" aria-labelledby="export-<?= $file->id ?>">
 
-		<?php if (! empty($exports)): ?>
+		<?php if ($exporters !== []): ?>
 		<h6 class="dropdown-header">Send To</h6>
-		<?php foreach ($exports as $class): ?>
+		<?php foreach ($exporters as $attributes): ?>
+		<?php if ($attributes['ajax']): ?>
 
-		<?php $export = new $class(); ?>
-		<?php if ($export->ajax): ?>
-		<a class="dropdown-item" href="<?= site_url('files/export/' . $export->slug . '/' . $file->id) ?>" onclick="$('#globalModal .modal-body').load('<?= site_url('files/export/' . $export->slug . '/' . $file->id) ?>'); $('#globalModal').modal(); return false;"><?= $export->name ?></a>
+		<a class="dropdown-item"
+			href="<?= site_url('files/export/' . $attributes['id'] . '/' . $file->id) ?>"
+			onclick="
+				$('#globalModal .modal-body').load('<?= site_url('files/export/' . $attributes['id'] . '/' . $file->id) ?>');
+				$('#globalModal').modal('show');
+				return false;"
+		><?= $attributes['name'] ?></a>
 
 		<?php else: ?>
-		<a class="dropdown-item" href="<?= site_url('files/export/' . $export->slug . '/' . $file->id) ?>"><?= $export->name ?></a>
+		<a class="dropdown-item"
+			href="<?= site_url('files/export/' . $attributes['id'] . '/' . $file->id) ?>"
+		><?= $attributes['name'] ?></a>
 
 		<?php endif; ?>
 		<?php endforeach; ?>
@@ -29,8 +40,17 @@ if (empty($exports) && $access === 'display') {
 		<?php if ($access === 'manage'): ?>
 		<div class="dropdown-divider"></div>
 		<h6 class="dropdown-header">Manage</h6>
-		<a class="dropdown-item" href="<?= site_url('files/rename/' . $file->id) ?>" onclick="$('#globalModal .modal-body').load('<?= site_url('files/rename/' . $file->id) ?>'); $('#globalModal').modal(); return false;">Rename</a>
-		<a class="dropdown-item" href="<?= site_url('files/delete/' . $file->id) ?>">Delete</a>
+		<a class="dropdown-item"
+			href="<?= site_url('files/rename/' . $file->id) ?>"
+			onclick="
+				$('#globalModal .modal-body').load('<?= site_url('files/rename/' . $file->id) ?>');
+				$('#globalModal').modal();
+				return false;"
+		>Rename</a>
+
+		<a class="dropdown-item"
+			href="<?= site_url('files/delete/' . $file->id) ?>"
+		>Delete</a>
 		<?php endif; ?>
 
 	</div>

@@ -8,6 +8,9 @@
 
 	<div class="row">
 		<div class="col">
+
+			<?php if ($model->mayCreate()): ?>
+
 			<div class="btn-toolbar float-right" role="toolbar" aria-label="Toolbar with button groups">
 				<div class="btn-group mr-2" role="group" aria-label="Action group">
 					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#dropzoneModal">
@@ -22,6 +25,8 @@
 				</div>
 			</div>
 
+			<?php endif; ?>
+
 			<h1><?= $access === 'manage' ? 'Manage' : 'Browse' ?> <?= $userName ?? '' ?> Files</h1>
 
 			<form class="form-inline mb-3" name="files-search" method="get" action="<?= current_url() ?>">
@@ -35,10 +40,14 @@
 
 			<div id="files-wrapper">
 				<?php if (empty($files)): ?>
+				<?php if ($model->mayCreate()): ?>
 				<p>
 					You have no files! Would you like to
 					<a class="dropzone-button" href="<?= site_url('files/new') ?>" data-toggle="modal" data-target="#dropzoneModal">add some now</a>?
 				</p>
+				<?php else: ?>
+				<p>No files to display.</p>
+				<?php endif; ?>
 
 				<?php else: ?>
 
