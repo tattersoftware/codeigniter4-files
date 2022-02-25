@@ -67,4 +67,4 @@ jobs:
           fi
 
       - name: Detect unused packages
-        run: composer-unused -vvv --profile --ansi --no-interaction --no-progress --excludePackage=php --excludePackage=tatter/alerts --excludePackage=tatter/preferences --excludePackage=tatter/thumbnails
+        run: composer-unused -vvv --output-format=github --ansi --no-interaction --no-progress
