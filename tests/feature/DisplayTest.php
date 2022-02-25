@@ -16,7 +16,7 @@ final class DisplayTest extends FeatureTestCase
         $result = $this->get('files');
 
         $result->assertStatus(200);
-        $result->assertSee('You have no files');
+        $result->assertSee('No files to display');
     }
 
     public function testDefaultDisplaysCards()

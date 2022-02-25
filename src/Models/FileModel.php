@@ -93,7 +93,6 @@ class FileModel extends Model
         // Gather file info
         $row = [
             'filename'   => $file->getFilename(),
-            'localname'  => $file->getRandomName(),
             'clientname' => $file->getFilename(),
             'type'       => Mimes::guessTypeFromExtension($file->getExtension()) ?? $file->getMimeType(),
             'size'       => $file->getSize(),
@@ -109,9 +108,10 @@ class FileModel extends Model
         // Determine if we need to move the file
         if (strpos($filePath, $storage) === false) {
             // Move the file
-            $file = $file->move($storage, $row['localname']);
+            $file = $file->move($storage, $file->getRandomName());
             chmod((string) $file, 0664);
         }
+        $row['localname'] = $file->getFilename();
 
         // Record it in the database
         $fileId = $this->insert($row);
@@ -133,7 +133,7 @@ class FileModel extends Model
 
                 try {
                     $result = service('thumbnails')->create($entity->getPath());
-                    rename($result, $output);
+                    copy($result, $output);
 
                     // If it succeeds then update the database
                     $entity->thumbnail = $thumbnail;

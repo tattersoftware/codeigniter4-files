@@ -30,10 +30,7 @@ abstract class TestCase extends CIUnitTestCase
      */
     protected string $testPath;
 
-    /**
-     * @var FileModel
-     */
-    protected $model;
+    protected FileModel $model;
 
     public static function setUpBeforeClass(): void
     {
