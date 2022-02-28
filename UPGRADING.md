@@ -6,6 +6,7 @@
 * Switches to `Tatter\Preferences` for managing persistent settings; read more below
 * Drops `Tatter\Audits` as a dependency and adds it as a suggestion; read more below
 * Access rights are now handled via Config file; see [Tatter\Permits](https://github.com/tattersoftware/codeigniter4-permits) for more information
+* The package dependency for `Tatter\Handlers` (via `Exports` and `Thumbnails`) has had a major update; please read the Upgrade Guides for those repos if you have any custom handlers or extensions
 
 ### `Settings` Migration
 
