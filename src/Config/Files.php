@@ -77,12 +77,12 @@ class Files extends BaseConfig
         $this->path = rtrim($storage, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 
         // Check or create the thumbnails subdirectory
-        $thumbnails = $storage . 'thumbnails';
+        $thumbnails = $this->path . 'thumbnails';
         if (! is_dir($thumbnails) && ! @mkdir($thumbnails, 0775, true)) {
             throw FilesException::forDirFail($thumbnails); // @codeCoverageIgnore
         }
 
-        return $storage;
+        return $this->path;
     }
 
     /**

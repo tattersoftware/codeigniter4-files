@@ -13,13 +13,13 @@ if (empty($bulks) && $access === 'display') {
 
 		<h6 class="dropdown-header">Send To</h6>
 
-		<?php foreach ($bulks as $class): ?>
-		<?php $export = new $class(); ?>
+		<?php foreach ($bulks as $exporter): ?>
+		<?php $attributes = $exporter::attributes(); ?>
 
-		<?php if ($export->ajax): ?>
-		<input name="<?= $export->slug ?>" type="submit" class="dropdown-item" value="<?= $export->name ?>" onclick="$('#globalModal .modal-body').load('<?= site_url('files/bulk/' . $export->slug) ?>'); $('#globalModal').modal(); return false;">
+		<?php if ($attributes['ajax']): ?>
+		<input name="<?= $attributes['id'] ?>" type="submit" class="dropdown-item" value="<?= $attributes['name'] ?>" onclick="$('#globalModal .modal-body').load('<?= site_url('files/bulk/' . $attributes['id']) ?>'); $('#globalModal').modal(); return false;">
 		<?php else: ?>
-		<input name="<?= $export->slug ?>" type="submit" class="dropdown-item" value="<?= $export->name ?>">
+		<input name="<?= $attributes['id'] ?>" type="submit" class="dropdown-item" value="<?= $attributes['name'] ?>">
 		<?php endif; ?>
 
 		<?php endforeach; ?>

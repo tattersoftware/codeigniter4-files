@@ -65,7 +65,7 @@ final class PermissionsTest extends FeatureTestCase
         $result = $this->get('files');
 
         $result->assertStatus(302);
-        $result->assertSessionHas('error', lang('Permits.notPermitted'));
+        $result->assertSessionHas('error', lang('Files.notPermitted'));
     }
 
     public function testDenyAjaxReturnsError()
@@ -76,7 +76,7 @@ final class PermissionsTest extends FeatureTestCase
         $result = $this->withHeaders(['X-Requested-With' => 'XMLHttpRequest'])->get('files');
 
         $result->assertStatus(403);
-        $result->assertJSONFragment(['error' => lang('Permits.notPermitted')]);
+        $result->assertJSONFragment(['error' => lang('Files.notPermitted')]);
     }
 
     public function testUploadMissingFile()

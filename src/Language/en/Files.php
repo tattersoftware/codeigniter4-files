@@ -4,6 +4,7 @@ namespace Tatter\Files\Language\en;
 
 return [
     // Exceptions
+    'notPermitted'  => 'You do not have permission to do that.',
     'noAuth'        => 'Missing dependency: authentication function user_id()',
     'dirFail'       => 'Unable to create storage directory: {0}',
     'chunkDirFail'  => 'Unable to create directory for chunk uploads: {0}',
