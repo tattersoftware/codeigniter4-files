@@ -1,9 +1,9 @@
 # Tatter\Files
 File uploads and management, for CodeIgniter 4
 
-[![](https://github.com/tattersoftware/codeigniter4-files/workflows/PHPUnit/badge.svg)](https://github.com/tattersoftware/codeigniter4-files/actions/workflows/test.yml)
-[![](https://github.com/tattersoftware/codeigniter4-files/workflows/PHPStan/badge.svg)](https://github.com/tattersoftware/codeigniter4-files/actions/workflows/analyze.yml)
-[![](https://github.com/tattersoftware/codeigniter4-files/workflows/Deptrac/badge.svg)](https://github.com/tattersoftware/codeigniter4-files/actions/workflows/inspect.yml)
+[![](https://github.com/tattersoftware/codeigniter4-files/workflows/PHPUnit/badge.svg)](https://github.com/tattersoftware/codeigniter4-files/actions/workflows/phpunit.yml)
+[![](https://github.com/tattersoftware/codeigniter4-files/workflows/PHPStan/badge.svg)](https://github.com/tattersoftware/codeigniter4-files/actions/workflows/phpstan.yml)
+[![](https://github.com/tattersoftware/codeigniter4-files/workflows/Deptrac/badge.svg)](https://github.com/tattersoftware/codeigniter4-files/actions/workflows/deptrac.yml)
 [![Coverage Status](https://coveralls.io/repos/github/tattersoftware/codeigniter4-files/badge.svg?branch=develop)](https://coveralls.io/github/tattersoftware/codeigniter4-files?branch=develop)
 
 ## Quick Start
@@ -28,17 +28,23 @@ and exporting files to various destinations.
 
 Install easily via Composer to take advantage of CodeIgniter 4's autoloading capabilities
 and always be up-to-date:
-* `> composer require tatter/files`
+```shell
+> composer require tatter/files
+```
 
 Or, install manually by downloading the source files and adding the directory to
-`app/Config/Autoload.php`.
+**app/Config/Autoload.php**.
 
 Once the files are downloaded and included in the autoload, run any library migrations
 to ensure the database is setup correctly:
-* `> php spark migrate -all`
+```shell
+> php spark migrate -all
+```
 
 Finally, run the seeder to install necessary database settings:
-`php spark db:seed "Tatter\Files\Database\Seeds\FileSeeder"`
+```shell
+php spark db:seed "Tatter\Files\Database\Seeds\FileSeeder"
+```
 
 **NOTE**: If your project is part of a tracking repository you probably want to add the file
 storage to your **.gitignore**
@@ -87,8 +93,7 @@ which files to display when. This controller has a `setData()` method to allow y
 intercept this process to provide your own settings at any point. Simply extend the
 controller to your own and then provide whatever changes you would like, followed
 by the `display()` method. E.g.:
-
-```
+```php
 <?php namespace App\Controller;
 
 class WidgetFiles
