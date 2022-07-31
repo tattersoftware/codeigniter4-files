@@ -1,7 +1,8 @@
 {
     "name": "tatter/files",
-    "type": "library",
     "description": "File uploads and management, for CodeIgniter 4",
+    "license": "MIT",
+    "type": "library",
     "keywords": [
         "codeigniter",
         "codeigniter4",
@@ -9,8 +10,6 @@
         "uploads",
         "dropzone"
     ],
-    "homepage": "https://github.com/tattersoftware/codeigniter4-files",
-    "license": "MIT",
     "authors": [
         {
             "name": "Matthew Gatner",
@@ -19,6 +18,7 @@
             "role": "Developer"
         }
     ],
+    "homepage": "https://github.com/tattersoftware/codeigniter4-files",
     "require": {
         "php": "^7.4 || ^8.0",
         "codeigniter4/authentication-implementation": "^1.0",
@@ -30,18 +30,21 @@
         "tatter/thumbnails": "^2.0"
     },
     "require-dev": {
-        "codeigniter4/devkit": "^1.0",
         "codeigniter4/framework": "^4.1",
-        "tatter/imposter": "^1.0"
+        "tatter/imposter": "^1.0",
+        "tatter/tools": "^2.0"
     },
     "suggest": {
         "tatter/audits": "Adds logging for user changes to Files database rows."
     },
-    "config": {
-        "allow-plugins": {
-            "phpstan/extension-installer": true
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
         }
-    },
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "Tatter\\Files\\": "src"
@@ -55,23 +58,24 @@
             "Tests\\Support\\": "tests/_support"
         }
     },
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://asset-packagist.org"
+    "config": {
+        "allow-plugins": {
+            "phpstan/extension-installer": true
         }
-    ],
-    "minimum-stability": "dev",
-    "prefer-stable": true,
+    },
     "scripts": {
-        "analyze": "phpstan analyze",
+        "analyze": [
+            "phpstan analyze",
+            "psalm",
+            "rector process --dry-run"
+        ],
         "ci": [
             "Composer\\Config::disableProcessTimeout",
             "@deduplicate",
             "@analyze",
+            "@composer normalize --dry-run",
             "@test",
             "@inspect",
-            "rector process",
             "@style"
         ],
         "deduplicate": "phpcpd app/ src/",

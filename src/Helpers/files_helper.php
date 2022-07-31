@@ -110,13 +110,13 @@ if (! function_exists('return_bytes')) {
 
         switch ($unit) {
             case 'g': $num *= 1024;
-            // no break
+                // no break
             case 'm': $num *= 1024;
-            // no break
+                // no break
             case 'k': $num *= 1024;
 
-            // If it is not one of those modifiers then it was numerical bytes, add the final digit back
-            // no break
+                // If it is not one of those modifiers then it was numerical bytes, add the final digit back
+                // no break
             default:
                 $num = (int) ($num . $unit);
         }
