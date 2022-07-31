@@ -38,13 +38,26 @@ Or, install manually by downloading the source files and adding the directory to
 Once the files are downloaded and included in the autoload, run any library migrations
 to ensure the database is setup correctly:
 ```shell
-> php spark migrate -all
+> php spark migrate --all
 ```
 
-Finally, run the seeder to install necessary database settings:
+Run the seeder to install necessary database settings:
 ```shell
 php spark db:seed "Tatter\Files\Database\Seeds\FileSeeder"
 ```
+
+Finally, run the framework's Publish Command to copy assets to your public directory:
+```shell
+php spark publish
+```
+
+**NOTE**: You may need to adjust your **Publisher.php** config file to support `.mjs` files.
+
+## Configuration (optional)
+
+The library's default behavior can be altered by extending its config file. Copy
+**examples/Files.php** to **app/Config/** and follow the instructions
+in the comments. If no config file is found in **app/Config** the library will use its own.
 
 **NOTE**: If your project is part of a tracking repository you probably want to add the file
 storage to your **.gitignore**
@@ -52,12 +65,6 @@ storage to your **.gitignore**
 writable/files/*
 !writable/files/index.html
 ```
-
-## Configuration (optional)
-
-The library's default behavior can be altered by extending its config file. Copy
-**examples/Files.php** to **app/Config/** and follow the instructions
-in the comments. If no config file is found in **app/Config** the library will use its own.
 
 ## Usage
 
