@@ -5,13 +5,13 @@
 <?php
     // Determine upload limit from PHP settings
     helper('files');
-    $uploadLimitBytes = max_file_upload_in_bytes();
+$uploadLimitBytes = max_file_upload_in_bytes();
 
-    // Buffer chunks to be just under the limit (maintain bytes)
-    $chunkSize = $uploadLimitBytes - 1000;
+// Buffer chunks to be just under the limit (maintain bytes)
+$chunkSize = $uploadLimitBytes - 1000;
 
-    // Limit files to the MB equivalent of 500 chunks
-    $maxFileSize = round($chunkSize * 500 / 1024 / 1024, 1);
+// Limit files to the MB equivalent of 500 chunks
+$maxFileSize = round($chunkSize * 500 / 1024 / 1024, 1);
 ?>
 			Dropzone.options.filesDropzone = {
 

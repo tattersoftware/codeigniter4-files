@@ -5,6 +5,9 @@ namespace Tatter\Files\Config;
 if (empty(config('Files')->routeFiles)) {
     return;
 }
+
+$routes ??= service('routes');
+
 $options = [
     'filter'    => 'assets:\Tatter\Files\Bundles\FilesBundle',
     'namespace' => '\Tatter\Files\Controllers',

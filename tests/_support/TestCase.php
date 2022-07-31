@@ -67,7 +67,7 @@ abstract class TestCase extends CIUnitTestCase
         }
 
         // Set up the model
-        $this->model = model(FileModel::class); // @phpstan-ignore-line
+        $this->model = model(FileModel::class);
     }
 
     protected function tearDown(): void

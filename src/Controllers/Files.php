@@ -58,7 +58,7 @@ class Files extends Controller
     public function __construct(?FilesConfig $config = null, ?FileModel $model = null)
     {
         $this->config = $config ?? config('Files');
-        $this->model  = $model ?? model(FileModel::class); // @phpstan-ignore-line
+        $this->model  = $model ?? model(FileModel::class);
     }
 
     //--------------------------------------------------------------------
